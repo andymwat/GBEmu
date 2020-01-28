@@ -1,0 +1,7 @@
+#CLion files
+.idea/**
+.idea/**/*
+
+#Compiled files
+cmake-build-debug/**
+cmake-build-debug/**/*
