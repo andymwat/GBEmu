@@ -23,9 +23,9 @@ int main(int argc, char* args[])
     lcdEnable = true;
     a=b=c=d=e=f=h=l=sp=pc=0;
     cout<<"Loading ROM..."<<endl;
-    loadTestRom("/home/andrew/Downloads/GBemu/cpu_instrs/cpu_instrs.gb");
+    //loadTestRom("/home/andrew/Downloads/GBemu/cpu_instrs/cpu_instrs.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/tetris.gb");
-    //loadTestRom("/home/andrew/Downloads/GBemu/sml.gb");
+    loadTestRom("/home/andrew/Downloads/GBemu/sml.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/cpu_instrs/individual/11-op a,(hl).gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/drMario.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/kirby.gb");
