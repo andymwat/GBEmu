@@ -1,1 +1,0 @@
-/usr/bin/c++  -g   CMakeFiles/GBEmu.dir/main.cpp.o CMakeFiles/GBEmu.dir/cartridge.cpp.o CMakeFiles/GBEmu.dir/interpreter.cpp.o CMakeFiles/GBEmu.dir/lcdController.cpp.o CMakeFiles/GBEmu.dir/keyboardInput.cpp.o CMakeFiles/GBEmu.dir/instructionDecoder.cpp.o CMakeFiles/GBEmu.dir/bitIntstructionDecoder.cpp.o  -o GBEmu -lSDL2 
