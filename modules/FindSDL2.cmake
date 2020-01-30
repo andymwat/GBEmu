@@ -7,6 +7,7 @@
 #     SDL2_DLLS
 #------------------------------------------------------------------------------
 
+include(FindPackageHandleStandardArgs)
 if(WIN32)
 	message("Building on Windows")
     # Search for SDL2 Debug CMake build in extern/SDL2-2.0.10-dev/build
@@ -43,20 +44,19 @@ if(WIN32)
     endif()
 
     mark_as_advanced(SDL2_ROOT)
-    include(FindPackageHandleStandardArgs)
     find_package_handle_standard_args(SDL2 DEFAULT_MSG SDL2_INCLUDE_DIRS SDL2_LIBS SDL2_DLLS)
 else()
 	message("Building on MacOS/Linux")
     # On MacOS, should be installed via Macports
     # On Ubuntu, install with: apt-get install libsdl2-dev
-    find_path(SDL2_INCLUDE_DIRS SDL.h PATH_SUFFIXES SDL2)
-    find_library(_SDL2_LIB SDL2)
-    set(SDL2_LIBS ${SDL2})
-    if(_SDL2_use_main)
-        find_library(_SDL2main_LIB SDL2)
-        list(APPEND SDL2_LIBS ${_SDL2main_LIB})
-    endif()
+    #find_path(SDL2_INCLUDE_DIRS SDL.h PATH_SUFFIXES SDL2)
+    #find_library(_SDL2_LIB SDL2)
 
-    mark_as_advanced(SDL2_INCLUDE_DIRS _SDL2_LIB _SDL2main_LIB)
-    find_package_handle_standard_args(SDL2 DEFAULT_MSG SDL2_INCLUDE_DIRS SDL2_LIBS)
+    #set(SDL2_LIBS ${SDL2})
+    #if(_SDL2_use_main)
+    #    find_library(_SDL2main_LIB SDL2)
+    #    list(APPEND SDL2_LIBS ${_SDL2main_LIB})
+    #endif()
+    #mark_as_advanced(SDL2_INCLUDE_DIRS _SDL2_LIB _SDL2main_LIB)
+    #find_package_handle_standard_args(SDL2 DEFAULT_MSG SDL2_INCLUDE_DIRS SDL2_LIBS)
 endif()
