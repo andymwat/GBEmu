@@ -7,7 +7,7 @@
 #include <SDL.h>
 
 #include "cartridge.h"
-#include "main.h"
+#include "helpers.h"
 #include "interpreter.h"
 #include "lcdController.h"
 #include "keyboardInput.h"
