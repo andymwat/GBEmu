@@ -5,3 +5,7 @@
 #Compiled files
 cmake-build-debug/**
 cmake-build-debug/**/*
+
+#Visual Studio files
+.vs/**
+/CMakeSettings.json

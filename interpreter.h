@@ -50,7 +50,6 @@ extern bool ramEnable;
 void writeToAddress(uint16_t, uint8_t);
 uint8_t readFromAddress(uint16_t);
 void handleRomWrite(uint16_t, uint8_t);
-void execute(uint16_t);
 uint16_t concat(uint8_t,uint8_t);
 void writePair(uint8_t&, uint8_t&, uint16_t);
 void loadTestRom(std::string);

@@ -7,7 +7,7 @@
 
 #include <iostream>
 #include <fstream>
-#include <unistd.h>
+//#include <unistd.h>
 #include <SDL.h>
 #include "interpreter.h"
 #include "lcdController.h"
@@ -20,9 +20,9 @@ unsigned int gpuModeClock = 0;
 uint8_t gpuMode = 0;
 uint8_t line=0;
 
-SDL_Window* window = NULL;
-SDL_Surface* screenSurface = NULL;
-SDL_Surface* renderSurface = NULL;
+SDL_Window* window = nullptr;
+SDL_Surface* screenSurface = nullptr;
+SDL_Surface* renderSurface = nullptr;
 
 void initWindow() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -164,7 +164,7 @@ void renderScanline() {
 
 void pushBufferToWindow() {
     //cout<<"\033[1;32mINFO: \033[0m Pushing buffer to window."<<endl;
-    delete renderSurface;
+	SDL_FreeSurface(renderSurface);
     renderSurface = SDL_CreateRGBSurfaceFrom(pixelArray, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 4*SCREEN_WIDTH,0x0000ff,0x00ff00,0xff0000,0 );
     SDL_BlitSurface(renderSurface, NULL, screenSurface, NULL);
     SDL_UpdateWindowSurface(window);

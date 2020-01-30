@@ -3,17 +3,25 @@
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
 #include <iostream>
 #include <fstream>
-#include <unistd.h>
+//#include <unistd.h>
 #include <SDL.h>
 
+//WTF
+//This took me too many hours to debug
+//way, WAY too many
+#undef main
+//
 #include "cartridge.h"
-#include "helpers.h"
+#include "main.h"
 #include "interpreter.h"
+#include "instructionDecoder.h"
 #include "lcdController.h"
 #include "keyboardInput.h"
 
 using namespace std;
 SDL_Event events;
+
+
 
 
 int main(int argc, char* args[])
@@ -25,7 +33,7 @@ int main(int argc, char* args[])
     cout<<"Loading ROM..."<<endl;
     //loadTestRom("/home/andrew/Downloads/GBemu/cpu_instrs/cpu_instrs.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/tetris.gb");
-    loadTestRom("/home/andrew/Downloads/GBemu/sml.gb");
+   // loadTestRom("/home/andrew/Downloads/GBemu/sml.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/cpu_instrs/individual/11-op a,(hl).gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/drMario.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/kirby.gb");
@@ -35,6 +43,7 @@ int main(int argc, char* args[])
     //loadTestRom("/home/andrew/Downloads/GBemu/new/dkl.gb");
     //loadTestRom("/home/andrew/Downloads/DMG_ROM.bin");
 
+	loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/cpu_instrs.gb");
     /*cout<<endl<<"Select an option:"<<endl;
     cout<<"1: Run normally."<<endl;
     cout<<"2: Run normally until pc reaches a value, then stop."<<endl;
@@ -49,7 +58,7 @@ int main(int argc, char* args[])
         m_TimerCounter = 1024;
         initRegisters();//ignore bootrom
         cout<<"ROM loaded. Starting emulation..."<<endl;
-        usleep(50000);
+        //usleep(50000);
         while(true)
         {
             dumpRegisters();
@@ -73,6 +82,8 @@ int main(int argc, char* args[])
                 if (cycles == 0)
                 {
                     cout<<"\033[1;33mWARNING:\033[0m Cycle count not set."<<endl;
+					cout << "pc:\t" << "0x" << hex << pc << dec << endl;
+					cout << "Opcode:\t0x" << hex << (uint16_t)readFromAddress(pc) << dec << endl;
                 }
                 if (sp == 0)
                 {
@@ -91,10 +102,14 @@ int main(int argc, char* args[])
                         checkKeyboard(events);
                     }
                     cycles = 0;
+					//cout << "pc:\t" << "0x" << hex << pc << dec << endl;
+					//cout << "Opcode:\t0x" << hex << (uint16_t)readFromAddress(pc) << dec << endl;
                     execute(pc);
                     if (cycles == 0)
                     {
                         cout<<"\033[1;33mWARNING:\033[0m Cycle count not set."<<endl;
+						cout << "pc:\t" << "0x" << hex << pc << dec << endl;
+						cout<< "Opcode:\t0x"<<hex << (uint16_t)readFromAddress(pc) << dec << endl;
                     }
                     if (sp == 0)
                     {
@@ -228,7 +243,5 @@ int main(int argc, char* args[])
 
     return 0;
 }
-
-
 
 #pragma clang diagnostic pop

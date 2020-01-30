@@ -6,7 +6,8 @@
 #define GBEMU_CARTRIDGE_H
 
 
-#include <stdint-gcc.h>
+//#include <stdint-gcc.h>
+#include <cstdint>
 
 class cartridge {
 public:

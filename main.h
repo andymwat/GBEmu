@@ -1,10 +1,19 @@
 //
 // Created by andrew on 10/12/19.
 //
-
-#ifndef GBEMU_HELPERS_H
-#define GBEMU_HELPERS_H
-
+#include <string>
+#include <sstream>
 
 
-#endif //GBEMU_HELPERS_H
+#ifndef GBEMU_MAIN_H
+#define GBEMU_MAIN_H
+
+template <typename T>
+std::string to_string(T value)
+{
+    std::ostringstream os ;
+    os << value ;
+    return os.str() ;
+}
+
+#endif //GBEMU_MAIN_H

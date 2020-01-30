@@ -3,10 +3,11 @@
 //
 
 #include "cartridge.h"
+#include "main.h"
 #include <cmath>
 #include <iostream>
 
-#include <unistd.h>
+//#include <unistd.h>
 
 cartridge::cartridge(uint8_t mbcNumber, uint8_t bankNum, uint8_t ramBankNum) {
     this->mbcType = mbcNumber;
@@ -51,12 +52,12 @@ cartridge::cartridge(uint8_t mbcNumber, uint8_t bankNum, uint8_t ramBankNum) {
     {
         std::cout<<"ERROR: Could not allocate memory for ROM."<<std::endl;
     }
-    std::cout<<"CARTRIDGE INFO: Allocated " <<std::to_string(bankSize*numberOfBanks)<<" bytes for cartridge ROM."<<std::endl;
-    std::cout<<"Bank size: "<<std::to_string(bankSize)<<std::endl;
+    std::cout<<"CARTRIDGE INFO: Allocated " <<to_string(bankSize*numberOfBanks)<<" bytes for cartridge ROM."<<std::endl;
+    std::cout<<"Bank size: "<<to_string(bankSize)<<std::endl;
 }
 cartridge::~cartridge() {
     std::cout<<"Freeing ROM and RAM memory..."<<std::endl;
-    usleep(5000000);
+   // usleep(5000000);
     delete banks;
     delete ramBanks;
 }

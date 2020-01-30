@@ -7,11 +7,12 @@
 //
 #include <iostream>
 #include <fstream>
-#include <unistd.h>
+//#include <unistd.h>
 #include "cartridge.h"
 #include "interpreter.h"
 #include "lcdController.h"
 #include "keyboardInput.h"
+#include "main.h"
 
 using namespace std;
 
@@ -520,6 +521,7 @@ uint8_t handleIORead(uint16_t address) {
 
 void loadTestRom(string path)//calculates number of banks based on cartridge MBC number
 {
+	std::cout << "Loading test ROM: " << path << "...\n";
     std::ifstream infile(path);
     if (!infile.good())
     {
