@@ -22,8 +22,6 @@ using namespace std;
 SDL_Event events;
 
 
-
-
 int main(int argc, char* args[])
 {
     cout<<"Initializing window..."<<endl;
