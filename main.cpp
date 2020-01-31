@@ -17,6 +17,7 @@
 #include "instructionDecoder.h"
 #include "lcdController.h"
 #include "keyboardInput.h"
+#include "logger.h"
 
 using namespace std;
 SDL_Event events;
@@ -79,13 +80,13 @@ int main(int argc, char* args[])
                 execute(pc);
                 if (cycles == 0)
                 {
-                    cout<<"\033[1;33mWARNING:\033[0m Cycle count not set."<<endl;
-					cout << "pc:\t" << "0x" << hex << pc << dec << endl;
-					cout << "Opcode:\t0x" << hex << (uint16_t)readFromAddress(pc) << dec << endl;
+                    logger::logWarning("Cycle count not set.", pc, readFromAddress(pc));
+					//cout << "pc:\t" << "0x" << hex << pc << dec << endl;
+					//cout << "Opcode:\t0x" << hex << (uint16_t)readFromAddress(pc) << dec << endl;
                 }
                 if (sp == 0)
                 {
-                    cout<<"\033[1;33mWARNING:\033[0m Stack pointer is 0."<<endl;
+                    logger::logWarning("Stack pointer is zero.", pc, readFromAddress(pc));
                 }
                 updateScreen(cycles);
             } else{
@@ -105,13 +106,14 @@ int main(int argc, char* args[])
                     execute(pc);
                     if (cycles == 0)
                     {
-                        cout<<"\033[1;33mWARNING:\033[0m Cycle count not set."<<endl;
-						cout << "pc:\t" << "0x" << hex << pc << dec << endl;
-						cout<< "Opcode:\t0x"<<hex << (uint16_t)readFromAddress(pc) << dec << endl;
+                        logger::logWarning("Cycle count not set.", pc, readFromAddress(pc));
+                        //cout<<"\033[1;33mWARNING:\033[0m Cycle count not set."<<endl;
+						//cout << "pc:\t" << "0x" << hex << pc << dec << endl;
+						//cout<< "Opcode:\t0x"<<hex << (uint16_t)readFromAddress(pc) << dec << endl;
                     }
                     if (sp == 0)
                     {
-                        cout<<"\033[1;33mWARNING:\033[0m Stack pointer is 0."<<endl;
+                        logger::logWarning("Stack pointer is zero.", pc, readFromAddress(pc));
                     }
                     updateScreen(cycles);
                 }
@@ -124,11 +126,11 @@ int main(int argc, char* args[])
         cout<<msg<<endl;
         if (errorAddress >= 0)
         {
-            cout<<"Error accessing address 0x"<<hex<<errorAddress<<dec<<endl;
+            logger::logError("Error accessing address, data could not be read (disregard data).", errorAddress, 0);
         }
         dumpRegisters();
     }
-    cout<<output;
+    cout<<output<<endl;
     /*}
     else if (selection == 2)
     {

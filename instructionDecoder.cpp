@@ -15,6 +15,7 @@
 #include "lcdController.h"
 #include "keyboardInput.h"
 #include "instructionDecoder.h"
+#include "logger.h"
 
 using namespace std;
 
@@ -332,7 +333,8 @@ void execute(uint16_t address)
 	}
 	else if (opcode == 0xe8)//add sp, i8
 	{
-		cout << "WARNING: Carry/half-carry with \"add sp, i8\" is untested.\n";
+	    logger::logWarning("Carry/half-carry with \"add sp, i8\" is untested", pc, opcode);
+		//cout << "WARNING: Carry/half-carry with \"add sp, i8\" is untested.\n";
 		int8_t next = readFromAddress(address + 1);
 		setCarry((unsigned int)sp + (signed int)next > 0xffff || (((unsigned int)sp & 0xffff) + ((signed int)next & 0xffff)) > 0xffff);
 		setHalf(((sp & 0x0f) + (next & 0x0f)) > 0xf || ((sp & 0x0f00) + (next & 0x0f00)) > 0x0f00);
@@ -788,6 +790,7 @@ void execute(uint16_t address)
 	{
 		int8_t offset = readFromAddress(address + 1);
 		writePair(h, l, sp + offset);
+        logger::logWarning("Carry and Half-carry flags with the \"ld hl, sp+i8\" instruction are not tested.", pc, opcode);
 		cycles = 12;
 		pc += 2;
 		if (offset >= 0)
@@ -802,7 +805,7 @@ void execute(uint16_t address)
 		}
 		setSubtract(false);
 		setZero(false);
-		cout << "\033[1;33mWARNING:\033[0m Carry and Half-carry flags with the \"ld hl, sp+i8\" instruction are not tested." << endl;
+		//cout << "\033[1;33mWARNING:\033[0m Carry and Half-carry flags with the \"ld hl, sp+i8\" instruction are not tested." << endl;
 
 	}
 	else if (opcode == 0xf9)//ld sp, hl
@@ -1248,7 +1251,8 @@ bool executeStructural(uint8_t opcode, uint16_t address)
 	}
 	else if (opcode == 0xff)//rst 0x38
 	{
-	cout << "\033[1;33mWARNING:\033[0m RST 0x38 instruction encountered. Might be an error" << endl;
+	    logger::logWarning("RST 0x38 instruction encountered. Might be an error.", address, opcode);
+	//cout << "\033[1;33mWARNING:\033[0m RST 0x38 instruction encountered. Might be an error" << endl;
 	pc++;//?
 	writeToAddress(sp - 1, (uint8_t)(pc >> 8));//write PCh to stack
 	writeToAddress(sp - 2, (uint8_t)(pc & 0x00ff));//write PCl to stack
