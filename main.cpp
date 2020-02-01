@@ -42,7 +42,8 @@ int main(int argc, char* args[])
     //loadTestRom("/home/andrew/Downloads/GBemu/new/dkl.gb");
     //loadTestRom("/home/andrew/Downloads/DMG_ROM.bin");
 
-	loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/cpu_instrs.gb");
+	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/cpu_instrs.gb");
+	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/asteroids.gb");
     /*cout<<endl<<"Select an option:"<<endl;
     cout<<"1: Run normally."<<endl;
     cout<<"2: Run normally until pc reaches a value, then stop."<<endl;
@@ -124,6 +125,10 @@ int main(int argc, char* args[])
         dumpRegisters();
     }
     cout<<output<<endl;
+
+#if defined(_WIN32)
+	system("pause");
+#endif
     /*}
     else if (selection == 2)
     {
@@ -233,7 +238,7 @@ int main(int argc, char* args[])
     */
     SDL_DestroyWindow(window);
     SDL_Quit();
-
+	
     return 0;
 }
 
