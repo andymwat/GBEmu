@@ -7,6 +7,7 @@
 #include "lcdController.h"
 #include <SDL.h>
 #include <iostream>
+#include "logger.h"
 
 uint8_t joypadStateInternal;
 /*Bits:
@@ -24,7 +25,7 @@ void checkKeyboard(SDL_Event events)
 {
     if (events.type == SDL_KEYDOWN)
     {
-        std::cout<<"\033[1;34mJOYPAD: \033[0mGot key down."<<std::endl;
+		logger::logInfo("[JOYPAD]: Got key down.");
         switch (events.key.keysym.sym)
         {
             case SDLK_UP:
@@ -56,7 +57,7 @@ void checkKeyboard(SDL_Event events)
     }
     if (events.type == SDL_KEYUP)
     {
-        std::cout<<"\033[1;34mJOYPAD: \033[0mGot key up."<<std::endl;
+		logger::logInfo("[JOYPAD]: Got key up.");
         switch (events.key.keysym.sym)
         {
             case SDLK_UP:
