@@ -12,7 +12,8 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 ## Screenshots
 
 ![Blargg's test ROM](blarggs.png)
-![sml](sml.png)
+![Super Mario Land](sml.png)
+![Dr. Mario](drMario.png)
 
 ## Unimplemented features/TO-DO
   - Sound support

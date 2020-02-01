@@ -218,14 +218,17 @@ void handleRomWrite(uint16_t address, uint8_t data)
 {
     if (currentCartridge->mbcType == 0x00 )//ROM only, 2 banks
     {
+		logger::logWarning("Trying to write to ROM of cart without MBC", address, data);
+		/*
         if (data == 0x01)
         {
-            cout<<"WARNING: Attempting to select ROM bank 1 in cart without MBC.\n";
+			logger::logWarning("Attempting to select ROM bank 1 on cart without MBC.", address, data);
         } else{
             errorAddress = address;
-            cout<<"WARNING: Attempting to select invalid ROM bank in cart without MBC.\n";
+			logger::logError("Attempting to invalid ROM bank on cart without MBC.", address, data);
             throw "Tried to select an invalid ROM bank on cart without MBC";
         }
+    	*/
     }
     else if (currentCartridge->mbcType == 0x01)//mbc1
     {
@@ -249,6 +252,11 @@ void handleRomWrite(uint16_t address, uint8_t data)
                 ramEnable = false;
             }
         }
+		else if (address >= 0x4000 && address <=0x5fff)
+		{
+			logger::logError("Error writing to upper bits of ROM bank/RAM bank select.", address, data);
+			throw "Wrote to unimplemented RAM bank/upper bits of ROM bank";
+		}
         else
         {
 			logger::logError("Error writing to ROM address.", address, data);

@@ -9,8 +9,8 @@
 
 
 const uint32_t color0 = 0x88ffffff;
-const uint32_t color1 = 0x88ff0000;
-const uint32_t color2 = 0x8800ff00;
+const uint32_t color1 = 0x88a8a8a8;
+const uint32_t color2 = 0x88545454;
 const uint32_t color3 = 0x88000000;
 
 const uint8_t SCREEN_WIDTH = 160;
