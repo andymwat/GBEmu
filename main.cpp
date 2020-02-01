@@ -30,7 +30,7 @@ int main(int argc, char* args[])
     lcdEnable = true;
     a=b=c=d=e=f=h=l=sp=pc=0;
     cout<<"Loading ROM..."<<endl;
-    loadTestRom("/home/andrew/Downloads/GBemu/cpu_instrs/cpu_instrs.gb");
+   //loadTestRom("/home/andrew/Downloads/GBemu/cpu_instrs/cpu_instrs.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/tetris.gb");
    // loadTestRom("/home/andrew/Downloads/GBemu/sml.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/cpu_instrs/individual/11-op a,(hl).gb");
@@ -42,7 +42,7 @@ int main(int argc, char* args[])
     //loadTestRom("/home/andrew/Downloads/GBemu/new/dkl.gb");
     //loadTestRom("/home/andrew/Downloads/DMG_ROM.bin");
 
-	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/cpu_instrs.gb");
+	loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/cpu_instrs.gb");
     /*cout<<endl<<"Select an option:"<<endl;
     cout<<"1: Run normally."<<endl;
     cout<<"2: Run normally until pc reaches a value, then stop."<<endl;
@@ -81,12 +81,10 @@ int main(int argc, char* args[])
                 if (cycles == 0)
                 {
                     logger::logWarning("Cycle count not set.", pc, readFromAddress(pc));
-					//cout << "pc:\t" << "0x" << hex << pc << dec << endl;
-					//cout << "Opcode:\t0x" << hex << (uint16_t)readFromAddress(pc) << dec << endl;
                 }
                 if (sp == 0)
                 {
-                    logger::logWarning("Stack pointer is zero.", pc, readFromAddress(pc));
+                    //logger::logWarning("Stack pointer is zero.", pc, readFromAddress(pc));
                 }
                 updateScreen(cycles);
             } else{
@@ -101,19 +99,14 @@ int main(int argc, char* args[])
                         checkKeyboard(events);
                     }
                     cycles = 0;
-					//cout << "pc:\t" << "0x" << hex << pc << dec << endl;
-					//cout << "Opcode:\t0x" << hex << (uint16_t)readFromAddress(pc) << dec << endl;
                     execute(pc);
                     if (cycles == 0)
                     {
                         logger::logWarning("Cycle count not set.", pc, readFromAddress(pc));
-                        //cout<<"\033[1;33mWARNING:\033[0m Cycle count not set."<<endl;
-						//cout << "pc:\t" << "0x" << hex << pc << dec << endl;
-						//cout<< "Opcode:\t0x"<<hex << (uint16_t)readFromAddress(pc) << dec << endl;
                     }
                     if (sp == 0)
                     {
-                        logger::logWarning("Stack pointer is zero.", pc, readFromAddress(pc));
+                        //logger::logWarning("Stack pointer is zero.", pc, readFromAddress(pc));
                     }
                     updateScreen(cycles);
                 }

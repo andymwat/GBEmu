@@ -13,6 +13,7 @@
 #include "lcdController.h"
 #include "keyboardInput.h"
 #include "main.h"
+#include "logger.h"
 
 using namespace std;
 
@@ -63,11 +64,10 @@ void writeToAddress(uint16_t address, uint8_t data) {
     }
     else if (address == 0xff7f)
     {
-        cout<<"Wrote to 0xff7f, probably a ROM bug."<<endl;
+		logger::logInfo("Wrote to 0xff7f, probably a ROM bug.");
     }
     else if (address >= 0xc000 && address <= 0xdfff)
     {
-        //cout<<"INFO: Wrote 0x"<<hex<<(uint16_t)(data)<<dec<<" to work ram address 0x"<<hex<<(address)<<dec<<endl;
         workRam[address-0xc000] = data;
     }
     else if (address >= 0xe000 && address <=0xfdff)//mirror
@@ -240,18 +240,18 @@ void handleRomWrite(uint16_t address, uint8_t data)
             cout<<"WARNING: RAM enable and banking is not tested.\n";
             if ((data & 0x0f) == 0x0a)
             {
-                cout<<"INFO: enabling cartRAM.\n";
+				logger::logInfo("CartRAM is enabled.");
                 ramEnable = true;
             }
             else
             {
-                cout<<"INFO: disabling cartRAM.\n";
+				logger::logInfo("CartRAM is disabled.");
                 ramEnable = false;
             }
         }
         else
         {
-            cout<<"Error writing to address 0x"<<hex<<address<<dec<<" with data 0x"<<hex<<(uint16_t)data<<dec<<"\n";
+			logger::logError("Error writing to ROM address.", address, data);
             errorAddress = address;
             throw "Wrote to invalid ROM address on mbc1 only";
         }
@@ -266,28 +266,28 @@ void handleRomWrite(uint16_t address, uint8_t data)
         }
         else if (address <= 0x1fff)//ram enable
         {
-            cout<<"WARNING: RAM enable and banking is not tested.\n";
+			logger::logWarning("RAM enable and banking is untested.", address, data);
             if ((data & 0x0f) == 0x0a)
             {
-                cout<<"INFO: enabling cartRAM.\n";
+				logger::logInfo("CartRAM is enabled.");
                 ramEnable = true;
             }
             else
             {
-                cout<<"INFO: disabling cartRAM.\n";
+				logger::logInfo("CartRAM is disabled.");
                 ramEnable = false;
             }
         }
         else
         {
-            cout<<"Error writing to address 0x"<<hex<<address<<dec<<" with data 0x"<<hex<<(uint16_t)data<<dec<<"\n";
+			logger::logError("Error writing to ROM address.", address, data);
             errorAddress = address;
             throw "Wrote to unimplemented ROM address on mbc1+ram+battery";
         }
     }
     else
     {
-        cout<<"Error writing to address 0x"<<hex<<address<<dec<<" with data 0x"<<hex<<(uint16_t)data<<dec<<"\n";
+		logger::logError("Error writing to ROM address.", address, data);
         errorAddress = address;
         throw "Attempting to write to ROM on unimplemented MBC type.";
     }
@@ -309,22 +309,22 @@ void writePair(uint8_t &x, uint8_t &y, uint16_t data) {
 
 void handleSoundWrite(uint16_t address, uint8_t data)
 {
-    cout<<"write to sound registers ignored (address: "<<to_string(address) <<", data: " <<to_string(data)<<endl;
+	logger::logWarning("Sound registers write unimplemented, returning 0x0", address, data);
 }
 uint8_t handleSoundRead(uint16_t address)
 {
-    cout << "read from sound registers ignored, returning 0x00 (address: "<<to_string(address)<<endl;
+	logger::logWarning("Sound registers read unimplemented, returning 0x0", address, 0x0);
     return 0x00;
 }
 
 void handleIOWrite(uint16_t address, uint8_t data) {
     if (address == 0xff4d)
     {
-        cout<<"\033[1;33mWARNING:\033[0m Speed control register write unimplemented."<<endl;
+		logger::logWarning("Speed control register write unimplemented.", address, data);
     }
     else if (address >= 0xff03 && address <= 0xff0e)
     {
-        cout<<"WARNING: Tried writing to 0xff03-0xff0e, ignoring...\n";
+		logger::logWarning("Tried writing to 0xff03-0xff0e, ignoring.", address, data);
     }
     else if (address == 0xff00)
     {
@@ -393,11 +393,11 @@ void handleIOWrite(uint16_t address, uint8_t data) {
         }
         if (TestBit(tmc,2))
         {
-            cout<<"INFO: timer is enabled.\n";
+			logger::logInfo("Timer is enabled.");
         }
         else
         {
-            cout<<"INFO: timer is disabled.\n";
+			logger::logInfo("Timer is disabled.");
         }
     }
     else if (address == 0xff04)
@@ -406,7 +406,6 @@ void handleIOWrite(uint16_t address, uint8_t data) {
     }
     else if (address == 0xff0f)
     {
-       // cout<<"INFO: Writing to interrupt flag at pc 0x" <<hex<<(pc)<<dec<<" and data 0x"<<hex<<(uint16_t)(data)<<dec<<endl;
         interruptFlag = data;
     }
     else if (address == 0xff01)//serial data (SB)
@@ -420,7 +419,7 @@ void handleIOWrite(uint16_t address, uint8_t data) {
         {
             output += (char)tempOutput;
         }
-        cout<<"\033[1;33mWARNING:\033[0m Serial control byte not implemented."<<endl;
+		logger::logWarning("Serial control write unimplemented.", address, data);
     }
     else if (address == 0xff41)
     {
@@ -451,12 +450,11 @@ uint8_t handleIORead(uint16_t address) {
     }
     else if (address >= 0xff03 && address <= 0xff0e)
     {
-        cout<<"WARNING: reading from 0xff03-0xff0e, returning 0xff...\n";
+		logger::logWarning("Reading from 0xff03-0xff0e, returning 0xff.", address,0xff);
         return 0xff;
     }
     else if (address == 0xff44)//lcdc y coordinate (0-153, 144-153 is vblank)
     {
-        //cout<<"\033[1;33mWARNING:\033[0m LCD ypos byte read unimplemented "<<endl;
         return line;
     }
     else if (address == 0xff40)
@@ -465,7 +463,7 @@ uint8_t handleIORead(uint16_t address) {
     }
     else if (address == 0xff4d)//cgb key1 (prepare speed switch)
     {
-        cout<<"\033[1;33mWARNING:\033[0m Speed control register unimplemented, returning 0xff "<<endl;
+		logger::logWarning("Speed control registers read unimplemented, returning 0xff", address, 0xff);
         return 0xff;
     }
     else if (address == 0xff45)
@@ -679,7 +677,6 @@ void sub8(uint8_t & destination, uint8_t source) {
     pc++;
 }
 void add16(uint16_t &destination, uint16_t source) {
-    //cout<<"\033[1;33mWARNING:\033[0m Half-carry with 16-bit adds is untested."<<endl;
     setCarry((unsigned int)destination + (unsigned int)source > 0xffff   || (source&0xffff + destination&0xffff)>0xffff);
     setHalf(((destination & 0x0f) + (source & 0x0f)) > 0xf || ((destination & 0x0f00) + (source & 0x0f00)) > 0x0f00);//check carry from bit 4 to 5 and from 11 to 12
     //ONLY TESTS FIRST NIBBLE!
@@ -733,7 +730,7 @@ void checkInterrupts() {
 
     if ((interruptFlag & 0x01) == 0x01 && (interruptRegister & 0x01) == 0x01)//catch v-blank interrupt
     {
-        cout<<"\033[1;32mINFO: \033[0mCaught V-blank interrupt."<<endl;
+		logger::logInfo("Caught V-Blank interrupt.");
         enableInterrupts = false;
         interruptFlag = interruptFlag & 0xfe;//clear vblank bit
         //push pc onto stack
@@ -751,7 +748,7 @@ void checkInterrupts() {
     }
     else if ((interruptFlag & 0x02) == 0x02&& (interruptRegister & 0x02) == 0x02)//catch lcd stat interrupt
     {
-        cout<<"\033[1;32mINFO: \033[0mCaught LCD STAT interrupt."<<endl;
+		logger::logInfo("Caught LCD STAT interrupt.");
         enableInterrupts = false;
         interruptFlag = interruptFlag & 0xfd;
         //push pc onto stack
@@ -769,7 +766,7 @@ void checkInterrupts() {
     }
     else if ((interruptFlag & 0x04) == 0x04 && (interruptRegister & 0x04) == 0x04)//catch Timer interrupt
     {
-        cout<<"\033[1;32mINFO: \033[0mCaught timer interrupt."<<endl;
+		logger::logInfo("Caught Timer interrupt.");
         cout<<"Interrupt flag: 0x"<<hex<<(uint16_t)interruptFlag<<dec<<endl;
         enableInterrupts = false;
         interruptFlag = interruptFlag & 0xfb;
@@ -788,7 +785,7 @@ void checkInterrupts() {
     }
     else if ((interruptFlag & 0x08) == 0x08 && (interruptRegister & 0x08) == 0x08)//catch serial interrupt
     {
-        cout<<"\033[1;32mINFO: \033[0mCaught serial interrupt."<<endl;
+		logger::logInfo("Caught serial interrupt.");
         enableInterrupts = false;
         interruptFlag = interruptFlag & 0xf7;
         //push pc onto stack
@@ -806,7 +803,7 @@ void checkInterrupts() {
     }
     else if ((interruptFlag & 0x10) == 0x10 && (interruptRegister & 0x10) == 0x10)//catch joypad interrupt
     {
-        cout<<"\033[1;32mINFO: \033[0mCaught joypad interrupt."<<endl;
+		logger::logInfo("Caught joypad interrupt.");
         enableInterrupts = false;
         interruptFlag = interruptFlag & 0xef;
         //push pc onto stack
@@ -836,7 +833,7 @@ void processTimer(uint8_t opCycle)
             if(tima == 0xff)
             {
                 writeToAddress(0xff05, readFromAddress(0xff06));
-                cout<<"INFO: Requesting timer interrupt.\n";
+				logger::logInfo("Requesting timer interrupt.");
                 interruptFlag |= 0x04;
             }
             else
@@ -876,8 +873,9 @@ void doDMATransfer(uint8_t data) {
 
     //dumpRegisters();
     uint16_t address = data << 8;
-
-    cout<<"\033[1;32mINFO: \033[0mExecuting OAM DMA transfer, reading from addresses 0x"<<hex<<address<<"-0x"<<address+0xa0<<dec<<endl;
+	std::stringstream stream;
+	stream << "Executing DMA transfer, reading from 0x" << std::hex << address << "-0x" << address + 0xa0 << dec;
+	logger::logInfo(stream.str());
     for (uint8_t i = 0; i<0xa0; i++)
     {
         writeToAddress(0xfe00+i, readFromAddress(address+i));

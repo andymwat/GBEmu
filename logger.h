@@ -23,6 +23,7 @@ public:
     static void logError(std::string str,  uint16_t address, uint8_t data);
     static void logWarning(std::string str,  uint16_t address, uint8_t data);
     static void logErrorNoData(std::string str);
+	static void logWarningNoData(std::string str);
 };
 
 

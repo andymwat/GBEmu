@@ -36,7 +36,6 @@ void execute(uint16_t address)
 		return;
 	}
 	uint8_t opcode = readFromAddress(address);
-	//std::cout<<"Address/opcode: " <<hex<<"\t0x"<<address<<"\t0x"<<(uint16_t)opcode<<dec<<std::endl;
 
 	targetRegister = opcode & 0x07;     //bottom 3 bits are which register (b,c,d,e,h,l,(hl),a
 	instruction = (opcode & 0xf8) >> 3;   //top 5 bits are instruction (rlc,rrc,rl,rr,sla,sra,swap,srl,bit 0-7,res 0-7,set 0-7)
@@ -209,7 +208,6 @@ void execute(uint16_t address)
 		sp = concat(readFromAddress(address + 2), readFromAddress(address + 1));//read nn into sp
 		pc += 3;
 		cycles = 12;
-		// cout<<"Loaded " << to_string(sp) <<" into sp."<<endl;
 	}
 	else if (opcode == 0x00)//nop
 	{
@@ -278,11 +276,9 @@ void execute(uint16_t address)
 		h = readFromAddress(address + 2);//read n into h
 		pc += 3;
 		cycles = 12;
-		//cout<<"Loaded " << to_string(l) << " and " << to_string(h) <<" into l and h, respectively."<<endl;
 	}
 	else if (opcode == 0x32)//ldd (hl),a
 	{
-		//cout<<"Writing a into address 0x" <<hex<< (concat(h,l))<<dec <<"."<<endl;
 		writeToAddress(concat(h, l), a);
 		writePair(h, l, concat(h, l) - 1);
 		cycles = 8;
@@ -575,8 +571,6 @@ void execute(uint16_t address)
 		uint8_t temp = readFromAddress(hl);
 		inc8(temp);
 		writeToAddress(hl, temp);
-		//pc++; //because of pc in inc earlier
-		//cout<<"DEBUG: Previously broken \"inc (hl)\" fixed.\n";
 		cycles = 12;
 	}
 	else if (opcode == 0x33)//inc sp
@@ -602,16 +596,10 @@ void execute(uint16_t address)
 		writeToAddress(target + 1, high);
 		cycles = 20;
 		pc += 3;
-		//cout<<"WARNING: opcode 0x08 (ld (u16), sp) untested.\n";
 	}
 	else if (opcode == 0xea)//ld (nn), a
 	{
 		uint16_t next = concat(readFromAddress(address + 2), readFromAddress(address + 1));
-		/* if (next ==  0xd65f && a == 0x0)
-		 {
-			 dumpWorkRamToFile("/home/andrew/Downloads/ramdump.bin");
-			 throw "Wrote 0 to 0xd65f, dumping workram...";
-		 }*/
 		writeToAddress(next, a);
 		pc += 3;
 		cycles = 16;
@@ -983,9 +971,6 @@ bool executeStructural(uint8_t opcode, uint16_t address)
 	}
 	else if (opcode == 0xc9)//ret
 	{
-	//cout<<"WARNING";
-	//cout<<" returning to " << to_string(concat(readFromAddress(sp+1),readFromAddress(sp))) <<endl;
-	//dumpRegisters();
 	pc = concat(readFromAddress(sp + 1), readFromAddress(sp));
 	sp += 2;
 	cycles = 16;
@@ -1034,242 +1019,236 @@ bool executeStructural(uint8_t opcode, uint16_t address)
 	}
 	else if (opcode == 0xd8)//ret c
 	{
-	if (carryStatus())
-	{
-		pc = concat(readFromAddress(sp + 1), readFromAddress(sp));
-		sp += 2;
-		cycles = 20;
-	}
-	else
-	{
-		pc++;
-		cycles = 8;
-	}
+		if (carryStatus())
+		{
+			pc = concat(readFromAddress(sp + 1), readFromAddress(sp));
+			sp += 2;
+			cycles = 20;
+		}
+		else
+		{
+			pc++;
+			cycles = 8;
+		}
 	}
 	else if (opcode == 0x28)//jr z,n
 	{
-	pc += 2;
-	if (zeroStatus()) {
-		pc += (int8_t)readFromAddress(address + 1);
-		cycles = 12;
-	}
-	else {
-		cycles = 8;
-	}
+		pc += 2;
+		if (zeroStatus()) {
+			pc += (int8_t)readFromAddress(address + 1);
+			cycles = 12;
+		}
+		else {
+			cycles = 8;
+		}
 	}
 	else if (opcode == 0x20)//jr nz, n
 	{
-	pc += 2;//increment to next instruction
-	if (!zeroStatus())
-	{
-		pc += (int8_t)readFromAddress(address + 1);//jump
-		cycles = 12;
-		// cout<<"Incrementing pc by " << to_string((int8_t)next)<<" bytes"<<endl;
-	}
-	else { //if zero bit is set
-	 //cout<<"Zero not set, skipping jump"<<endl;
-		cycles = 8;
-	}
+		pc += 2;//increment to next instruction
+		if (!zeroStatus())
+		{
+			pc += (int8_t)readFromAddress(address + 1);//jump
+			cycles = 12;
+		}
+		else { //if zero bit is set
+			cycles = 8;
+		}
 	}
 	else if (opcode == 0x38)//jr c, n
 	{
-	pc += 2;
-	if (carryStatus())
-	{
-		pc += (int8_t)readFromAddress(address + 1);
-		cycles = 12;
-	}
-	else {
-		cycles = 8;
-	}
-
+		pc += 2;
+		if (carryStatus())
+		{
+			pc += (int8_t)readFromAddress(address + 1);
+			cycles = 12;
+		}
+		else {
+			cycles = 8;
+		}
 	}
 	else if (opcode == 0x30)//jr nc, n
 	{
-	pc += 2;
-	if (!carryStatus()) {
-		pc += (int8_t)readFromAddress(address + 1);
-		cycles = 12;
-	}
-	else {
-		cycles = 8;
-	}
+		pc += 2;
+		if (!carryStatus()) {
+			pc += (int8_t)readFromAddress(address + 1);
+			cycles = 12;
+		}
+		else {
+			cycles = 8;
+		}
 	}
 	else if (opcode == 0x18)//jr n
 	{
-	pc += 2;
-	pc += (int8_t)readFromAddress(address + 1);
-	cycles = 12;
+		pc += 2;
+		pc += (int8_t)readFromAddress(address + 1);
+		cycles = 12;
 	}
 	else if (opcode == 0xc3)//jp nn
 	{
-	//cout<<"jumping from 0x"<<hex<<pc<<dec<<" to 0x"<<hex<<concat(readFromAddress(address+2),readFromAddress(address+1))<<dec<<endl;
-	pc = concat(readFromAddress(address + 2), readFromAddress(address + 1));
-	cycles = 16;
-	if (pc == 0x0000)
-	{
-		//dumpWorkRamToFile("/home/andrew/Downloads/ram.bin");
-		throw "Jumped to 0, probably a bug";
-	}
+		pc = concat(readFromAddress(address + 2), readFromAddress(address + 1));
+		cycles = 16;
+		if (pc == 0x0000)
+		{
+			throw "Jumped to 0, probably a bug";
+		}
 	}
 	else if (opcode == 0xca)//jp z, nn
 	{
-	if (zeroStatus())
-	{
-		pc = concat(readFromAddress(address + 2), readFromAddress(address + 1));
-		cycles = 16;
-	}
-	else {
-		pc += 3;
-		cycles = 12;
-	}
+		if (zeroStatus())
+		{
+			pc = concat(readFromAddress(address + 2), readFromAddress(address + 1));
+			cycles = 16;
+		}
+		else {
+			pc += 3;
+			cycles = 12;
+		}
 	}
 	else if (opcode == 0xda)//jp c, nn
 	{
-	if (carryStatus())
-	{
-		pc = concat(readFromAddress(address + 2), readFromAddress(address + 1));
-		cycles = 16;
-	}
-	else {
-		pc += 3;
-		cycles = 12;
-	}
+		if (carryStatus())
+		{
+			pc = concat(readFromAddress(address + 2), readFromAddress(address + 1));
+			cycles = 16;
+		}
+		else {
+			pc += 3;
+			cycles = 12;
+		}
 	}
 	else if (opcode == 0xc2)//jp nz, nn
 	{
-	if (!zeroStatus())
-	{
-		pc = concat(readFromAddress(address + 2), readFromAddress(address + 1));
-		cycles = 16;
-	}
-	else {
-		pc += 3;
-		cycles = 12;
-	}
+		if (!zeroStatus())
+		{
+			pc = concat(readFromAddress(address + 2), readFromAddress(address + 1));
+			cycles = 16;
+		}
+		else {
+			pc += 3;
+			cycles = 12;
+		}
 	}
 	else if (opcode == 0xd2)//jp nc, nn
 	{
-	if (!carryStatus())
-	{
-		pc = concat(readFromAddress(address + 2), readFromAddress(address + 1));
-		cycles = 16;
-	}
-	else {
-		pc += 3;
-		cycles = 12;
-	}
+		if (!carryStatus())
+		{
+			pc = concat(readFromAddress(address + 2), readFromAddress(address + 1));
+			cycles = 16;
+		}
+		else {
+			pc += 3;
+			cycles = 12;
+		}
 	}
 	else if (opcode == 0xf3)//di(disable interrupts)
 	{
-	cout << "INFO: disabling interrupts.\n";
-	enableInterrupts = false;
-	pc++;
-	cycles = 4;
+		logger::logInfo("Disabling interrupts.");
+		enableInterrupts = false;
+		pc++;
+		cycles = 4;
 	}
 	else if (opcode == 0xd9)//reti
 	{
-	enableInterrupts = true;
-	pc = concat(readFromAddress(sp + 1), readFromAddress(sp));
-	sp += 2;
-	cycles = 16;
+		enableInterrupts = true;
+		pc = concat(readFromAddress(sp + 1), readFromAddress(sp));
+		sp += 2;
+		cycles = 16;
 	}
 	else if (opcode == 0xfb)//ei (enable interrupts)
 	{
-	cout << "INFO: Enabling interrupts.\n";
-	enableInterrupts = true;
-	pc++;
-	cycles = 4;
+		logger::logInfo("Enabling interrupts.");
+		enableInterrupts = true;
+		pc++;
+		cycles = 4;
 	}
 	else if (opcode == 0xe9)//jp hl
 	{
-	pc = concat(h, l);
-	cycles = 4;
+		pc = concat(h, l);
+		cycles = 4;
 	}
 	else if (opcode == 0xc7)//rst 0x00
 	{
-	pc++;//?
-	writeToAddress(sp - 1, (uint8_t)(pc >> 8));//write PCh to stack
-	writeToAddress(sp - 2, (uint8_t)(pc & 0x00ff));//write PCl to stack
-	sp -= 2;
-	cycles = 16;
-	pc = 0x0000;
+		pc++;//?
+		writeToAddress(sp - 1, (uint8_t)(pc >> 8));//write PCh to stack
+		writeToAddress(sp - 2, (uint8_t)(pc & 0x00ff));//write PCl to stack
+		sp -= 2;
+		cycles = 16;
+		pc = 0x0000;
 	}
 	else if (opcode == 0xd7)//rst 0x10
 	{
-	pc++;//?
-	writeToAddress(sp - 1, (uint8_t)(pc >> 8));//write PCh to stack
-	writeToAddress(sp - 2, (uint8_t)(pc & 0x00ff));//write PCl to stack
-	sp -= 2;
-	cycles = 16;
-	pc = 0x0010;
+		pc++;//?
+		writeToAddress(sp - 1, (uint8_t)(pc >> 8));//write PCh to stack
+		writeToAddress(sp - 2, (uint8_t)(pc & 0x00ff));//write PCl to stack
+		sp -= 2;
+		cycles = 16;
+		pc = 0x0010;
 	}
 	else if (opcode == 0xe7)//rst 0x20
 	{
-	pc++;//?
-	writeToAddress(sp - 1, (uint8_t)(pc >> 8));//write PCh to stack
-	writeToAddress(sp - 2, (uint8_t)(pc & 0x00ff));//write PCl to stack
-	sp -= 2;
-	cycles = 16;
-	pc = 0x0020;
+		pc++;//?
+		writeToAddress(sp - 1, (uint8_t)(pc >> 8));//write PCh to stack
+		writeToAddress(sp - 2, (uint8_t)(pc & 0x00ff));//write PCl to stack
+		sp -= 2;
+		cycles = 16;
+		pc = 0x0020;
 	}
 	else if (opcode == 0xf7)//rst 0x30
 	{
-	pc++;//?
-	writeToAddress(sp - 1, (uint8_t)(pc >> 8));//write PCh to stack
-	writeToAddress(sp - 2, (uint8_t)(pc & 0x00ff));//write PCl to stack
-	sp -= 2;
-	cycles = 16;
-	pc = 0x0030;
+		pc++;//?
+		writeToAddress(sp - 1, (uint8_t)(pc >> 8));//write PCh to stack
+		writeToAddress(sp - 2, (uint8_t)(pc & 0x00ff));//write PCl to stack
+		sp -= 2;
+		cycles = 16;
+		pc = 0x0030;
 	}
 	else if (opcode == 0xcf)//rst 0x08
 	{
-	pc++;//?
-	writeToAddress(sp - 1, (uint8_t)(pc >> 8));//write PCh to stack
-	writeToAddress(sp - 2, (uint8_t)(pc & 0x00ff));//write PCl to stack
-	sp -= 2;
-	cycles = 16;
-	pc = 0x0008;
+		pc++;//?
+		writeToAddress(sp - 1, (uint8_t)(pc >> 8));//write PCh to stack
+		writeToAddress(sp - 2, (uint8_t)(pc & 0x00ff));//write PCl to stack
+		sp -= 2;
+		cycles = 16;
+		pc = 0x0008;
 	}
 	else if (opcode == 0xdf)//rst 0x18
 	{
-	pc++;//?
-	writeToAddress(sp - 1, (uint8_t)(pc >> 8));//write PCh to stack
-	writeToAddress(sp - 2, (uint8_t)(pc & 0x00ff));//write PCl to stack
-	sp -= 2;
-	cycles = 16;
-	pc = 0x0018;
+		pc++;//?
+		writeToAddress(sp - 1, (uint8_t)(pc >> 8));//write PCh to stack
+		writeToAddress(sp - 2, (uint8_t)(pc & 0x00ff));//write PCl to stack
+		sp -= 2;
+		cycles = 16;
+		pc = 0x0018;
 	}
 	else if (opcode == 0xef)//rst 0x28
 	{
-	pc++;//?
-	writeToAddress(sp - 1, (uint8_t)(pc >> 8));//write PCh to stack
-	writeToAddress(sp - 2, (uint8_t)(pc & 0x00ff));//write PCl to stack
-	sp -= 2;
-	cycles = 16;
-	pc = 0x0028;
+		pc++;//?
+		writeToAddress(sp - 1, (uint8_t)(pc >> 8));//write PCh to stack
+		writeToAddress(sp - 2, (uint8_t)(pc & 0x00ff));//write PCl to stack
+		sp -= 2;
+		cycles = 16;
+		pc = 0x0028;
 	}
 	else if (opcode == 0xff)//rst 0x38
 	{
 	    logger::logWarning("RST 0x38 instruction encountered. Might be an error.", address, opcode);
-	//cout << "\033[1;33mWARNING:\033[0m RST 0x38 instruction encountered. Might be an error" << endl;
-	pc++;//?
-	writeToAddress(sp - 1, (uint8_t)(pc >> 8));//write PCh to stack
-	writeToAddress(sp - 2, (uint8_t)(pc & 0x00ff));//write PCl to stack
-	sp -= 2;
-	cycles = 16;
-	pc = 0x0038;
+		pc++;//?
+		writeToAddress(sp - 1, (uint8_t)(pc >> 8));//write PCh to stack
+		writeToAddress(sp - 2, (uint8_t)(pc & 0x00ff));//write PCl to stack
+		sp -= 2;
+		cycles = 16;
+		pc = 0x0038;
 	}
 	else if (opcode == 0x76)//halt
 	{
-	cycles = 4;
-	pc++;
-	halted = true;
-	cout << "WARNING: HALT bug is not implemented.\n";
+		cycles = 4;
+		pc++;
+		halted = true;
+		logger::logWarningNoData("HALT bug is not implemented.");
 	}
 	else
 	{
-	return false;
+		return false;
 	}
 	return true;
 }
