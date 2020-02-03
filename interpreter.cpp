@@ -113,7 +113,7 @@ void writeToAddress(uint16_t address, uint8_t data) {
     }
     else if (address >= 0xfea0 && address <= 0xfeff)
     {
-        cout<<"Tried to write to an unused address, probably a ROM bug."<<endl;
+        logger::logInfo("Tried to write to an unused address, probably a ROM bug.");
     }
     else if (address >= 0xfe00 && address <= 0xfe9f)
     {
