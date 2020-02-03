@@ -2,9 +2,12 @@
 #pragma ide diagnostic ignored "hicpp-exception-baseclass"
 #pragma ide diagnostic ignored "readability-static-accessed-through-instance"
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
-
+//
+// Created by andrew on 11/17/19.
+//
 #include <iostream>
 #include <fstream>
+//#include <unistd.h>
 #include "cartridge.h"
 #include "interpreter.h"
 #include "lcdController.h"
@@ -30,8 +33,6 @@ int m_TimerCounter;
 uint8_t a,b,c,d,e,f,h,l;
 uint16_t sp;
 uint16_t pc;
-bool runningTest = false;
-uint8_t* testInstructions;
 
 uint8_t vram[8192];
 uint8_t* cartRam;
@@ -42,7 +43,7 @@ uint8_t backgroundPalette, scrollX, scrollY, windowX, windowY, lcdControl, coinc
 uint8_t highRam[127];
 uint8_t spriteAttributeTable[160];
 
-uint8_t joypadRegister = 0xf;
+uint8_t joypadRegister;
 uint8_t interruptRegister = 0;
 uint8_t interruptFlag = 0;
 
@@ -56,7 +57,6 @@ bool halted = false;
 
 
 void writeToAddress(uint16_t address, uint8_t data) {
-
     // std::cout<<"Writing address " << std::to_string(address) <<std::endl;
     if (address >= 0x8000 && address <=0x9fff)
     {
@@ -88,14 +88,13 @@ void writeToAddress(uint16_t address, uint8_t data) {
         {
             if (currentCartridge->ramBankIdentifier == 0x00)//no cartRAM
             {
-				logger::logWarningNoData(" Attempting to write to cartRAM on cartridge without RAM, ignoring.");
-                
+                cout<<"WARNING: Attempting to write to cartRAM on cartridge without RAM, ignoring...\n";
             } else{
                 cartRam[address - 0xa000] = data;
             }
         } else
         {
-			logger::logWarningNoData(" Attempting to write to cartRAM while RAM is disabled, ignoring.");
+            cout<<"WARNING: Attempting to write to cartRAM while RAM is disabled, ignoring...\n";
         }
         //cout<<"WARNING: Cart RAM banking is not tested. Writing to address 0x" <<hex<<address<<dec<<".\n";
 
@@ -114,7 +113,7 @@ void writeToAddress(uint16_t address, uint8_t data) {
     }
     else if (address >= 0xfea0 && address <= 0xfeff)
     {
-		//logger::logInfo("Tried to write to an unused address, probably a ROM bug.");
+        logger::logInfo("Tried to write to an unused address, probably a ROM bug.");
     }
     else if (address >= 0xfe00 && address <= 0xfe9f)
     {
@@ -331,10 +330,13 @@ void handleIOWrite(uint16_t address, uint8_t data) {
     {
 		logger::logWarning("Speed control register write unimplemented.", address, data);
     }
+    else if (address >= 0xff03 && address <= 0xff0e)
+    {
+		logger::logWarning("Tried writing to 0xff03-0xff0e, ignoring.", address, data);
+    }
     else if (address == 0xff00)
     {
-		//logger::logWarning("Joypad Write", pc, joypadRegister);
-        joypadRegister = data & 0xf0;
+        joypadRegister = data;
     }
     else if (address == 0xff42)
     {
@@ -448,18 +450,16 @@ void handleIOWrite(uint16_t address, uint8_t data) {
 uint8_t handleIORead(uint16_t address) {
     if (address == 0xff00)
     {
-       // return getJoypadState();
-		//logger::logWarning("Joypad Read", pc, joypadRegister);
-		return joypadRegister;
+        return getJoypadState();
     }
-	else if (address == 0xff02)
-	{
-		logger::logWarningNoData("Serial control register unimplemented, returning 0xff.");
-		return 0xff;
-	}
     else if (address == 0xff01)
     {
         return tempOutput;
+    }
+    else if (address >= 0xff03 && address <= 0xff0e)
+    {
+		logger::logWarning("Reading from 0xff03-0xff0e, returning 0xff.", address,0xff);
+        return 0xff;
     }
     else if (address == 0xff44)//lcdc y coordinate (0-153, 144-153 is vblank)
     {
@@ -618,12 +618,18 @@ void dumpToConsole(std::string path)
 
 void dumpRegisters()
 {
-    cout<<"af:\t" <<to_string(concat(a,f))<<"\t"<<"0x"<<hex<< (concat(a, f ))<<dec<<endl;
-    cout<<"bc:\t" <<to_string(concat(b,c))<<"\t"<<"0x"<<hex<< concat(b, c) <<dec<<endl;
-    cout<<"de:\t" <<to_string(concat(d,e))<<"\t"<<"0x"<<hex<<concat(d,e)<<dec<<endl;
-    cout<<"hl:\t" <<to_string(concat(h,l))<<"\t"<<"0x"<<hex<<concat(h,l)<<dec<<endl;
-    cout<<"sp:\t" <<to_string(sp)<<"\t"<<"0x"<<hex<<sp<<dec<<endl;
     cout<<"pc:\t" <<to_string(pc)<<"\t"<<"0x"<<hex<<pc<<dec<<endl;
+    cout<<"sp:\t" <<to_string(sp)<<"\t"<<"0x"<<hex<<sp<<dec<<endl;
+    cout<<"a:\t" <<to_string(a)<<"\t"<<"0x"<<hex<<(int)a<<dec<<endl;
+    cout<<"b:\t" <<to_string(b)<<"\t"<<"0x"<<hex<<(int)b<<dec<<endl;
+    cout<<"c:\t" <<to_string(c)<<"\t"<<"0x"<<hex<<(int)c<<dec<<endl;
+    cout<<"d:\t" <<to_string(d)<<"\t"<<"0x"<<hex<<(int)d<<dec<<endl;
+    cout<<"e:\t" <<to_string(e)<<"\t"<<"0x"<<hex<<(int)e<<dec<<endl;
+    cout<<"de:\t" <<to_string(concat(d,e))<<"\t"<<"0x"<<hex<<concat(d,e)<<dec<<endl;
+    cout<<"f:\t" <<to_string(f)<<"\t"<<"0x"<<hex<<(int)f<<dec<<endl;
+    cout<<"h:\t" <<to_string(h)<<"\t"<<"0x"<<hex<<(int)h<<dec<<endl;
+    cout<<"l:\t" <<to_string(l)<<"\t"<<"0x"<<hex<<(int)l<<dec<<endl;
+    cout<<"hl:\t" <<to_string(concat(h,l))<<"\t"<<"0x"<<hex<<concat(h,l)<<dec<<endl;
 
 }
 void initRegisters() {
@@ -639,7 +645,6 @@ void initRegisters() {
     writeToAddress(0xff47,0xfc);
     writeToAddress(0xff48,0xff);
     writeToAddress(0xff49,0xff);
-	
 
 
 }
@@ -680,10 +685,9 @@ void sub8(uint8_t & destination, uint8_t source) {
     pc++;
 }
 void add16(uint16_t &destination, uint16_t source) {
-
-	setHalf(((destination & 0xFFF) + (source & 0xFFF)) & 0x1000); //taken from SameBoy
-    setCarry(((unsigned long)destination + (unsigned long)source) & 0x10000);//taken from SameBoy
-    
+    setCarry((unsigned int)destination + (unsigned int)source > 0xffff   || (source&0xffff + destination&0xffff)>0xffff);
+    setHalf(((destination & 0x0f) + (source & 0x0f)) > 0xf || ((destination & 0x0f00) + (source & 0x0f00)) > 0x0f00);//check carry from bit 4 to 5 and from 11 to 12
+    //ONLY TESTS FIRST NIBBLE!
     destination += source;
     setSubtract(false);
     cycles = 8;
@@ -771,7 +775,7 @@ void checkInterrupts() {
     else if ((interruptFlag & 0x04) == 0x04 && (interruptRegister & 0x04) == 0x04)//catch Timer interrupt
     {
 		logger::logInfo("Caught Timer interrupt.");
-        //cout<<"Interrupt flag: 0x"<<hex<<(uint16_t)interruptFlag<<dec<<endl;
+        cout<<"Interrupt flag: 0x"<<hex<<(uint16_t)interruptFlag<<dec<<endl;
         enableInterrupts = false;
         interruptFlag = interruptFlag & 0xfb;
         //push pc onto stack
@@ -783,7 +787,7 @@ void checkInterrupts() {
         if (halted)
         {
             halted = false;
-			logger::logWarningNoData("Ignoring HALT bug.");
+            cout<<"WARNING: Ignoring HALT bug...\n";
         }
         pc=0x50;
     }
@@ -801,7 +805,7 @@ void checkInterrupts() {
         if (halted)
         {
             halted = false;
-			logger::logWarningNoData("Ignoring HALT bug.");
+            cout<<"WARNING: Ignoring HALT bug...\n";
         }
         pc=0x58;
     }
@@ -819,7 +823,7 @@ void checkInterrupts() {
         if (halted)
         {
             halted = false;
-			logger::logWarningNoData("Ignoring HALT bug.");
+            cout<<"WARNING: Ignoring HALT bug...\n";
         }
         pc=0x60;
     }
@@ -858,7 +862,7 @@ void doDividerRegister(uint8_t opCycle)
 }
 uint8_t GetClockFreq()
 {
-    return tmc & 0x03;
+    return tmc&0x03;
 }
 void SetClockFreq()
 {
@@ -879,15 +883,11 @@ void doDMATransfer(uint8_t data) {
     uint16_t address = data << 8;
 	std::stringstream stream;
 	stream << "Executing DMA transfer, reading from 0x" << std::hex << address << "-0x" << address + 0xa0 << dec;
-	//logger::logInfo(stream.str());
+	logger::logInfo(stream.str());
     for (uint8_t i = 0; i<0xa0; i++)
     {
         writeToAddress(0xfe00+i, readFromAddress(address+i));
     }
 }
-
-
-
-
 
 #pragma clang diagnostic pop
