@@ -88,13 +88,14 @@ void writeToAddress(uint16_t address, uint8_t data) {
         {
             if (currentCartridge->ramBankIdentifier == 0x00)//no cartRAM
             {
-                cout<<"WARNING: Attempting to write to cartRAM on cartridge without RAM, ignoring...\n";
+				logger::logWarningNoData(" Attempting to write to cartRAM on cartridge without RAM, ignoring.");
+                
             } else{
                 cartRam[address - 0xa000] = data;
             }
         } else
         {
-            cout<<"WARNING: Attempting to write to cartRAM while RAM is disabled, ignoring...\n";
+			logger::logWarningNoData(" Attempting to write to cartRAM while RAM is disabled, ignoring.");
         }
         //cout<<"WARNING: Cart RAM banking is not tested. Writing to address 0x" <<hex<<address<<dec<<".\n";
 
@@ -113,7 +114,7 @@ void writeToAddress(uint16_t address, uint8_t data) {
     }
     else if (address >= 0xfea0 && address <= 0xfeff)
     {
-        cout<<"Tried to write to an unused address, probably a ROM bug."<<endl;
+		logger::logInfo("Tried to write to an unused address, probably a ROM bug.");
     }
     else if (address >= 0xfe00 && address <= 0xfe9f)
     {
@@ -330,10 +331,6 @@ void handleIOWrite(uint16_t address, uint8_t data) {
     {
 		logger::logWarning("Speed control register write unimplemented.", address, data);
     }
-    else if (address >= 0xff03 && address <= 0xff0e)
-    {
-		logger::logWarning("Tried writing to 0xff03-0xff0e, ignoring.", address, data);
-    }
     else if (address == 0xff00)
     {
         joypadRegister = data;
@@ -455,11 +452,6 @@ uint8_t handleIORead(uint16_t address) {
     else if (address == 0xff01)
     {
         return tempOutput;
-    }
-    else if (address >= 0xff03 && address <= 0xff0e)
-    {
-		logger::logWarning("Reading from 0xff03-0xff0e, returning 0xff.", address,0xff);
-        return 0xff;
     }
     else if (address == 0xff44)//lcdc y coordinate (0-153, 144-153 is vblank)
     {
