@@ -770,7 +770,7 @@ void checkInterrupts() {
     else if ((interruptFlag & 0x04) == 0x04 && (interruptRegister & 0x04) == 0x04)//catch Timer interrupt
     {
 		logger::logInfo("Caught Timer interrupt.");
-        cout<<"Interrupt flag: 0x"<<hex<<(uint16_t)interruptFlag<<dec<<endl;
+        //cout<<"Interrupt flag: 0x"<<hex<<(uint16_t)interruptFlag<<dec<<endl;
         enableInterrupts = false;
         interruptFlag = interruptFlag & 0xfb;
         //push pc onto stack
@@ -878,7 +878,7 @@ void doDMATransfer(uint8_t data) {
     uint16_t address = data << 8;
 	std::stringstream stream;
 	stream << "Executing DMA transfer, reading from 0x" << std::hex << address << "-0x" << address + 0xa0 << dec;
-	logger::logInfo(stream.str());
+	//logger::logInfo(stream.str());
     for (uint8_t i = 0; i<0xa0; i++)
     {
         writeToAddress(0xfe00+i, readFromAddress(address+i));
