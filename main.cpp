@@ -43,8 +43,8 @@ int main(int argc, char* args[])
     //loadTestRom("/home/andrew/Downloads/DMG_ROM.bin");
 
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/cpu_instrs.gb");
-	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/tetris.gb");
-	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/sml.gb");
+	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/tetris.gb");
+	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/sml.gb");
     /*cout<<endl<<"Select an option:"<<endl;
     cout<<"1: Run normally."<<endl;
     cout<<"2: Run normally until pc reaches a value, then stop."<<endl;
@@ -76,8 +76,8 @@ int main(int argc, char* args[])
                     {
                         throw "User exit.";
                     }
-                    checkKeyboard(events);
                 }
+				checkKeyboardNew();
                 cycles = 0;
                 execute(pc);
                 if (cycles == 0)
@@ -89,7 +89,8 @@ int main(int argc, char* args[])
                     //logger::logWarning("Stack pointer is zero.", pc, readFromAddress(pc));
                 }
                 updateScreen(cycles);
-            } else{
+            }
+        	else{
                 while (pc != sel)
                 {
                     while (SDL_PollEvent(&events) != 0)
@@ -98,8 +99,8 @@ int main(int argc, char* args[])
                         {
                             throw "User exit.";
                         }
-                        checkKeyboard(events);
                     }
+						checkKeyboardNew();
                     cycles = 0;
                     execute(pc);
                     if (cycles == 0)

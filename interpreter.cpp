@@ -43,7 +43,7 @@ uint8_t backgroundPalette, scrollX, scrollY, windowX, windowY, lcdControl, coinc
 uint8_t highRam[127];
 uint8_t spriteAttributeTable[160];
 
-uint8_t joypadRegister;
+uint8_t joypadRegister = 0xf;
 uint8_t interruptRegister = 0;
 uint8_t interruptFlag = 0;
 
@@ -114,7 +114,7 @@ void writeToAddress(uint16_t address, uint8_t data) {
     }
     else if (address >= 0xfea0 && address <= 0xfeff)
     {
-		logger::logInfo("Tried to write to an unused address, probably a ROM bug.");
+		//logger::logInfo("Tried to write to an unused address, probably a ROM bug.");
     }
     else if (address >= 0xfe00 && address <= 0xfe9f)
     {
@@ -333,7 +333,8 @@ void handleIOWrite(uint16_t address, uint8_t data) {
     }
     else if (address == 0xff00)
     {
-        joypadRegister = data;
+		//logger::logWarning("Joypad Write", pc, joypadRegister);
+        joypadRegister = data & 0xf0;
     }
     else if (address == 0xff42)
     {
@@ -447,7 +448,9 @@ void handleIOWrite(uint16_t address, uint8_t data) {
 uint8_t handleIORead(uint16_t address) {
     if (address == 0xff00)
     {
-        return getJoypadState();
+       // return getJoypadState();
+		//logger::logWarning("Joypad Read", pc, joypadRegister);
+		return joypadRegister;
     }
     else if (address == 0xff01)
     {
