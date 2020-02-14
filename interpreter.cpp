@@ -43,7 +43,7 @@ uint8_t backgroundPalette, scrollX, scrollY, windowX, windowY, lcdControl, coinc
 uint8_t highRam[127];
 uint8_t spriteAttributeTable[160];
 
-uint8_t joypadRegister;
+uint8_t joypadRegister = 0xf;
 uint8_t interruptRegister = 0;
 uint8_t interruptFlag = 0;
 
@@ -88,13 +88,14 @@ void writeToAddress(uint16_t address, uint8_t data) {
         {
             if (currentCartridge->ramBankIdentifier == 0x00)//no cartRAM
             {
-                cout<<"WARNING: Attempting to write to cartRAM on cartridge without RAM, ignoring...\n";
+				logger::logWarningNoData(" Attempting to write to cartRAM on cartridge without RAM, ignoring.");
+                
             } else{
                 cartRam[address - 0xa000] = data;
             }
         } else
         {
-            cout<<"WARNING: Attempting to write to cartRAM while RAM is disabled, ignoring...\n";
+			logger::logWarningNoData(" Attempting to write to cartRAM while RAM is disabled, ignoring.");
         }
         //cout<<"WARNING: Cart RAM banking is not tested. Writing to address 0x" <<hex<<address<<dec<<".\n";
 
@@ -113,7 +114,7 @@ void writeToAddress(uint16_t address, uint8_t data) {
     }
     else if (address >= 0xfea0 && address <= 0xfeff)
     {
-        logger::logInfo("Tried to write to an unused address, probably a ROM bug.");
+		//logger::logInfo("Tried to write to an unused address, probably a ROM bug.");
     }
     else if (address >= 0xfe00 && address <= 0xfe9f)
     {
@@ -330,13 +331,10 @@ void handleIOWrite(uint16_t address, uint8_t data) {
     {
 		logger::logWarning("Speed control register write unimplemented.", address, data);
     }
-    else if (address >= 0xff03 && address <= 0xff0e)
-    {
-		logger::logWarning("Tried writing to 0xff03-0xff0e, ignoring.", address, data);
-    }
     else if (address == 0xff00)
     {
-        joypadRegister = data;
+		//logger::logWarning("Joypad Write", pc, joypadRegister);
+        joypadRegister = data & 0xf0;
     }
     else if (address == 0xff42)
     {
@@ -450,16 +448,13 @@ void handleIOWrite(uint16_t address, uint8_t data) {
 uint8_t handleIORead(uint16_t address) {
     if (address == 0xff00)
     {
-        return getJoypadState();
+       // return getJoypadState();
+		//logger::logWarning("Joypad Read", pc, joypadRegister);
+		return joypadRegister;
     }
     else if (address == 0xff01)
     {
         return tempOutput;
-    }
-    else if (address >= 0xff03 && address <= 0xff0e)
-    {
-		logger::logWarning("Reading from 0xff03-0xff0e, returning 0xff.", address,0xff);
-        return 0xff;
     }
     else if (address == 0xff44)//lcdc y coordinate (0-153, 144-153 is vblank)
     {
@@ -775,7 +770,7 @@ void checkInterrupts() {
     else if ((interruptFlag & 0x04) == 0x04 && (interruptRegister & 0x04) == 0x04)//catch Timer interrupt
     {
 		logger::logInfo("Caught Timer interrupt.");
-        cout<<"Interrupt flag: 0x"<<hex<<(uint16_t)interruptFlag<<dec<<endl;
+        //cout<<"Interrupt flag: 0x"<<hex<<(uint16_t)interruptFlag<<dec<<endl;
         enableInterrupts = false;
         interruptFlag = interruptFlag & 0xfb;
         //push pc onto stack
@@ -883,7 +878,7 @@ void doDMATransfer(uint8_t data) {
     uint16_t address = data << 8;
 	std::stringstream stream;
 	stream << "Executing DMA transfer, reading from 0x" << std::hex << address << "-0x" << address + 0xa0 << dec;
-	logger::logInfo(stream.str());
+	//logger::logInfo(stream.str());
     for (uint8_t i = 0; i<0xa0; i++)
     {
         writeToAddress(0xfe00+i, readFromAddress(address+i));
