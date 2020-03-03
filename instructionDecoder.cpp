@@ -350,11 +350,11 @@ void execute(uint16_t address)
 	}
 	else if (opcode == 0xe8)//add sp, i8
 	{
-	    logger::logWarning("Carry/half-carry with \"add sp, i8\" is untested", pc, opcode);
-		//cout << "WARNING: Carry/half-carry with \"add sp, i8\" is untested.\n";
-		int8_t next = readFromAddress(address + 1);
-		setCarry((unsigned int)sp + (signed int)next > 0xffff || (((unsigned int)sp & 0xffff) + ((signed int)next & 0xffff)) > 0xffff);
-		setHalf(((sp & 0x0f) + (next & 0x0f)) > 0xf || ((sp & 0x0f00) + (next & 0x0f00)) > 0x0f00);
+	    //logger::logWarning("Carry/half-carry with \"add sp, i8\" is untested", pc, opcode);
+
+		int8_t next = (int8_t)readFromAddress(address + 1);
+		setCarry((((uint16_t)sp & 0xFF) + ((int16_t)next & 0xFF) > 0xFF));
+		setHalf(((sp & 0x0f) + (next & 0x0f)) > 0xf );	//check only bit 3 to 4 --->>https://stackoverflow.com/questions/57958631/game-boy-half-carry-flag-and-16-bit-instructions-especially-opcode-0xe8
 		setSubtract(false);
 		setZero(false);
 		sp += next;
@@ -799,7 +799,6 @@ void execute(uint16_t address)
 	{
 		int8_t offset = readFromAddress(address + 1);
 		writePair(h, l, sp + offset);
-        logger::logWarning("Carry and Half-carry flags with the \"ld hl, sp+i8\" instruction are not tested.", pc, opcode);
 		cycles = 12;
 		pc += 2;
 		if (offset >= 0)

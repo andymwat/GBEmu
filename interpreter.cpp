@@ -639,6 +639,7 @@ void initRegisters() {
     writeToAddress(0xff47,0xfc);
     writeToAddress(0xff48,0xff);
     writeToAddress(0xff49,0xff);
+	
 
 
 }
@@ -679,9 +680,10 @@ void sub8(uint8_t & destination, uint8_t source) {
     pc++;
 }
 void add16(uint16_t &destination, uint16_t source) {
-    setCarry((unsigned int)destination + (unsigned int)source > 0xffff   || (source&0xffff + destination&0xffff)>0xffff);
-    setHalf(((destination & 0x0f) + (source & 0x0f)) > 0xf || ((destination & 0x0f00) + (source & 0x0f00)) > 0x0f00);//check carry from bit 4 to 5 and from 11 to 12
-    //ONLY TESTS FIRST NIBBLE!
+
+	setHalf(((destination & 0xFFF) + (source & 0xFFF)) & 0x1000); //taken from SameBoy
+    setCarry(((unsigned long)destination + (unsigned long)source) & 0x10000);//taken from SameBoy
+    
     destination += source;
     setSubtract(false);
     cycles = 8;
@@ -856,7 +858,7 @@ void doDividerRegister(uint8_t opCycle)
 }
 uint8_t GetClockFreq()
 {
-    return tmc&0x03;
+    return tmc & 0x03;
 }
 void SetClockFreq()
 {

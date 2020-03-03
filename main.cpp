@@ -49,8 +49,9 @@ int main(int argc, char* args[])
     //loadTestRom("/home/andrew/Downloads/DMG_ROM.bin");
 
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/cpu_instrs.gb");
+	loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/03-op sp,hl.gb");
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/sml.gb");
-	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/tetris.gb");
+	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/tetris.gb");
 
 
 	if (RUN_DEBUG_TESTS)
