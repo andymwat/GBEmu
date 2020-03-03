@@ -44,7 +44,7 @@ int main(int argc, char* args[])
 
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/cpu_instrs.gb");
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/tetris.gb");
-	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/drMario.gb");
+	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/tetris2.gb");
     /*cout<<endl<<"Select an option:"<<endl;
     cout<<"1: Run normally."<<endl;
     cout<<"2: Run normally until pc reaches a value, then stop."<<endl;

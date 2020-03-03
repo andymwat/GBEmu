@@ -27,6 +27,8 @@ uint8_t temp;
 uint8_t* reg;
 void execute(uint16_t address)
 {
+	
+
 
 	if (halted)
 	{
@@ -35,7 +37,16 @@ void execute(uint16_t address)
 		checkInterrupts();
 		return;
 	}
-	uint8_t opcode = readFromAddress(address);
+	uint8_t opcode;
+
+	if (runningTest)
+	{
+		opcode = testInstructions[address];
+	}
+	else
+	{
+		opcode = readFromAddress(address);
+	}
 
 	targetRegister = opcode & 0x07;     //bottom 3 bits are which register (b,c,d,e,h,l,(hl),a
 	instruction = (opcode & 0xf8) >> 3;   //top 5 bits are instruction (rlc,rrc,rl,rr,sla,sra,swap,srl,bit 0-7,res 0-7,set 0-7)
@@ -205,6 +216,7 @@ void execute(uint16_t address)
 	}
 	else if (opcode == 0x31)//ld sp, nn
 	{
+
 		sp = concat(readFromAddress(address + 2), readFromAddress(address + 1));//read nn into sp
 		pc += 3;
 		cycles = 12;

@@ -33,6 +33,8 @@ int m_TimerCounter;
 uint8_t a,b,c,d,e,f,h,l;
 uint16_t sp;
 uint16_t pc;
+bool runningTest = false;
+uint8_t* testInstructions;
 
 uint8_t vram[8192];
 uint8_t* cartRam;
@@ -782,7 +784,7 @@ void checkInterrupts() {
         if (halted)
         {
             halted = false;
-            cout<<"WARNING: Ignoring HALT bug...\n";
+			logger::logWarningNoData("Ignoring HALT bug.");
         }
         pc=0x50;
     }
@@ -800,7 +802,7 @@ void checkInterrupts() {
         if (halted)
         {
             halted = false;
-            cout<<"WARNING: Ignoring HALT bug...\n";
+			logger::logWarningNoData("Ignoring HALT bug.");
         }
         pc=0x58;
     }
@@ -818,7 +820,7 @@ void checkInterrupts() {
         if (halted)
         {
             halted = false;
-            cout<<"WARNING: Ignoring HALT bug...\n";
+			logger::logWarningNoData("Ignoring HALT bug.");
         }
         pc=0x60;
     }
@@ -884,5 +886,9 @@ void doDMATransfer(uint8_t data) {
         writeToAddress(0xfe00+i, readFromAddress(address+i));
     }
 }
+
+
+
+
 
 #pragma clang diagnostic pop

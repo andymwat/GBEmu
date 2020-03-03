@@ -5,9 +5,96 @@
 #define GBEMU_INTERPRETER_H
 
 #include <string>
+#include "logger.h"
+#include <iostream>
 extern uint8_t a,b,c,d,e,f,h,l;
 extern uint16_t sp;
 extern uint16_t pc;
+extern bool runningTest;
+extern uint8_t* testInstructions;
+
+struct cpuRegisterState
+{
+	uint8_t a, b, c, d, e, f, h, l;
+	uint16_t sp;
+	uint16_t pc;
+
+	int checkAgainst(cpuRegisterState other)
+	{
+		bool errored = false;
+		if (this->a != other.a)
+		{
+			logger::logErrorNoData("Mismatch in register A!");
+			std::cout << "Expected:\t0x" << std::hex << (uint16_t)this->a << std::endl;
+			std::cout << "Actual:  \t0x" << std::hex << (uint16_t)other.a << std::dec << std::endl;
+			errored = true;
+		}
+		if (this->b != other.b)
+		{
+			logger::logErrorNoData("Mismatch in register B!");
+			std::cout << "Expected:\t0x" << std::hex << (uint16_t)this->b << std::endl;
+			std::cout << "Actual:  \t0x" << std::hex << (uint16_t)other.b << std::dec << std::endl;
+			errored = true;
+		}
+		if (this->c != other.c)
+		{
+			logger::logErrorNoData("Mismatch in register C!");
+			std::cout << "Expected:\t0x" << std::hex << (uint16_t)this->c << std::endl;
+			std::cout << "Actual:  \t0x" << std::hex << (uint16_t)other.c << std::dec << std::endl;
+			errored = true;
+		}
+		if (this->d != other.d)
+		{
+			logger::logErrorNoData("Mismatch in register D!");
+			std::cout << "Expected:\t0x" << std::hex << (uint16_t)this->d << std::endl;
+			std::cout << "Actual:  \t0x" << std::hex << (uint16_t)other.d << std::dec << std::endl;
+			errored = true;
+		}
+		if (this->e != other.e)
+		{
+			logger::logErrorNoData("Mismatch in register E!");
+			std::cout << "Expected:\t0x" << std::hex << (uint16_t)this->e << std::endl;
+			std::cout << "Actual:  \t0x" << std::hex << (uint16_t)other.e << std::dec << std::endl;
+			errored = true;
+		}
+		if (this->f != other.f)
+		{
+			logger::logErrorNoData("Mismatch in register F!");
+			std::cout << "Expected:\t0x" << std::hex << (uint16_t)this->f << std::endl;
+			std::cout << "Actual:  \t0x" << std::hex << (uint16_t)other.f << std::dec << std::endl;
+			errored = true;
+		}
+		if (this->h != other.h)
+		{
+			logger::logErrorNoData("Mismatch in register H!");
+			std::cout << "Expected:\t0x" << std::hex << (uint16_t)this->h << std::endl;
+			std::cout << "Actual:  \t0x" << std::hex << (uint16_t)other.h << std::dec << std::endl;
+			errored = true;
+		}
+		if (this->l != other.l)
+		{
+			logger::logErrorNoData("Mismatch in register L!");
+			std::cout << "Expected:\t0x" << std::hex << (uint16_t)this->l << std::endl;
+			std::cout << "Actual:  \t0x" << std::hex << (uint16_t)other.l << std::dec << std::endl;
+			errored = true;
+		}
+
+		if (this->sp != other.sp)
+		{
+			logger::logErrorNoData("Mismatch in register SP!");
+			std::cout << "Expected:\t0x" << std::hex << this->sp << std::endl;
+			std::cout << "Actual:  \t0x" << std::hex << other.sp << std::dec << std::endl;
+			errored = true;
+		}
+		if (errored)
+		{
+			return -1;
+		}
+		return 0;
+	}
+	
+};
+
 
 extern uint8_t vram[8192];
 extern uint8_t* cartRam;
