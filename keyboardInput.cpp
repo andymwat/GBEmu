@@ -11,6 +11,7 @@
 
 uint8_t joypadStateInternal;
 uint8_t previousJoypadState;
+bool keyboardBreak = false;
 /*Bits:
  * NOTE: 0=selected/pressed
  * 7: not used
@@ -37,7 +38,7 @@ void checkKeyboardNew()
 	b_b = keyboardState[SDL_SCANCODE_X];
 	b_start = keyboardState[SDL_SCANCODE_A];
 	b_select = keyboardState[SDL_SCANCODE_S];
-
+	keyboardBreak = keyboardState[SDL_SCANCODE_B];
 	joypadRegister |= 0xf;//set bottom for bits, to be cleared below
 	if (!TestBit(joypadRegister, 5))//button select
 	{

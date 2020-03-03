@@ -2,12 +2,9 @@
 #pragma ide diagnostic ignored "hicpp-exception-baseclass"
 #pragma ide diagnostic ignored "readability-static-accessed-through-instance"
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
-//
-// Created by andrew on 11/17/19.
-//
+
 #include <iostream>
 #include <fstream>
-//#include <unistd.h>
 #include "cartridge.h"
 #include "interpreter.h"
 #include "lcdController.h"
@@ -59,6 +56,7 @@ bool halted = false;
 
 
 void writeToAddress(uint16_t address, uint8_t data) {
+
     // std::cout<<"Writing address " << std::to_string(address) <<std::endl;
     if (address >= 0x8000 && address <=0x9fff)
     {
@@ -454,6 +452,11 @@ uint8_t handleIORead(uint16_t address) {
 		//logger::logWarning("Joypad Read", pc, joypadRegister);
 		return joypadRegister;
     }
+	else if (address == 0xff02)
+	{
+		logger::logWarningNoData("Serial control register unimplemented, returning 0xff.");
+		return 0xff;
+	}
     else if (address == 0xff01)
     {
         return tempOutput;
@@ -615,18 +618,12 @@ void dumpToConsole(std::string path)
 
 void dumpRegisters()
 {
-    cout<<"pc:\t" <<to_string(pc)<<"\t"<<"0x"<<hex<<pc<<dec<<endl;
-    cout<<"sp:\t" <<to_string(sp)<<"\t"<<"0x"<<hex<<sp<<dec<<endl;
-    cout<<"a:\t" <<to_string(a)<<"\t"<<"0x"<<hex<<(int)a<<dec<<endl;
-    cout<<"b:\t" <<to_string(b)<<"\t"<<"0x"<<hex<<(int)b<<dec<<endl;
-    cout<<"c:\t" <<to_string(c)<<"\t"<<"0x"<<hex<<(int)c<<dec<<endl;
-    cout<<"d:\t" <<to_string(d)<<"\t"<<"0x"<<hex<<(int)d<<dec<<endl;
-    cout<<"e:\t" <<to_string(e)<<"\t"<<"0x"<<hex<<(int)e<<dec<<endl;
+    cout<<"af:\t" <<to_string(concat(a,f))<<"\t"<<"0x"<<hex<< (concat(a, f ))<<dec<<endl;
+    cout<<"bc:\t" <<to_string(concat(b,c))<<"\t"<<"0x"<<hex<< concat(b, c) <<dec<<endl;
     cout<<"de:\t" <<to_string(concat(d,e))<<"\t"<<"0x"<<hex<<concat(d,e)<<dec<<endl;
-    cout<<"f:\t" <<to_string(f)<<"\t"<<"0x"<<hex<<(int)f<<dec<<endl;
-    cout<<"h:\t" <<to_string(h)<<"\t"<<"0x"<<hex<<(int)h<<dec<<endl;
-    cout<<"l:\t" <<to_string(l)<<"\t"<<"0x"<<hex<<(int)l<<dec<<endl;
     cout<<"hl:\t" <<to_string(concat(h,l))<<"\t"<<"0x"<<hex<<concat(h,l)<<dec<<endl;
+    cout<<"sp:\t" <<to_string(sp)<<"\t"<<"0x"<<hex<<sp<<dec<<endl;
+    cout<<"pc:\t" <<to_string(pc)<<"\t"<<"0x"<<hex<<pc<<dec<<endl;
 
 }
 void initRegisters() {

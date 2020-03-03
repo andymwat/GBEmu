@@ -1,21 +1,25 @@
-//
-// Created by andrew on 11/20/19.
-//
+
 #pragma ide diagnostic ignored "hicpp-exception-baseclass"
 #pragma ide diagnostic ignored "readability-static-accessed-through-instance"
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
-//
-// Created by andrew on 11/17/19.
-//
+
 #include <iostream>
 #include <fstream>
-//#include <unistd.h>
+
 #include "cartridge.h"
 #include "interpreter.h"
 #include "lcdController.h"
 #include "keyboardInput.h"
 #include "instructionDecoder.h"
 #include "logger.h"
+
+
+
+
+
+//Define as true to show instructions being run
+#define DEBUG_MODE false
+
 
 using namespace std;
 
@@ -46,6 +50,11 @@ void execute(uint16_t address)
 	else
 	{
 		opcode = readFromAddress(address);
+	}
+
+	if (DEBUG_MODE)
+	{
+		cout << "DEBUG: Running instruction at address:  0x" << hex << address << "   opcode: 0x" << (uint16_t)opcode << dec << "\n";
 	}
 
 	targetRegister = opcode & 0x07;     //bottom 3 bits are which register (b,c,d,e,h,l,(hl),a
