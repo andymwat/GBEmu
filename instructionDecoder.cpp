@@ -363,14 +363,24 @@ void execute(uint16_t address)
 	}
 	else if (opcode == 0xde)//sbc a, u8
 	{
+		uint8_t next = readFromAddress(address + 1);
 		if (carryStatus())
 		{
+			setHalf((a & 0xf) < (next & 0xf) + 1);
+			setCarry(((unsigned long)a) - ((unsigned long)next) - 1 > 0xFF);
 			a--;
 		}
-		sub8(a, readFromAddress(address + 1));
-		//if carry is 0, same as sub a, u8
+		else
+		{
+			setCarry(((unsigned long)a) - ((unsigned long)next) > 0xFF);
+			setHalf((a & 0xf) < (next & 0xf));
+		}
+
+		a -= next;
+		setZero(a == 0);
+		setSubtract(true);
 		cycles = 8;
-		pc++;//memory read
+		pc+=2;//memory read
 	}
 	else if (opcode == 0xfa)//ld a, (nn)
 	{
@@ -778,14 +788,39 @@ void execute(uint16_t address)
 	}
 	else if (opcode == 0xce)//adc n
 	{
+		
+		uint8_t next = readFromAddress(address + 1);
 		if (carryStatus())
 		{
-			a++;
-		}//if carry == 0, same as add a,n
-		add8(a, readFromAddress(address + 1));
+			setHalf(((a & 0xf) + (next & 0xf) + 1) > 0x0f);
+			setCarry(((unsigned long)a) + ((unsigned long)next) + 1 > 0xFF);
 
-		pc++;//because memory read
+			a += next;
+			a++;
+		}
+		else
+		{
+			setHalf(((a & 0xf) + (next & 0xf)) > 0x0f);
+			setCarry(((unsigned long)a) + ((unsigned long)next) > 0xFF);
+
+			a += next;
+		}
+		
+
+		if (a == 0x00)
+		{
+			setZero(true);
+		}
+		else
+		{
+			setZero(false);
+		}
+		setSubtract(false);
+
+
+		pc+=2;//because memory read
 		cycles = 8;
+		
 	}
 	else if (opcode == 0x37)//scf
 	{
