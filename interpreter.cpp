@@ -317,7 +317,7 @@ void writePair(uint8_t &x, uint8_t &y, uint16_t data) {
 
 void handleSoundWrite(uint16_t address, uint8_t data)
 {
-	logger::logWarning("Sound registers write unimplemented, returning 0x0", address, data);
+	logger::logWarning("Sound registers write unimplemented.", address, data);
 }
 uint8_t handleSoundRead(uint16_t address)
 {
@@ -427,7 +427,7 @@ void handleIOWrite(uint16_t address, uint8_t data) {
         {
             output += (char)tempOutput;
         }
-		logger::logWarning("Serial control write unimplemented.", address, data);
+		//logger::logWarning("Serial control write unimplemented.", address, data);
     }
     else if (address == 0xff41)
     {
@@ -685,9 +685,9 @@ void sub8(uint8_t & destination, uint8_t source) {
     pc++;
 }
 void add16(uint16_t &destination, uint16_t source) {
-    setCarry((unsigned int)destination + (unsigned int)source > 0xffff   || (source&0xffff + destination&0xffff)>0xffff);
+    setCarry((unsigned int)destination + (unsigned int)source > 0xffff   || (source&0x00ff + destination&0x00ff)>0x00ff);
     setHalf(((destination & 0x0f) + (source & 0x0f)) > 0xf || ((destination & 0x0f00) + (source & 0x0f00)) > 0x0f00);//check carry from bit 4 to 5 and from 11 to 12
-    //ONLY TESTS FIRST NIBBLE!
+
     destination += source;
     setSubtract(false);
     cycles = 8;
