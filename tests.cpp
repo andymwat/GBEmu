@@ -20,27 +20,30 @@ int runTest(cpuRegisterState startState, std::vector<uint8_t> instructions, cpuR
 	logger::logInfo("Starting test...");
 	logger::logWarningNoData("WARNING: Instructions that reference memory WILL NOT WORK in tests. The address read from will be garbage.");
 
-	for (uint16_t i = 0; i < instructions.size(); i++)
-	{
-		try {
-			cycles = 0;
-			execute(i);
-			if (cycles == 0)
-			{
-				logger::logWarning("Cycle count not set.", pc, readFromAddress(pc));
-			}
-		}
-		catch (const char* msg)
+
+	try {
+		for (uint16_t i = 0; i < instructions.size(); i++)
 		{
-			cout << msg << endl;
-			if (errorAddress >= 0)
-			{
-				logger::logError("Error accessing address, data could not be read (disregard data).", errorAddress, 0);
-			}
-			dumpRegisters();
+			
+				cycles = 0;
+				execute(i);
+				if (cycles == 0)
+				{
+					logger::logWarning("Cycle count not set.", pc, readFromAddress(pc));
+				}
+			
+			
 		}
 	}
-
+	catch (const char* msg)
+	{
+		std::cout << msg << std::endl;
+		if (errorAddress >= 0)
+		{
+			logger::logError("Error accessing address, data could not be read (disregard data).", errorAddress, 0);
+		}
+		dumpRegisters();
+	}
 	startState.a = a;
 	startState.b = b;
 	startState.c = c;
@@ -51,7 +54,9 @@ int runTest(cpuRegisterState startState, std::vector<uint8_t> instructions, cpuR
 	startState.l = l;
 	startState.sp = sp;
 
-	if (expectedState.checkAgainst(startState) != 0)
+
+	int result = expectedState.checkAgainst(startState);
+	if (result != 0)
 	{
 		logger::logErrorNoData("Test(s) failed!");
 	}
@@ -61,4 +66,5 @@ int runTest(cpuRegisterState startState, std::vector<uint8_t> instructions, cpuR
 	}
 
 	runningTest = false;
+	return result;
 }

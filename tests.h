@@ -5,7 +5,6 @@
 #include "interpreter.h"
 #include "logger.h"
 #include "instructionDecoder.h"
-#include "main.h"
 
 
 //Run a series of instructions and check final cpu state against expected

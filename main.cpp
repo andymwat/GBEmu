@@ -3,12 +3,16 @@
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
 #include <iostream>
 #include <fstream>
-//#include <unistd.h>
+#include <vector>
 #include <SDL.h>
 
-//WTF
-//This took me too many hours to debug
-//way, WAY too many
+//Define as true to run tests
+#define RUN_DEBUG_TESTS false
+
+
+
+
+//Gotta do this for SDL for some reason
 #undef main
 //
 #include "cartridge.h"
@@ -18,6 +22,8 @@
 #include "lcdController.h"
 #include "keyboardInput.h"
 #include "logger.h"
+
+#include "tests.h"
 
 using namespace std;
 SDL_Event events;
@@ -32,7 +38,7 @@ int main(int argc, char* args[])
     cout<<"Loading ROM..."<<endl;
    //loadTestRom("/home/andrew/Downloads/GBemu/cpu_instrs/cpu_instrs.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/tetris.gb");
-   // loadTestRom("/home/andrew/Downloads/GBemu/sml.gb");
+    //loadTestRom("/home/andrew/Downloads/GBemu/sml.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/cpu_instrs/individual/11-op a,(hl).gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/drMario.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/kirby.gb");
@@ -43,17 +49,35 @@ int main(int argc, char* args[])
     //loadTestRom("/home/andrew/Downloads/DMG_ROM.bin");
 
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/cpu_instrs.gb");
-	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/tetris.gb");
-	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/tetris2.gb");
-    /*cout<<endl<<"Select an option:"<<endl;
-    cout<<"1: Run normally."<<endl;
-    cout<<"2: Run normally until pc reaches a value, then stop."<<endl;
-    cout<<"3: Run with debug mode on."<<endl;
-    cout<<"Select: ";
-    int selection;
-    cin>>selection;
-    if (selection == 1)
-    {*/
+	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/sml.gb");
+	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/tetris2.gb");
+
+
+	if (RUN_DEBUG_TESTS)
+	{
+		std::vector<uint8_t> instructions = { 0x00, 0x00, 0x04,0x05,0x14,0x15,0x24,0x25 };
+		cpuRegisterState startState, endState;
+		startState.a = startState.b = startState.c = startState.d = startState.e = startState.f = startState.h = startState.l = 0x00;
+		startState.pc = 0x0000;
+		startState.sp = 0x0000;
+
+		endState = startState;
+		endState.f = 0xc0;
+		
+		if (runTest(startState, instructions, endState) == 0)
+		{
+			cout << "All tests executed successfully.\n";
+		}
+
+#if defined(_WIN32)
+		system("pause");
+#endif
+		return 0;
+
+	}
+
+
+
     try {
         pc = 0x100;
         m_TimerCounter = 1024;
