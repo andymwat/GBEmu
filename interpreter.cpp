@@ -322,11 +322,11 @@ void writePair(uint8_t &x, uint8_t &y, uint16_t data) {
 
 void handleSoundWrite(uint16_t address, uint8_t data)
 {
-	logger::logWarning("Sound registers write unimplemented, ignoring.", address, data);
+	//logger::logWarning("Sound registers write unimplemented, ignoring.", address, data);
 }
 uint8_t handleSoundRead(uint16_t address)
 {
-	logger::logWarning("Sound registers read unimplemented, returning 0x0", address, 0x0);
+	//logger::logWarning("Sound registers read unimplemented, returning 0x0", address, 0x0);
 	return 0x00;
 }
 

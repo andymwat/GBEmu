@@ -48,11 +48,11 @@ int main(int argc, char* args[])
     //loadTestRom("/home/andrew/Downloads/GBemu/new/dkl.gb");
     //loadTestRom("/home/andrew/Downloads/DMG_ROM.bin");
 
-	loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/cpu_instrs.gb");
+	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/instr_timing/instr_timing.gb");
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/11-op a,(hl).gb");
 	 //loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/10-bit ops.gb");
-	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/sml.gb");
-	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/tetris.gb");
+	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/galaga.gb");
+	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/tetris2.gb");
 
 
 	if (RUN_DEBUG_TESTS)

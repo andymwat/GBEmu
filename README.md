@@ -15,6 +15,7 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 ![Blargg's test ROM](screenshots/blarggs.png)
 ![Super Mario Land](screenshots/sml.png)
 ![Dr. Mario](screenshots/drMario.png)
+![Tetris](screenshots/tetris.png)
 
 ## Unimplemented features/TO-DO
   - Sound support
@@ -32,10 +33,10 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 | Asteroids                   | Boots slowly to title screen. Can get in-game, but sprites are missing/bugged.                                                                                                                        |
 | Asteroids & Missile Command | Crashes on boot when trying to select the upper bits of the ROM/RAM bank (upper bit selection is unimplemented). 
 | Blargg's Test ROMs          | Passes all tests in the cpu_instrs ROM.
-| Donkey Kong Land            | Gets to some sort of menu (sprites are bugged), but then hangs when trying to go in-game.                                                                                                             |
+| Donkey Kong Land            | Title screen shows, and gets to some sort of buggy screen after that.                                                                                                             |
 | Dr. Mario                   | Boots to menus, but hangs when going in-game (probably due to incomplete timer support).                                                                                                              |
-| Galaga & Galaxian           | Hangs on boot.                                                                                                                                                                                        |
-| Super Mario Land            | Gets in-game and is controllable, if extremely buggy. The player sprite appears on the left side of the screen, and appears to be turned 90 degrees sideways. Scrolling appears to be broken as well. |
-| Tetris                      | Gets to the title screen, but hangs on trying to get to the menus.                                                                                                                                    |
-| Tetris 2                    | Hangs on the title screen.                                                                                                                                                                            |
+| Galaga & Galaxian           | Boots to menu, and can get in-game. Sprites are broken, but it appears to be running okay.                                                                                                                                                                                      |
+| Super Mario Land            | Gets in-game and is controllable, if extremely buggy, due to the LCD controller's sprite issues. The player sprite appears on the left side of the screen, and appears to be turned 90 degrees sideways. Scrolling now works. |
+| Tetris                      | Gets in-game, but the pieces' sprites are broken while they are moving.                                                                                                                                    |
+| Tetris 2                    | Same as the original Tetris.                                                                                                                                                                            |
  
