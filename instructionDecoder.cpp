@@ -166,10 +166,30 @@ void execute(uint16_t address)
 	else if (opcode >= 0x88 && opcode <= 0x8f)//adc a, x
 	{
 		if (carryStatus())
+		{
+			setHalf((a & 0xF) + (*reg & 0xF) + 1 > 0x0F);
+			setCarry(((unsigned long)a) + ((unsigned long)(*reg)) + 1 > 0xFF);
+			a += *reg;
 			a++;
-		add8(a, *reg);
+		}
+		else
+		{
+			setHalf((a & 0xF) + (*reg & 0xF) > 0x0F);
+			setCarry(((unsigned long)a) + ((unsigned long)(*reg)) > 0xFF);
+			a += *reg;
+		}
+		setZero(a == 0);
+		setSubtract(false);
 		if (memoryReference)
+		{
 			cycles = 8;
+		}
+		else
+		{
+			cycles = 4;
+		}
+		pc++;
+		
 	}
 	else if (opcode >= 0x90 && opcode <= 0x97)//sub a, x
 	{
@@ -180,10 +200,29 @@ void execute(uint16_t address)
 	else if (opcode >= 0x98 && opcode <= 0x9f)//sbc a, x
 	{
 		if (carryStatus())
+		{
+			setHalf((a & 0xF) < (*reg & 0xF) + 1);
+			setCarry(((unsigned long)a) - ((unsigned long)(*reg)) - 1 > 0xFF);
+			a -= *reg;
 			a--;
-		sub8(a, *reg);
+		}
+		else
+		{
+			setHalf((a & 0xF) < (*reg & 0xF));
+			setCarry(((unsigned long)a) - ((unsigned long)(*reg)) > 0xFF);
+			a -= *reg;
+		}
+		setZero(a == 0);
+		setSubtract(true);
 		if (memoryReference)
+		{
 			cycles = 8;
+		}
+		else
+		{
+			cycles = 4;
+		}
+		pc++;
 	}
 	else if (opcode >= 0xa0 && opcode <= 0xa7)//and a, x
 	{
@@ -433,16 +472,13 @@ void execute(uint16_t address)
 	}
 	else if (opcode == 0x17)//rla
 	{
-		uint8_t firstBit = ((a | 0x80));
+		bool bit7 = (a & 0x80) != 0;
 		a = (a << 1);
 		if (carryStatus())
 		{
 			a = (a | 0x01);
 		}
-		else {
-			a = (a & 0xfe);
-		}
-		setCarry(firstBit == 0x80);
+		setCarry(bit7);
 		setZero(false);
 		setSubtract(false);
 		setHalf(false);
@@ -757,14 +793,17 @@ void execute(uint16_t address)
 	}
 	else if (opcode == 0x0f)//rrca
 	{
-		uint8_t firstBit = ((a & 0x01));
+		bool bit0 = (a & 0x01) != 0;
 		a = (a >> 1);
 		setCarry(false);
-		if (firstBit == 0x01)
+		if (bit0)
 		{
-			a |= 0x80;
 			setCarry(true);
+			a |= 0x80;
 		}
+		setZero(false);
+		setSubtract(false);
+		setHalf(false);
 		cycles = 4;
 		pc++;
 	}
