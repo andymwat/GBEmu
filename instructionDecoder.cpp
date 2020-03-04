@@ -727,7 +727,7 @@ void execute(uint16_t address)
 	}
 	else if (opcode == 0x2b)//dec hl
 	{
-		writePair(h, l, concat(d, e) - 1);
+		writePair(h, l, concat(h, l) - 1);
 		pc++;
 		cycles = 8;
 	}
