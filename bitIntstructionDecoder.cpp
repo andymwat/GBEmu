@@ -163,6 +163,10 @@ void executePrefixedInstruction(uint8_t opcode)
         setZero(*reg == 0x00);
         setSubtract(false);
         setHalf(false);
+		if (memoryReference)
+		{
+			writeToAddress(concat(h, l), *reg);
+		}
     }
     else if (opcode >= 0x28 && opcode <= 0x2f)//sra
     {
@@ -171,6 +175,10 @@ void executePrefixedInstruction(uint8_t opcode)
         setZero(*reg == 0x00);
         setSubtract(false);
         setHalf(false);
+		if (memoryReference)
+		{
+			writeToAddress(concat(h, l), *reg);
+		}
         //cout<<"WARNING: Arithmetic right shift is untested.\n";
     }
     else if (opcode >= 0x38 && opcode <= 0x3f)//srl
@@ -180,10 +188,14 @@ void executePrefixedInstruction(uint8_t opcode)
         setZero(*reg == 0x00);
         setSubtract(false);
         setHalf(false);
+		if (memoryReference)
+		{
+			writeToAddress(concat(h, l), *reg);
+		}
     }
     else if (opcode >= 0x80 && opcode <= 0xbf)//res
     {
-        BitReset(*reg,instruction-0x10);
+        *reg = BitReset(*reg, instruction-0x10);
         if (memoryReference)
         {
             writeToAddress(concat(h,l),*reg);
@@ -191,7 +203,7 @@ void executePrefixedInstruction(uint8_t opcode)
     }
     else if (opcode >= 0xc0)//set
     {
-        BitSet(*reg, instruction-0x18);
+        *reg = BitSet(*reg, instruction-0x18);
         if (memoryReference)
         {
             writeToAddress(concat(h,l),*reg);

@@ -947,6 +947,7 @@ void execute(uint16_t address)
 	}
 	else if (opcode == 0xcb)//prefix for extended instructions
 	{
+		//logger::logWarning("Running prefixed instruction, probably bugged.", address, readFromAddress(address+1));
 		executePrefixedInstruction(readFromAddress(address + 1));
 	}
 	else {

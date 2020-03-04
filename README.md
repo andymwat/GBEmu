@@ -3,6 +3,7 @@
 GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for the GUI. It can boot a few ROM-only and MBC 1 games, albeit very slowly.
 
 ## Features
+ - Passes all tests in blargg's cpu_instrs ROM
  - Nearly complete MBC 1 support
  - Partial GPU emulation
  - CPU stepping and breakpoints
@@ -30,7 +31,7 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 |-----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Asteroids                   | Boots slowly to title screen. Can get in-game, but sprites are missing/bugged.                                                                                                                        |
 | Asteroids & Missile Command | Crashes on boot when trying to select the upper bits of the ROM/RAM bank (upper bit selection is unimplemented). 
-| Blargg's Test ROMs          | Completes all tests successfully except 05, 09, 10, and 11 (op rp, op r,r, bit ops, and op a,(hl) respectively).
+| Blargg's Test ROMs          | Passes all tests in the cpu_instrs ROM.
 | Donkey Kong Land            | Gets to some sort of menu (sprites are bugged), but then hangs when trying to go in-game.                                                                                                             |
 | Dr. Mario                   | Boots to menus, but hangs when going in-game (probably due to incomplete timer support).                                                                                                              |
 | Galaga & Galaxian           | Hangs on boot.                                                                                                                                                                                        |
