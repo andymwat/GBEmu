@@ -5,7 +5,6 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 ## Features
  - Passes all tests in blargg's cpu_instrs ROM
  - Nearly complete MBC 1 support
- - Partial GPU emulation
  - CPU stepping and breakpoints
  - Nearly complete interrupt support, including timers
  - Compiles on both Windows and Linux (and presumably MacOS as well) using CMake
@@ -16,6 +15,8 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 ![Super Mario Land](screenshots/sml.png)
 ![Dr. Mario](screenshots/drMario.png)
 ![Tetris](screenshots/tetris.png)
+![Asteroids](screenshots/asteroids.png)
+![Galaga](screenshots/galaga.png)
 
 ## Unimplemented features/TO-DO
   - Sound support
@@ -30,13 +31,13 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 ## Compatibility
 | ROM                         | Compatibility notes                                                                                                                                                                                   |
 |-----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Asteroids                   | Boots slowly to title screen. Can get in-game, but sprites are missing/bugged.                                                                                                                        |
+| Asteroids                   | Can get in-game, but is very slow and the ship sprite can bug out at times                                                                                                                      |
 | Asteroids & Missile Command | Crashes on boot when trying to select the upper bits of the ROM/RAM bank (upper bit selection is unimplemented). 
 | Blargg's Test ROMs          | Passes all tests in the cpu_instrs ROM.
-| Donkey Kong Land            | Title screen shows, and gets to some sort of buggy screen after that.                                                                                                             |
+| Donkey Kong Land            | Title screen shows, and gets to a flickering menu after that.                                                                                                             |
 | Dr. Mario                   | Boots to menus, but hangs when going in-game (probably due to incomplete timer support).                                                                                                              |
-| Galaga & Galaxian           | Boots to menu, and can get in-game. Sprites are broken, but it appears to be running okay.                                                                                                                                                                                      |
-| Super Mario Land            | Gets in-game and is controllable, if extremely buggy, due to the LCD controller's sprite issues. The player sprite appears on the left side of the screen, and appears to be turned 90 degrees sideways. Scrolling now works. |
-| Tetris                      | Gets in-game, but the pieces' sprites are broken while they are moving.                                                                                                                                    |
+| Galaga & Galaxian           | Fully playable, but pretty slow.                                                                                                                                                                                     |
+| Super Mario Land            | Playable but slow.			 |
+| Tetris                      | Playable but slow.                                                                                                                                    |
 | Tetris 2                    | Same as the original Tetris.                                                                                                                                                                            |
  

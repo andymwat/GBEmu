@@ -19,9 +19,12 @@ std::string output = "Program output: \n";
 bool enableInterrupts = true;
 bool lcdEnable = true;
 bool windowDisplayEnable = true;
-bool spriteDisplayEnable = true;
+bool spriteDisplayEnable = false;
 bool bgDisplayEnable = true;
-bool spriteSize, bgTilemapDisplaySelect, bgAndWindowTileDataSelect, windowTilemapDisplaySelect;
+bool spriteSize = false;
+bool bgTilemapDisplaySelect = false;
+bool windowTilemapDisplaySelect = false;
+bool bgAndWindowTileDataSelect = true;
 bool ramEnable;
 unsigned int cycles = 0;
 double cycleTime = 0.23841880647;//microseconds
@@ -54,6 +57,22 @@ cartridge* currentCartridge;
 char tempOutput;
 bool halted = false;
 
+
+/*
+ * Memory map:
+ * 0x0000-0x3FFF: ROM Bank 0 (16k)
+ * 0x4000-0x7FFF: Switchable ROM bank (16k)
+ * 0x8000-0x9FFF: Video RAM (8k)
+ * 0xA000-0xBFFF: Switchable RAM AKA .sav (8k)
+ * 0xC000-0xCFFF: Work RAM bank 0 (4k)
+ * 0xD000-0xDFFF: Work RAM bank 1 (4k)
+ * 0xE000-0xFDFF: Echo of work RAM (8k)
+ * 0xFE00-0xFE9F: Sprite Attribute table (160)
+ * 0xFEA0-0xFEFF: Not mapped
+ * 0xFF00-0xFF7F: Device mappings (128)
+ * 0xFF80-0xFFFE: High RAM (127)
+ * 0xFFFF-0xFFFF: Interrupt enable
+ */
 
 void writeToAddress(uint16_t address, uint8_t data) {
 
@@ -97,7 +116,7 @@ void writeToAddress(uint16_t address, uint8_t data) {
 		}
 		else
 		{
-			logger::logWarningNoData(" Attempting to write to cartRAM while RAM is disabled, ignoring.");
+			//logger::logWarningNoData(" Attempting to write to cartRAM while RAM is disabled, ignoring.");
 		}
 		//cout<<"WARNING: Cart RAM banking is not tested. Writing to address 0x" <<hex<<address<<dec<<".\n";
 
@@ -195,7 +214,7 @@ uint8_t readFromAddress(uint16_t address) {
 	}
 	else if (address >= 0xfe00 && address <= 0xfe9f)
 	{
-		return spriteAttributeTable[0xfe00 - address];
+		return spriteAttributeTable[address - 0xfe00 ];
 	}
 	else {
 		errorAddress = address;
@@ -203,21 +222,6 @@ uint8_t readFromAddress(uint16_t address) {
 	}
 }
 
-/*
- * Memory map:
- * 0x0000-0x3FFF: ROM Bank 0 (16k)
- * 0x4000-0x7FFF: Switchable ROM bank (16k)
- * 0x8000-0x9FFF: Video RAM (8k)
- * 0xA000-0xBFFF: Switchable RAM AKA .sav (8k)
- * 0xC000-0xCFFF: Work RAM bank 0 (4k)
- * 0xD000-0xDFFF: Work RAM bank 1 (4k)
- * 0xE000-0xFDFF: Echo of work RAM (8k)
- * 0xFE00-0xFE9F: Sprite Attribute table (256)
- * 0xFEA0-0xFEFF: Not mapped
- * 0xFF00-0xFF7F: Device mappings (128)
- * 0xFF80-0xFFFE: High RAM (127)
- * 0xFFFF-0xFFFF: Interrupt enable
- */
 
 void handleRomWrite(uint16_t address, uint8_t data)
 {
@@ -245,15 +249,15 @@ void handleRomWrite(uint16_t address, uint8_t data)
 		}
 		else if (address <= 0x1fff)//ram enable
 		{
-			cout << "WARNING: RAM enable and banking is not tested.\n";
+			//cout << "WARNING: RAM enable and banking is not tested.\n";
 			if ((data & 0x0f) == 0x0a)
 			{
-				logger::logInfo("CartRAM is enabled.");
+				//logger::logInfo("CartRAM is enabled.");
 				ramEnable = true;
 			}
 			else
 			{
-				logger::logInfo("CartRAM is disabled.");
+				//logger::logInfo("CartRAM is disabled.");
 				ramEnable = false;
 			}
 		}
@@ -279,15 +283,15 @@ void handleRomWrite(uint16_t address, uint8_t data)
 		}
 		else if (address <= 0x1fff)//ram enable
 		{
-			logger::logWarning("RAM enable and banking is untested.", address, data);
+			//logger::logWarning("RAM enable and banking is untested.", address, data);
 			if ((data & 0x0f) == 0x0a)
 			{
-				logger::logInfo("CartRAM is enabled.");
+				//logger::logInfo("CartRAM is enabled.");
 				ramEnable = true;
 			}
 			else
 			{
-				logger::logInfo("CartRAM is disabled.");
+				//logger::logInfo("CartRAM is disabled.");
 				ramEnable = false;
 			}
 		}
@@ -333,7 +337,7 @@ uint8_t handleSoundRead(uint16_t address)
 void handleIOWrite(uint16_t address, uint8_t data) {
 	if (address == 0xff4d)
 	{
-		logger::logWarning("Speed control register write unimplemented.", address, data);
+		//logger::logWarning("Speed control register write unimplemented.", address, data);
 	}
 	else if (address == 0xff00)
 	{
@@ -377,7 +381,7 @@ void handleIOWrite(uint16_t address, uint8_t data) {
 		lcdControl = data;
 		bgDisplayEnable = (lcdControl & 0x01) == 0x01;//test for bg display enable bit
 		spriteDisplayEnable = (lcdControl & 0x02) == 0x02;//...
-		spriteSize = (lcdControl & 0x04) == 0x04;//...
+		spriteSize = (lcdControl & 0x04) == 0x04;//... 1 = 8x16, 0 = 8x8
 		bgTilemapDisplaySelect = (lcdControl & 0x08) == 0x08;//...
 		bgAndWindowTileDataSelect = (lcdControl & 0x10) == 0x10;//...
 		windowDisplayEnable = (lcdControl & 0x20) == 0x20;//...
@@ -731,7 +735,7 @@ void checkInterrupts() {
 	{
 		if (!enableInterrupts && (interruptFlag != 0x00))//if halted and caught interrupt but IME=0
 		{
-			cout << "WARNING: HALT bug.\n";
+			logger::logWarningNoData("HALT bug.");
 			halted = false;
 		}
 	}
@@ -742,7 +746,7 @@ void checkInterrupts() {
 
 	if ((interruptFlag & 0x01) == 0x01 && (interruptRegister & 0x01) == 0x01)//catch v-blank interrupt
 	{
-		logger::logInfo("Caught V-Blank interrupt.");
+		//logger::logInfo("Caught V-Blank interrupt.");
 		enableInterrupts = false;
 		interruptFlag = interruptFlag & 0xfe;//clear vblank bit
 		//push pc onto stack
@@ -754,13 +758,13 @@ void checkInterrupts() {
 		if (halted)
 		{
 			halted = false;
-			cout << "WARNING: Ignoring HALT bug...\n";
+			//cout << "WARNING: Ignoring HALT bug...\n";
 		}
 		pc = 0x40;
 	}
 	else if ((interruptFlag & 0x02) == 0x02 && (interruptRegister & 0x02) == 0x02)//catch lcd stat interrupt
 	{
-		logger::logInfo("Caught LCD STAT interrupt.");
+		//logger::logInfo("Caught LCD STAT interrupt.");
 		enableInterrupts = false;
 		interruptFlag = interruptFlag & 0xfd;
 		//push pc onto stack
@@ -772,13 +776,13 @@ void checkInterrupts() {
 		if (halted)
 		{
 			halted = false;
-			cout << "WARNING: Ignoring HALT bug...\n";
+			//cout << "WARNING: Ignoring HALT bug...\n";
 		}
 		pc = 0x48;
 	}
 	else if ((interruptFlag & 0x04) == 0x04 && (interruptRegister & 0x04) == 0x04)//catch Timer interrupt
 	{
-		logger::logInfo("Caught Timer interrupt.");
+		//logger::logInfo("Caught Timer interrupt.");
 		//cout<<"Interrupt flag: 0x"<<hex<<(uint16_t)interruptFlag<<dec<<endl;
 		enableInterrupts = false;
 		interruptFlag = interruptFlag & 0xfb;
@@ -791,13 +795,13 @@ void checkInterrupts() {
 		if (halted)
 		{
 			halted = false;
-			logger::logWarningNoData("Ignoring HALT bug.");
+			//logger::logWarningNoData("Ignoring HALT bug.");
 		}
 		pc = 0x50;
 	}
 	else if ((interruptFlag & 0x08) == 0x08 && (interruptRegister & 0x08) == 0x08)//catch serial interrupt
 	{
-		logger::logInfo("Caught serial interrupt.");
+		//logger::logInfo("Caught serial interrupt.");
 		enableInterrupts = false;
 		interruptFlag = interruptFlag & 0xf7;
 		//push pc onto stack
@@ -809,13 +813,13 @@ void checkInterrupts() {
 		if (halted)
 		{
 			halted = false;
-			logger::logWarningNoData("Ignoring HALT bug.");
+			//logger::logWarningNoData("Ignoring HALT bug.");
 		}
 		pc = 0x58;
 	}
 	else if ((interruptFlag & 0x10) == 0x10 && (interruptRegister & 0x10) == 0x10)//catch joypad interrupt
 	{
-		logger::logInfo("Caught joypad interrupt.");
+		//logger::logInfo("Caught joypad interrupt.");
 		enableInterrupts = false;
 		interruptFlag = interruptFlag & 0xef;
 		//push pc onto stack
@@ -827,7 +831,7 @@ void checkInterrupts() {
 		if (halted)
 		{
 			halted = false;
-			logger::logWarningNoData("Ignoring HALT bug.");
+			//logger::logWarningNoData("Ignoring HALT bug.");
 		}
 		pc = 0x60;
 	}
@@ -845,7 +849,7 @@ void processTimer(uint8_t opCycle)
 			if (tima == 0xff)
 			{
 				writeToAddress(0xff05, readFromAddress(0xff06));
-				logger::logInfo("Requesting timer interrupt.");
+				//logger::logInfo("Requesting timer interrupt.");
 				interruptFlag |= 0x04;
 			}
 			else

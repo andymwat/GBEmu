@@ -1237,7 +1237,7 @@ bool executeStructural(uint8_t opcode, uint16_t address)
 	}
 	else if (opcode == 0xf3)//di(disable interrupts)
 	{
-		logger::logInfo("Disabling interrupts.");
+		//logger::logInfo("Disabling interrupts.");
 		enableInterrupts = false;
 		pc++;
 		cycles = 4;
@@ -1251,7 +1251,7 @@ bool executeStructural(uint8_t opcode, uint16_t address)
 	}
 	else if (opcode == 0xfb)//ei (enable interrupts)
 	{
-		logger::logInfo("Enabling interrupts.");
+		//logger::logInfo("Enabling interrupts.");
 		enableInterrupts = true;
 		pc++;
 		cycles = 4;
@@ -1339,7 +1339,7 @@ bool executeStructural(uint8_t opcode, uint16_t address)
 		cycles = 4;
 		pc++;
 		halted = true;
-		logger::logWarningNoData("HALT bug is not implemented.");
+		//logger::logWarningNoData("HALT bug is not implemented.");
 	}
 	else
 	{
