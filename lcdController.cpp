@@ -24,6 +24,11 @@ SDL_Window* window = nullptr;
 SDL_Surface* screenSurface = nullptr;
 SDL_Surface* renderSurface = nullptr;
 
+
+Uint64 NOW = SDL_GetPerformanceCounter();
+Uint64 LAST = 0;
+double deltaTime = 0;
+
 void initWindow() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
@@ -168,6 +173,13 @@ void pushBufferToWindow() {
     renderSurface = SDL_CreateRGBSurfaceFrom(pixelArray, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 4*SCREEN_WIDTH,0x0000ff,0x00ff00,0xff0000,0 );
     SDL_BlitSurface(renderSurface, NULL, screenSurface, NULL);
     SDL_UpdateWindowSurface(window);
+
+    LAST = NOW;
+    NOW = SDL_GetPerformanceCounter();
+    string str = "Frame time: ";
+    deltaTime = ((NOW - LAST)*1000 / (double)SDL_GetPerformanceFrequency() );
+    str += to_string(deltaTime) + "ms";
+    logger::logInfo(str);
 }
 
 void renderTiles()
