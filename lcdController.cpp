@@ -281,75 +281,6 @@ uint32_t GetColor(uint8_t colorNum, uint16_t address)
 
 void renderSprites() {
 
-    /*for (int sprite = 0; sprite < 40; sprite++)
-    {
-        uint8_t index = sprite*4;
-        uint8_t yPos = readFromAddress(0xfe00+index)-16;
-        uint8_t xPos = readFromAddress(0xfe00+index+1)-8;
-        uint8_t tileLocation = readFromAddress(0xfe00+index+2);
-        uint8_t attributes = readFromAddress(0xfe00+index+3);
-
-        bool yFlip = TestBit(attributes,6);
-        bool xFlip = TestBit(attributes,5);
-
-		int ySize = 8;
-		if (spriteSize)
-			ySize = 16;
-
-
-        if ((line >= yPos) && (line < (yPos + ySize)))
-        {
-            int curLine = line - yPos;
-
-            if (yFlip)
-            {
-                curLine -= ySize;
-                curLine *= -1;
-            }
-
-            curLine*=2;
-
-            uint16_t dataAddress = (0x8000 + (tileLocation * 16)) + curLine;
-            uint8_t data1 = readFromAddress(dataAddress);
-            uint8_t data2 = readFromAddress(dataAddress+1);
-
-			for (int tilePixel = 7; tilePixel >= 0; tilePixel--)
-			{
-				int colorBit = tilePixel;
-
-				if (xFlip)
-				{
-					colorBit -= 7;
-					colorBit *= -1;
-				}
-
-				int colorNum = BitGetVal(data2, colorBit);
-				colorNum <<= 1;
-				colorNum |= BitGetVal(data1, colorBit);
-				uint16_t colorAddress = TestBit(attributes, 4) ? 0xff49 : 0xff48;
-				uint32_t col = GetColor(colorNum, colorAddress);
-
-				if (col == color0)
-					continue;
-				int xPix = 7 - tilePixel;
-
-				int pixel = xPos + xPix;
-				if ((line < 0) || (line > 143) || (pixel < 0) || (pixel > 159))
-				{
-					continue;
-				}
-
-				if (TestBit(attributes, 7) == 1)
-				{
-					if (pixelArray[line][pixel] != color0) //pixel is hidden behind bg
-						continue;
-				}
-                   
-                pixelArray[line][pixel] = col;
-            }
-        }
-    }
-	*/
 	bool use8x16 = false;
 	if (TestBit(lcdControl, 2))
 		use8x16 = true;
@@ -402,11 +333,9 @@ void renderSprites() {
 
 				uint32_t col = GetColor(colourNum, TestBit(attributes, 4) ? 0xFF49 : 0xFF48);
 
-				// white is transparent for sprites.
-				if (col == color0)
+				//First color in palette is transparent
+				if (colourNum == 0)
 					continue;
-
-
 
 				int xPix = 0 - tilePixel;
 				xPix += 7;
@@ -415,12 +344,11 @@ void renderSprites() {
 
 				if ((scanline < 0) || (scanline > 143) || (pixel < 0) || (pixel > 159))
 				{
-					//	assert(false) ;
 					continue;
 				}
 
 				// check if pixel is hidden behind background
-				if (TestBit(attributes, 7) == 1)
+				if (TestBit(attributes, 7))
 				{
 					if (pixelArray[scanline][pixel] != color0)
 						continue;
