@@ -159,12 +159,12 @@ void renderScanline() {
     {
         renderSprites();
     }
-  //  cout<<"\033[1;32mINFO:\033[0m Rendering scanline " <<to_string(line)<<endl;
+    //  cout<<"\033[1;32mINFO:\033[0m Rendering scanline " <<to_string(line)<<endl;
 }
 
 void pushBufferToWindow() {
     //cout<<"\033[1;32mINFO: \033[0m Pushing buffer to window."<<endl;
-	SDL_FreeSurface(renderSurface);
+    SDL_FreeSurface(renderSurface);
     renderSurface = SDL_CreateRGBSurfaceFrom(pixelArray, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 4*SCREEN_WIDTH,0x0000ff,0x00ff00,0xff0000,0 );
     SDL_BlitSurface(renderSurface, NULL, screenSurface, NULL);
     SDL_UpdateWindowSurface(window);
@@ -281,83 +281,83 @@ uint32_t GetColor(uint8_t colorNum, uint16_t address)
 
 void renderSprites() {
 
-	bool use8x16 = false;
-	if (TestBit(lcdControl, 2))
-		use8x16 = true;
+    bool use8x16 = false;
+    if (TestBit(lcdControl, 2))
+        use8x16 = true;
 
-	for (int sprite = 0; sprite < 40; sprite++)
-	{
-		uint8_t index = sprite * 4;
-		uint8_t yPos = readFromAddress(0xFE00 + index) - 16;
-		uint8_t xPos = readFromAddress(0xFE00 + index + 1) - 8;
-		uint8_t tileLocation = readFromAddress(0xFE00 + index + 2);
-		uint8_t attributes = readFromAddress(0xFE00 + index + 3);
+    for (int sprite = 0; sprite < 40; sprite++)
+    {
+        uint8_t index = sprite * 4;
+        uint8_t yPos = readFromAddress(0xFE00 + index) - 16;
+        uint8_t xPos = readFromAddress(0xFE00 + index + 1) - 8;
+        uint8_t tileLocation = readFromAddress(0xFE00 + index + 2);
+        uint8_t attributes = readFromAddress(0xFE00 + index + 3);
 
-		bool yFlip = TestBit(attributes, 6);
-		bool xFlip = TestBit(attributes, 5);
+        bool yFlip = TestBit(attributes, 6);
+        bool xFlip = TestBit(attributes, 5);
 
-		int scanline = readFromAddress(0xFF44);
+        int scanline = readFromAddress(0xFF44);
 
-		int ysize = 8;
+        int ysize = 8;
 
-		if (use8x16)
-			ysize = 16;
+        if (use8x16)
+            ysize = 16;
 
-		if ((scanline >= yPos) && (scanline < (yPos + ysize)))
-		{
-			int line = scanline - yPos;
+        if ((scanline >= yPos) && (scanline < (yPos + ysize)))
+        {
+            int line = scanline - yPos;
 
-			if (yFlip)
-			{
-				line -= ysize;
-				line *= -1;
-			}
+            if (yFlip)
+            {
+                line -= ysize;
+                line *= -1;
+            }
 
-			line *= 2;
-			uint8_t data1 = readFromAddress((0x8000 + (tileLocation * 16)) + line);
-			uint8_t data2 = readFromAddress((0x8000 + (tileLocation * 16)) + line + 1);
+            line *= 2;
+            uint8_t data1 = readFromAddress((0x8000 + (tileLocation * 16)) + line);
+            uint8_t data2 = readFromAddress((0x8000 + (tileLocation * 16)) + line + 1);
 
 
 
-			for (int tilePixel = 7; tilePixel >= 0; tilePixel--)
-			{
-				int colourbit = tilePixel;
-				if (xFlip)
-				{
-					colourbit -= 7;
-					colourbit *= -1;
-				}
-				int colourNum = BitGetVal(data2, colourbit);
-				colourNum <<= 1;
-				colourNum |= BitGetVal(data1, colourbit);
+            for (int tilePixel = 7; tilePixel >= 0; tilePixel--)
+            {
+                int colourbit = tilePixel;
+                if (xFlip)
+                {
+                    colourbit -= 7;
+                    colourbit *= -1;
+                }
+                int colourNum = BitGetVal(data2, colourbit);
+                colourNum <<= 1;
+                colourNum |= BitGetVal(data1, colourbit);
 
-				uint32_t col = GetColor(colourNum, TestBit(attributes, 4) ? 0xFF49 : 0xFF48);
+                uint32_t col = GetColor(colourNum, TestBit(attributes, 4) ? 0xFF49 : 0xFF48);
 
-				//First color in palette is transparent
-				if (colourNum == 0)
-					continue;
+                //First color in palette is transparent
+                if (colourNum == 0)
+                    continue;
 
-				int xPix = 0 - tilePixel;
-				xPix += 7;
+                int xPix = 0 - tilePixel;
+                xPix += 7;
 
-				int pixel = xPos + xPix;
+                int pixel = xPos + xPix;
 
-				if ((scanline < 0) || (scanline > 143) || (pixel < 0) || (pixel > 159))
-				{
-					continue;
-				}
+                if ((scanline < 0) || (scanline > 143) || (pixel < 0) || (pixel > 159))
+                {
+                    continue;
+                }
 
-				// check if pixel is hidden behind background
-				if (TestBit(attributes, 7))
-				{
-					if (pixelArray[scanline][pixel] != color0)
-						continue;
-				}
-				pixelArray[scanline][pixel] = col;
+                // check if pixel is hidden behind background
+                if (TestBit(attributes, 7))
+                {
+                    if (pixelArray[scanline][pixel] != color0)
+                        continue;
+                }
+                pixelArray[scanline][pixel] = col;
 
-			}
-		}
-	}
+            }
+        }
+    }
 
 
 
