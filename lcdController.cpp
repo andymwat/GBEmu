@@ -12,6 +12,10 @@
 #include "interpreter.h"
 #include "lcdController.h"
 
+//linux sleep
+#ifdef PLATFORM_UNIX
+#include <unistd.h>
+#endif
 
 using namespace std;
 
@@ -180,7 +184,12 @@ void pushBufferToWindow() {
     deltaTime = ((NOW - LAST)*1000 / (double)SDL_GetPerformanceFrequency() );
 	if (deltaTime <= 16.666)
 	{
+#if defined(_WIN32)
 		Sleep(16.6666 - deltaTime);
+#endif
+#ifdef PLATFORM_UNIX
+		usleep(16666 - 1000*deltaTime);
+#endif
 	}
     str += to_string(deltaTime) + "ms";
     logger::logInfo(str);
