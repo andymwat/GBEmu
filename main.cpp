@@ -38,7 +38,7 @@ int main(int argc, char* args[])
     cout<<"Loading ROM..."<<endl;
    //loadTestRom("/home/andrew/Downloads/GBemu/cpu_instrs/cpu_instrs.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/tetris.gb");
-    loadTestRom("/home/andrew/Downloads/GBemu/sml.gb");
+    //loadTestRom("/home/andrew/Downloads/GBemu/sml.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/cpu_instrs/individual/11-op a,(hl).gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/drMario.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/kirby.gb");
@@ -51,7 +51,7 @@ int main(int argc, char* args[])
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/instr_timing/instr_timing.gb");
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/11-op a,(hl).gb");
 	 //loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/10-bit ops.gb");
-	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/sml.gb");
+	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/sml.gb");
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/galaga.gb");
 
 

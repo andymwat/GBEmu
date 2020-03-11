@@ -26,7 +26,7 @@ bool keyboardBreak = false;
 bool b_up, b_down, b_left, b_right, b_a, b_b, b_start, b_select;
 void checkKeyboardNew()
 {
-	SDL_PumpEvents();
+	//SDL_PumpEvents();
 
 	uint8_t *keyboardState = (uint8_t*)SDL_GetKeyboardState(NULL); //get keyboard state
 	b_up = keyboardState[SDL_SCANCODE_UP];
