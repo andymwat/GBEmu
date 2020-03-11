@@ -178,9 +178,17 @@ void pushBufferToWindow() {
     NOW = SDL_GetPerformanceCounter();
     string str = "Frame time: ";
     deltaTime = ((NOW - LAST)*1000 / (double)SDL_GetPerformanceFrequency() );
+	if (deltaTime <= 16.666)
+	{
+		Sleep(16.6666 - deltaTime);
+	}
     str += to_string(deltaTime) + "ms";
     logger::logInfo(str);
+	
+
+
 }
+
 
 void renderTiles()
 {

@@ -118,33 +118,40 @@ int main(int argc, char* args[])
                 updateScreen(cycles);
             }
         	else{
+				
                 while (pc != sel && !keyboardBreak)
                 {
-					keyboardBreak = false;
+					int cyclesUntilUpdate = 25000; //check for sdl events every 25k cycles (approx 3 times a frame)
+					while (SDL_PollEvent(&events) != 0)
+					{
+						if (events.type == SDL_QUIT)
+						{
+							throw "User exit.";
+						}
+					}
+					while (cyclesUntilUpdate >= 0)
+					{
+						keyboardBreak = false;
 
+
+						checkKeyboardNew();
+						cycles = 0;
+
+
+						execute(pc);
+
+						if (cycles == 0)
+						{
+							logger::logWarning("Cycle count not set.", pc, readFromAddress(pc));
+						}
+						if (sp == 0)
+						{
+							//logger::logWarning("Stack pointer is zero.", pc, readFromAddress(pc));
+						}
+						updateScreen(cycles);
+						cyclesUntilUpdate -= cycles;
+					}
 					
-                    while (SDL_PollEvent(&events) != 0)
-                    {
-                        if (events.type == SDL_QUIT)
-                        {
-                            throw "User exit.";
-                        }
-                    }
-					checkKeyboardNew();
-                    cycles = 0;
-
-
-                    execute(pc);
-
-                    if (cycles == 0)
-                    {
-                        logger::logWarning("Cycle count not set.", pc, readFromAddress(pc));
-                    }
-                    if (sp == 0)
-                    {
-                        //logger::logWarning("Stack pointer is zero.", pc, readFromAddress(pc));
-                    }
-                    updateScreen(cycles);
                 }
 
 				if (keyboardBreak)
