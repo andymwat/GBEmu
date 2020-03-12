@@ -6,7 +6,7 @@ SDL_AudioDeviceID dev;
 
 
 const uint16_t SAMPLES = 1024;
-
+const uint16_t defaultAmplitude = 36000;
 
 uint8_t c1Sweep, c1Duty, c1Envelope, c1FrequencyL, c1FrequencyH;
 
@@ -30,19 +30,71 @@ uint16_t audioBuffer[SAMPLES];
 uint8_t cyclesLeft = 0;
 uint16_t currentSample = 0;
 
+uint16_t sequencerCycles = 0;
+uint16_t sequencer = 0;
+
+
+uint8_t c1CurrentEnvelopeVolume, c2CurrentEnvelopeVolume; //volume from 0 to 15
+
 
 uint16_t dutyCycle[5][8] = {
-	{ 0,36000, 36000, 36000, 36000, 36000, 36000, 36000 },	//12.5%
-	{ 0, 36000, 36000, 36000, 0, 36000, 36000, 36000 },		//25%
-	{ 0, 0, 36000, 36000, 0, 0, 36000, 36000},				//50%
-	{ 0, 0, 0, 36000, 0, 0, 0, 36000 },						//75%
-	{0,0,0,0,0,0,0,0}										//0% (for when channel is disabled)
+	{ 0,defaultAmplitude, defaultAmplitude, defaultAmplitude, defaultAmplitude, defaultAmplitude, defaultAmplitude, defaultAmplitude },	//12.5%
+	{ 0, defaultAmplitude, defaultAmplitude, defaultAmplitude, 0, defaultAmplitude, defaultAmplitude, defaultAmplitude },				//25%
+	{ 0, 0, defaultAmplitude, defaultAmplitude, 0, 0, defaultAmplitude, defaultAmplitude},												//50%
+	{ 0, 0, 0, defaultAmplitude, 0, 0, 0, defaultAmplitude },																			//75%
+	{0,0,0,0,0,0,0,0}																													//0% (for when channel is disabled)
 };
 
 
 void updateAudio(uint8_t cycles)
 {
 	cyclesLeft += cycles;
+	sequencerCycles += cycles;
+	if (sequencerCycles >= 8192 )
+	{
+		sequencerCycles = 0;
+		sequencer++;
+		if (sequencer >= 512)
+		{
+			sequencer = 0;
+		}
+
+		if (sequencerCycles % 8 == 0)//envelope every 8 steps
+		{
+			if ((c1Envelope & 0x7) != 0)//if not finished
+			{
+				c1Envelope = (c1Envelope & 0xF8) | ((c1Envelope & 0x7) - 1);//decrement envelope sweep position
+
+				if ((c1Envelope & 0x8) == 0x8) //Increase
+				{
+					c1CurrentEnvelopeVolume++;
+				}
+				else//decrease
+				{
+					c1CurrentEnvelopeVolume--;
+				}
+		
+			}
+
+			if ((c2Envelope & 0x7) != 0)//if not finished
+			{
+				c2Envelope = (c2Envelope & 0xF8) | ((c2Envelope & 0x7) - 1);//decrement envelope position
+
+				if ((c2Envelope & 0x8) == 0x8) //Increase
+				{
+					c2CurrentEnvelopeVolume++;
+				}
+				else //decrease
+				{
+					c2CurrentEnvelopeVolume--;
+				}
+			}
+			c1CurrentEnvelopeVolume = (c1Envelope >> 4);
+			c2CurrentEnvelopeVolume = (c2Envelope >> 4);
+		}
+
+	}
+
 
 	if (c1Freq <= 0)
 	{
@@ -108,22 +160,27 @@ void updateAudio(uint8_t cycles)
 
 
 
-	if (cyclesLeft >= 86)
+	if (cyclesLeft >= 96)
 	{
 		cyclesLeft = 0;
 		currentSample++;
 		if (currentSample >= SAMPLES)
 		{
 			currentSample = 0;
-			if (SDL_GetQueuedAudioSize(1) <= sizeof(audioBuffer) + 256)//only push to queue if it's nearly empty (avoid infinitely growing queue)
+
+			//TODO
+			//Fix popping (when buffer runs out)
+			if (SDL_GetQueuedAudioSize(1) <= sizeof(audioBuffer) * 2) //only push to queue if it's nearly empty (avoid infinitely growing queue)
 			{
 				SDL_QueueAudio(1, audioBuffer, sizeof(audioBuffer));
-
 			}
 			
 		}
 		uint16_t sample1 = dutyCycle[c1DutyChannel][currentDutySection1];
 		uint16_t sample2 = dutyCycle[c2DutyChannel][currentDutySection2];
+		sample1 *= c1CurrentEnvelopeVolume / 16.0f;
+		sample2 *= c2CurrentEnvelopeVolume / 16.0f;
+
 		audioBuffer[currentSample] = (sample1 > sample2) ? sample1 : sample2;
 	}
 }
@@ -167,6 +224,7 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 		break;
 	case 0xff12:
 		c1Envelope = data;
+		c1CurrentEnvelopeVolume = (data >> 4);
 		break;
 	case 0xff13:
 		c1FrequencyL = data;
@@ -187,6 +245,7 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 		break;
 	case 0xff17:
 		c2Envelope = data;
+		c2CurrentEnvelopeVolume = (data >> 4);
 		break;
 	case 0xff18:
 		c2FrequencyL = data;

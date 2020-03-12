@@ -177,7 +177,7 @@ void pushBufferToWindow() {
    // logger::logInfo(str);
 	if (deltaTime <= 16.666)
 	{
-		SDL_Delay(16.666 - deltaTime);
+		SDL_Delay(16.666 - deltaTime);//vsync
 	}
     SDL_FreeSurface(renderSurface);
     renderSurface = SDL_CreateRGBSurfaceFrom(pixelArray, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 4*SCREEN_WIDTH,0x0000ff,0x00ff00,0xff0000,0 );
