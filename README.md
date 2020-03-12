@@ -18,6 +18,7 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 ![Tetris](screenshots/tetris.png)
 ![Asteroids](screenshots/asteroids.png)
 ![Galaga](screenshots/galaga.png)
+![Kirby](screenshots/kirby.png)
 
 ## Unimplemented features/TO-DO
   - Finish sound support
