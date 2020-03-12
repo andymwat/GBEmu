@@ -23,6 +23,7 @@
 #include "keyboardInput.h"
 #include "logger.h"
 
+#include "audioController.h"
 #include "tests.h"
 
 using namespace std;
@@ -33,6 +34,13 @@ int main(int argc, char* args[])
 {
     cout<<"Initializing window..."<<endl;
     initWindow();
+	cout << "Initializing audio..." << endl;
+	if (initAudio() != 0)
+	{
+
+		return -1;
+
+	}
     lcdEnable = true;
     a=b=c=d=e=f=h=l=sp=pc=0;
     cout<<"Loading ROM..."<<endl;
@@ -48,11 +56,12 @@ int main(int argc, char* args[])
     //loadTestRom("/home/andrew/Downloads/GBemu/new/dkl.gb");
     //loadTestRom("/home/andrew/Downloads/DMG_ROM.bin");
 
-	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/instr_timing/instr_timing.gb");
+	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/cpu_instrs.gb");
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/11-op a,(hl).gb");
 	 //loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/10-bit ops.gb");
 	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/sml.gb");
-	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/galaga.gb");
+	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/tetris.gb");
+
 
 
 	if (RUN_DEBUG_TESTS)
@@ -149,6 +158,7 @@ int main(int argc, char* args[])
 							//logger::logWarning("Stack pointer is zero.", pc, readFromAddress(pc));
 						}
 						updateScreen(cycles);
+						updateAudio(cycles);
 						cyclesUntilUpdate -= cycles;
 					}
 					
@@ -172,7 +182,7 @@ int main(int argc, char* args[])
         dumpRegisters();
     }
     cout<<output<<endl;
-
+	SDL_PauseAudio(1);
 #if defined(_WIN32)
 	system("pause");
 #endif

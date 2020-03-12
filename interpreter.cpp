@@ -11,7 +11,7 @@
 #include "keyboardInput.h"
 #include "main.h"
 #include "logger.h"
-
+#include "audioController.h"
 using namespace std;
 
 int errorAddress = -1;
@@ -326,6 +326,7 @@ void writePair(uint8_t &x, uint8_t &y, uint16_t data) {
 
 void handleSoundWrite(uint16_t address, uint8_t data)
 {
+	writeToAudioRegister(address, data);
 	//logger::logWarning("Sound registers write unimplemented, ignoring.", address, data);
 }
 uint8_t handleSoundRead(uint16_t address)
