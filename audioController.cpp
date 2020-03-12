@@ -13,8 +13,12 @@ uint8_t c1Sweep, c1Duty, c1Envelope, c1FrequencyL, c1FrequencyH;
 uint8_t  c2Duty, c2Envelope, c2FrequencyL, c2FrequencyH;
 
 
+uint8_t c1DutyChannel, c2DutyChannel;
+
 int16_t c1Freq = 0;
 int16_t c2Freq = 0;
+unsigned int c1Length, c2Length; //length in cycles
+unsigned int c1Time, c2Time; //how many cycles they've been playing
 
 
 uint8_t currentDutySection1 = 0;
@@ -27,17 +31,17 @@ uint8_t cyclesLeft = 0;
 uint16_t currentSample = 0;
 
 
-uint16_t dutyCycle[4][8] = {
+uint16_t dutyCycle[5][8] = {
 	{ 0,36000, 36000, 36000, 36000, 36000, 36000, 36000 },	//12.5%
 	{ 0, 36000, 36000, 36000, 0, 36000, 36000, 36000 },		//25%
 	{ 0, 0, 36000, 36000, 0, 0, 36000, 36000},				//50%
-	{ 0, 0, 0, 36000, 0, 0, 0, 36000 }						//75%
+	{ 0, 0, 0, 36000, 0, 0, 0, 36000 },						//75%
+	{0,0,0,0,0,0,0,0}										//0% (for when channel is disabled)
 };
 
 
 void updateAudio(uint8_t cycles)
 {
-
 	cyclesLeft += cycles;
 
 	if (c1Freq <= 0)
@@ -66,6 +70,44 @@ void updateAudio(uint8_t cycles)
 	c2Freq -= cycles;
 
 
+
+
+	if ((c1Duty & 0x40) == 0x40) //length enable
+	{
+		if (c1Time >= c1Length)
+		{
+			c1DutyChannel = 4;//disable (all 0)
+		}
+		else
+		{
+			c1Time += cycles;
+		}
+	}
+	else
+	{
+		c1DutyChannel = c1Duty >> 6;
+		c1Time = 0;
+	}
+
+	if ((c2Duty & 0x40) == 0x40) //length enable
+	{
+		if (c2Time >= c2Length)
+		{
+			c2DutyChannel = 4;//disable (all 0)
+		}
+		else
+		{
+			c2Time += cycles;
+		}
+	}
+	else
+	{
+		c2DutyChannel = c2Duty >> 6;
+		c2Time = 0;
+	}
+
+
+
 	if (cyclesLeft >= 86)
 	{
 		cyclesLeft = 0;
@@ -73,11 +115,15 @@ void updateAudio(uint8_t cycles)
 		if (currentSample >= SAMPLES)
 		{
 			currentSample = 0;
-			SDL_QueueAudio(1, audioBuffer, SAMPLES);
+			if (SDL_GetQueuedAudioSize(1) <= sizeof(audioBuffer) + 256)//only push to queue if it's nearly empty (avoid infinitely growing queue)
+			{
+				SDL_QueueAudio(1, audioBuffer, sizeof(audioBuffer));
+
+			}
 			
 		}
-		uint16_t sample1 = dutyCycle[c1Duty >> 6][currentDutySection1];
-		uint16_t sample2 = dutyCycle[c1Duty >> 6][currentDutySection1];
+		uint16_t sample1 = dutyCycle[c1DutyChannel][currentDutySection1];
+		uint16_t sample2 = dutyCycle[c2DutyChannel][currentDutySection2];
 		audioBuffer[currentSample] = (sample1 > sample2) ? sample1 : sample2;
 	}
 }
@@ -112,6 +158,12 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 		break;
 	case 0xff11:
 		c1Duty = data;
+		c1DutyChannel = data >> 6;
+		c1Length = 4194304 * ((64-(data & 0x3f)) * (((double)1)/256));
+		if ((data & 0x80) == 0x80)//restart sound
+		{
+			c1Time = 0;
+		}
 		break;
 	case 0xff12:
 		c1Envelope = data;
@@ -126,6 +178,12 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 
 	case 0xff16:
 		c2Duty = data;
+		c2DutyChannel = data >> 6;
+		c2Length = 4194304 * ((64 - (data & 0x3f)) * (((double)1) / 256));
+		if ((data & 0x80) == 0x80)//restart sound
+		{
+			c2Time = 0;
+		}
 		break;
 	case 0xff17:
 		c2Envelope = data;
