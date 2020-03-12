@@ -5,6 +5,7 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 ## Features
  - Passes all tests in blargg's cpu_instrs ROM
  - Nearly complete MBC 1 support
+ - Incomplete sound support
  - CPU stepping and breakpoints
  - Nearly complete interrupt support, including timers
  - Compiles on both Windows and Linux (and presumably MacOS as well) using CMake
@@ -19,7 +20,7 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 ![Galaga](screenshots/galaga.png)
 
 ## Unimplemented features/TO-DO
-  - Sound support
+  - Finish sound support
   - HALT bug emulation
   - MBC 2 & 3 support
   - Savestates
