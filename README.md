@@ -39,7 +39,7 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 | Donkey Kong Land            | Title screen shows, and gets to a flickering menu after that.                                                                                                             |
 | Dr. Mario                   | Boots to menus, but hangs when going in-game (probably due to incomplete timer support).                                                                                                              |
 | Galaga & Galaxian           | Fully playable, but pretty slow.                                                                                                                                                                                     |
-| Kirby's Dream Land          | Playable but very slow.			 |
+| Kirby's Dream Land          | Playable, but sound is very broken (missing wave and noise channels along with frequency sweep, which Kirby relies on a lot)			 |
 | Super Mario Land            | Playable but slow.			 |
 | Tetris                      | Playable but slow.                                                                                                                                    |
 | Tetris 2                    | Same as the original Tetris.                                                                                                                                                                            |
