@@ -29,6 +29,7 @@ void logger::logError(std::string str, uint16_t address, uint8_t data) {
 
 #ifdef PLATFORM_UNIX
     std::cout<<"\033[1;31m[ERROR]: \033[0m"<<str<<std::endl;
+    std::cout<<"Address: 0x"<<hex<<address<<dec<<" data: 0x"<<hex<<(uint16_t)data<<dec<<" "<<str<<endl;
 #else
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, 12);
@@ -44,6 +45,7 @@ void logger::logWarning(std::string str, uint16_t address, uint8_t data) {
 
 #ifdef PLATFORM_UNIX
     std::cout<<"\033[1;33m[WARNING]: \033[0m"<<str<<std::endl;
+    cout<<"Address: 0x"<<hex<<address<<dec<<" data: 0x"<<hex<<(uint16_t)data<<dec<<" "<<str<<endl;
 #else
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, 14);
