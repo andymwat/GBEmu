@@ -298,7 +298,7 @@ int initAudio(void)
 {
 
 	SDL_Init(SDL_INIT_AUDIO);
-	audioSpec.freq = 44100;
+	audioSpec.freq = 48000;
 	audioSpec.format = AUDIO_S16;
 	audioSpec.channels = 1;    //mono
 	audioSpec.samples = SAMPLES;  
