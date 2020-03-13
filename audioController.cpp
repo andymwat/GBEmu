@@ -63,6 +63,8 @@ uint16_t noiseCycles;
 uint16_t noiseShiftRegister = 0xff;
 
 
+uint8_t c1EnvelopeCycles,c2EnvelopeCycles,c4EnvelopeCycles;
+
 uint16_t dutyCycle[5][8] =
 {
         {defaultAmplitude,0,0,0,0,0,0,0},                                                                               //12.5%
@@ -168,64 +170,71 @@ void updateAudio(uint8_t cycles)
 		if (sequencer % 8 == 6) //envelope every 7th step
 		{
 
-			if ((c1Envelope & 0x7) != 0)//if not finished
+			if ((c1Envelope & 0x7) != 0)//if envelope active
 			{
-				if ((c1Envelope & 0x8) == 0x8) //Increase
-				{
-					c1Envelope = (c1Envelope & 0xF8) | ((c1Envelope & 0x7) - 1);//decrement envelope sweep position
-                    if (c1CurrentEnvelopeVolume != 15)
+			    c1EnvelopeCycles++;
+			    if (c1EnvelopeCycles >= (c1Envelope & 0x7)) //if its been n*(1/64) seconds, change volume
+                {
+			        c1EnvelopeCycles = 0;
+                    if ((c1Envelope & 0x8) == 0x8) //Increase
                     {
-                        c1CurrentEnvelopeVolume++;
+                        if (c1CurrentEnvelopeVolume != 15)
+                        {
+                            c1CurrentEnvelopeVolume++;
+                        }
                     }
-				}
-				else if ((c1Envelope & 0x8) != 0x8)//decrease
-				{
-					c1Envelope = (c1Envelope & 0xF8) | ((c1Envelope & 0x7) - 1);//decrement envelope sweep position
-                    if (c1CurrentEnvelopeVolume != 0)
+                    else if ((c1Envelope & 0x8) != 0x8)//decrease
                     {
-                        c1CurrentEnvelopeVolume--;
+                        if (c1CurrentEnvelopeVolume != 0)
+                        {
+                            c1CurrentEnvelopeVolume--;
+                        }
                     }
                 }
-		
 			}
 
-			if ((c2Envelope & 0x7) != 0)//if not finished
-			{
-				if ((c2Envelope & 0x8) == 0x8 ) //Increase
-				{
-					c2Envelope = (c2Envelope & 0xF8) | ((c2Envelope & 0x7) - 1);//decrement envelope sweep position
-                    if (c2CurrentEnvelopeVolume != 15)
-                    {
-                        c2CurrentEnvelopeVolume++;
-                    }
-
-				}
-				else if ((c2Envelope & 0x8) != 0x8)//decrease
-				{
-					c2Envelope = (c2Envelope & 0xF8) | ((c2Envelope & 0x7) - 1);//decrement envelope sweep position
-                    if (c2CurrentEnvelopeVolume != 0)
-                    {
-                        c2CurrentEnvelopeVolume--;
-                    }
-				}
-			}
-
-            if ((c4Envelope & 0x7) != 0)//if not finished
+            if ((c2Envelope & 0x7) != 0)//if envelope active
             {
-                if ((c4Envelope & 0x8) == 0x8) //Increase
+                c2EnvelopeCycles++;
+                if (c2EnvelopeCycles >= (c2Envelope & 0x7)) //if its been n*(1/64) seconds, change volume
                 {
-                    c4Envelope = (c4Envelope & 0xF8) | ((c4Envelope & 0x7) - 1);//decrement envelope sweep position
-                    if (c4CurrentEnvelopeVolume != 15)
+                    c2EnvelopeCycles = 0;
+                    if ((c2Envelope & 0x8) == 0x8) //Increase
                     {
-                        c4CurrentEnvelopeVolume++;
+                        if (c2CurrentEnvelopeVolume != 15)
+                        {
+                            c2CurrentEnvelopeVolume++;
+                        }
+                    }
+                    else if ((c2Envelope & 0x8) != 0x8)//decrease
+                    {
+                        if (c2CurrentEnvelopeVolume != 0)
+                        {
+                            c2CurrentEnvelopeVolume--;
+                        }
                     }
                 }
-                else if ((c4Envelope & 0x8) != 0x8)//decrease
+            }
+
+            if ((c4Envelope & 0x7) != 0)//if envelope active
+            {
+                c4EnvelopeCycles++;
+                if (c4EnvelopeCycles >= (c4Envelope & 0x7)) //if its been n*(1/64) seconds, change volume
                 {
-                    c4Envelope = (c4Envelope & 0xF8) | ((c4Envelope & 0x7) - 1);//decrement envelope sweep position
-                    if (c4CurrentEnvelopeVolume != 0)
+                    c4EnvelopeCycles = 0;
+                    if ((c4Envelope & 0x8) == 0x8) //Increase
                     {
-                        c4CurrentEnvelopeVolume--;
+                        if (c4CurrentEnvelopeVolume != 15)
+                        {
+                            c4CurrentEnvelopeVolume++;
+                        }
+                    }
+                    else if ((c4Envelope & 0x8) != 0x8)//decrease
+                    {
+                        if (c4CurrentEnvelopeVolume != 0)
+                        {
+                            c4CurrentEnvelopeVolume--;
+                        }
                     }
                 }
             }
