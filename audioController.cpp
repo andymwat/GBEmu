@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "hicpp-signed-bitwise"
 #include "audioController.h"
 
 
@@ -56,11 +58,11 @@ bool waveStatus;
 
 
 uint16_t dutyCycle[5][8] = {
-	{ 0,defaultAmplitude, defaultAmplitude, defaultAmplitude, defaultAmplitude, defaultAmplitude, defaultAmplitude, defaultAmplitude },	//12.5%
-	{ 0, defaultAmplitude, defaultAmplitude, defaultAmplitude, 0, defaultAmplitude, defaultAmplitude, defaultAmplitude },				//25%
-	{ 0, 0, defaultAmplitude, defaultAmplitude, 0, 0, defaultAmplitude, defaultAmplitude},												//50%
-	{ 0, 0, 0, defaultAmplitude, 0, 0, 0, defaultAmplitude },																			//75%
-	{0,0,0,0,0,0,0,0}																													//0% (for when channel is disabled)
+        {defaultAmplitude,0,0,0,0,0,0,0},                                                                               //12.5%
+        {defaultAmplitude,0,0,0,0,0,0,defaultAmplitude},                                                                //25%
+        {defaultAmplitude,0,0,0,0,defaultAmplitude,defaultAmplitude,defaultAmplitude},                                  //50%
+        {0,defaultAmplitude,defaultAmplitude,defaultAmplitude,defaultAmplitude,defaultAmplitude,defaultAmplitude,0},    //75%
+	    {0,0,0,0,0,0,0,0}																								//0% (for when channel is disabled)
 };
 
 
@@ -82,6 +84,7 @@ void updateAudio(uint8_t cycles)
 
 
 
+    c1Freq -= cycles;
 	if (c1Freq <= 0)
 	{
 		c1Freq = (2048 - c1FrequencySweep) * 4;
@@ -92,10 +95,10 @@ void updateAudio(uint8_t cycles)
 			currentDutySection1 = 0;
 		}
 	}
-	c1Freq -= cycles;
-	
 
 
+
+    c2Freq -= cycles;
 	if (c2Freq <= 0)
 	{
 		uint16_t frequency = ((((uint16_t)c2FrequencyH) & 0x0007) << 8) | (uint16_t)c2FrequencyL;
@@ -107,7 +110,6 @@ void updateAudio(uint8_t cycles)
 			currentDutySection2 = 0;
 		}
 	}
-	c2Freq -= cycles;
 
 
 	if (sequencerCycles >= 8192 )
@@ -125,7 +127,7 @@ void updateAudio(uint8_t cycles)
 			{
 				
 
-				if ((c1Envelope & 0x8) == 0x8 && (c1Envelope & 0x7) != 15) //Increase and not done
+				if ((c1Envelope & 0x8) == 0x8 && (c1Envelope & 0x7) != 0x7) //Increase and not done
 				{
 					c1Envelope = (c1Envelope & 0xF8) | ((c1Envelope & 0x7) - 1);//decrement envelope sweep position
 					c1CurrentEnvelopeVolume++;
@@ -140,7 +142,7 @@ void updateAudio(uint8_t cycles)
 
 			if ((c2Envelope & 0x7) != 0)//if not finished
 			{
-				if ((c2Envelope & 0x8) == 0x8 && (c2Envelope & 0x7) != 15) //Increase and not done
+				if ((c2Envelope & 0x8) == 0x8 && (c2Envelope & 0x7) != 0x7) //Increase and not done
 				{
 					c2Envelope = (c2Envelope & 0xF8) | ((c2Envelope & 0x7) - 1);//decrement envelope sweep position
 					c2CurrentEnvelopeVolume++;
@@ -155,7 +157,7 @@ void updateAudio(uint8_t cycles)
 			c2CurrentEnvelopeVolume = (c2Envelope >> 4);
 		}
 
-		if (sequencerCycles % 8 == 1 || sequencerCycles & 8 == 5)//Sweep every 2nd and 6th step
+		if (sequencerCycles % 8 == 1 || sequencerCycles % 8 == 5)//Sweep every 2nd and 6th step
 		{
 			c1FrequencySweepShadow = c1FrequencySweep;
 
@@ -249,7 +251,7 @@ void updateAudio(uint8_t cycles)
 
 
 
-	if (cyclesLeft >= 86)
+	if (cyclesLeft >= 88) //48000hz:  1/48000 seconds = 0.000020833 sec = 87.3 * 1/4194304
 	{
 		cyclesLeft = 0;
 		currentSample++;
@@ -290,7 +292,6 @@ void updateAudio(uint8_t cycles)
 
 		//audioBuffer[currentSample] = (sample1 > sample2) ? sample1 : sample2;
 		audioBuffer[currentSample] = sample1 + sample2  + sample3;
-		//audioBuffer[currentSample] = sample1 + sample2 + 0;
 	}
 }
 
@@ -406,3 +407,5 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 		break;
 	}
 }
+
+#pragma clang diagnostic pop

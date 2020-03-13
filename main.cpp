@@ -49,7 +49,7 @@ int main(int argc, char* args[])
     //loadTestRom("/home/andrew/Downloads/GBemu/sml.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/cpu_instrs/individual/11-op a,(hl).gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/drMario.gb");
-    //loadTestRom("/home/andrew/Downloads/GBemu/kirby.gb");
+    loadTestRom("/home/andrew/Downloads/GBemu/kirby.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/loz.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/pkmn.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/sml2.gb");
@@ -60,7 +60,7 @@ int main(int argc, char* args[])
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/11-op a,(hl).gb");
 	 //loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/10-bit ops.gb");
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/kirby.gb");
-	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/sml.gb");
+	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/sml.gb");
 
 
 

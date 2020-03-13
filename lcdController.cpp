@@ -7,11 +7,15 @@
 
 #include <iostream>
 #include <fstream>
-//#include <unistd.h>
+
+
 #include <SDL.h>
 #include "interpreter.h"
 #include "lcdController.h"
 
+#ifdef PLATFORM_UNIX
+#include <unistd.h>
+#endif
 
 using namespace std;
 
@@ -174,10 +178,15 @@ void pushBufferToWindow() {
 	deltaTime = ((NOW - LAST) * 1000 / (double)SDL_GetPerformanceFrequency());
 	//string str = "Frame time: ";
 	//str += to_string(deltaTime) + "ms";
-   // logger::logInfo(str);
+    //logger::logInfo(str);
 	if (deltaTime <= 16.666)
 	{
-		SDL_Delay(16.666 - deltaTime);//vsync
+
+#ifdef PLATFORM_UNIX
+		usleep(16666-(deltaTime*1000)); //usleep is more precise
+#else
+        SDL_Delay(16.666 - deltaTime);//vsync
+#endif
 	}
     SDL_FreeSurface(renderSurface);
     renderSurface = SDL_CreateRGBSurfaceFrom(pixelArray, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 4*SCREEN_WIDTH,0x0000ff,0x00ff00,0xff0000,0 );
