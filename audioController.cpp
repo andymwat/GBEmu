@@ -1,6 +1,7 @@
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
 #include "audioController.h"
+#include "lcdController.h"
 
 
 SDL_AudioSpec audioSpec;
@@ -54,10 +55,16 @@ unsigned int waveTime;
 bool waveStatus;
 
 
+uint8_t c4Length, c4Envelope, c4Polynomial, c4Counter;
+uint8_t c4CurrentEnvelopeVolume, c4Time;
+bool c4Enable = true;
+uint16_t c4Data;
+uint16_t noiseCycles;
+uint16_t noiseShiftRegister = 0xff;
 
 
-
-uint16_t dutyCycle[5][8] = {
+uint16_t dutyCycle[5][8] =
+{
         {defaultAmplitude,0,0,0,0,0,0,0},                                                                               //12.5%
         {defaultAmplitude,0,0,0,0,0,0,defaultAmplitude},                                                                //25%
         {defaultAmplitude,0,0,0,0,defaultAmplitude,defaultAmplitude,defaultAmplitude},                                  //50%
@@ -71,6 +78,43 @@ void updateAudio(uint8_t cycles)
 	cyclesLeft += cycles;
 	sequencerCycles += cycles;
 	waveCycles += cycles;
+    noiseCycles += cycles;
+    float r = (c4Polynomial & 0x7);
+    if (r == 0)
+    {
+        r = 0.5f;
+    }
+    if (noiseCycles >=  ( 1.0f/ (524288.0f / (r)  / pow(2,((c4Polynomial>>4)  +1))) * 4194304.0f)    )
+    {
+        noiseCycles = 0;
+        uint16_t result = ((noiseShiftRegister & 0x1) ^ ((noiseShiftRegister & 0x02) >> 1));
+        noiseShiftRegister = noiseShiftRegister >> 1;
+        if (result == 0)
+        {
+            noiseShiftRegister = BitReset(noiseShiftRegister, 14);
+        }
+        else
+        {
+            noiseShiftRegister = BitSet(noiseShiftRegister, 14);
+        }
+        if ((c4Polynomial & 0x8) == 0x8)//7 bit
+        {
+            if (result == 0)
+            {
+                noiseShiftRegister = BitReset(noiseShiftRegister, 6);
+            }
+            else
+            {
+                noiseShiftRegister = BitSet(noiseShiftRegister, 6);
+            }
+        }
+        c4Data = defaultAmplitude;
+        if (TestBit(noiseShiftRegister, 0))
+        {
+            c4Data = 0;
+        }
+    }
+
 
 	if (waveCycles >= (2048 - waveFrequency) * 2)
 	{
@@ -121,43 +165,73 @@ void updateAudio(uint8_t cycles)
 			sequencer = 0;
 		}
 
-		if (sequencerCycles % 8 == 6) //envelope every 7th step
+		if (sequencer % 8 == 6) //envelope every 7th step
 		{
+
 			if ((c1Envelope & 0x7) != 0)//if not finished
 			{
-				
-
-				if ((c1Envelope & 0x8) == 0x8 && (c1Envelope & 0x7) != 0x7) //Increase and not done
+				if ((c1Envelope & 0x8) == 0x8) //Increase
 				{
 					c1Envelope = (c1Envelope & 0xF8) | ((c1Envelope & 0x7) - 1);//decrement envelope sweep position
-					c1CurrentEnvelopeVolume++;
+                    if (c1CurrentEnvelopeVolume != 15)
+                    {
+                        c1CurrentEnvelopeVolume++;
+                    }
 				}
-				else if ((c1Envelope & 0x8) != 0x8 && (c1Envelope & 0x7) != 0)//decrease and not done
+				else if ((c1Envelope & 0x8) != 0x8)//decrease
 				{
 					c1Envelope = (c1Envelope & 0xF8) | ((c1Envelope & 0x7) - 1);//decrement envelope sweep position
-					c1CurrentEnvelopeVolume--;
-				}
+                    if (c1CurrentEnvelopeVolume != 0)
+                    {
+                        c1CurrentEnvelopeVolume--;
+                    }
+                }
 		
 			}
 
 			if ((c2Envelope & 0x7) != 0)//if not finished
 			{
-				if ((c2Envelope & 0x8) == 0x8 && (c2Envelope & 0x7) != 0x7) //Increase and not done
+				if ((c2Envelope & 0x8) == 0x8 ) //Increase
 				{
 					c2Envelope = (c2Envelope & 0xF8) | ((c2Envelope & 0x7) - 1);//decrement envelope sweep position
-					c2CurrentEnvelopeVolume++;
+                    if (c2CurrentEnvelopeVolume != 15)
+                    {
+                        c2CurrentEnvelopeVolume++;
+                    }
+
 				}
-				else if ((c2Envelope & 0x8) != 0x8 && (c2Envelope & 0x7) != 0)//decrease and not done
+				else if ((c2Envelope & 0x8) != 0x8)//decrease
 				{
 					c2Envelope = (c2Envelope & 0xF8) | ((c2Envelope & 0x7) - 1);//decrement envelope sweep position
-					c2CurrentEnvelopeVolume--;
+                    if (c2CurrentEnvelopeVolume != 0)
+                    {
+                        c2CurrentEnvelopeVolume--;
+                    }
 				}
 			}
-			c1CurrentEnvelopeVolume = (c1Envelope >> 4);
-			c2CurrentEnvelopeVolume = (c2Envelope >> 4);
+
+            if ((c4Envelope & 0x7) != 0)//if not finished
+            {
+                if ((c4Envelope & 0x8) == 0x8) //Increase
+                {
+                    c4Envelope = (c4Envelope & 0xF8) | ((c4Envelope & 0x7) - 1);//decrement envelope sweep position
+                    if (c4CurrentEnvelopeVolume != 15)
+                    {
+                        c4CurrentEnvelopeVolume++;
+                    }
+                }
+                else if ((c4Envelope & 0x8) != 0x8)//decrease
+                {
+                    c4Envelope = (c4Envelope & 0xF8) | ((c4Envelope & 0x7) - 1);//decrement envelope sweep position
+                    if (c4CurrentEnvelopeVolume != 0)
+                    {
+                        c4CurrentEnvelopeVolume--;
+                    }
+                }
+            }
 		}
 
-		if (sequencerCycles % 8 == 1 || sequencerCycles % 8 == 5)//Sweep every 2nd and 6th step
+		if (sequencer % 8 == 1 || sequencer % 8 == 5)//Sweep every 2nd and 6th step
 		{
 			c1FrequencySweepShadow = c1FrequencySweep;
 
@@ -233,6 +307,7 @@ void updateAudio(uint8_t cycles)
 	}
 
 
+
 	if ((waveFrequencyH & 0x40) == 0x40) //length enable
 	{
 		if (waveTime >= waveLength)
@@ -250,6 +325,20 @@ void updateAudio(uint8_t cycles)
 	}
 
 
+    if ((c4Counter & 0x40) == 0x40)//length enable
+    {
+        if (c4Time >= c4Length)//c4 sound ended
+        {
+            c4Enable = false;
+        } else{
+            c4Time += cycles;
+            c4Enable = true;
+        }
+    }
+    else
+    {
+        c4Enable = true;
+    }
 
 	if (cyclesLeft >= 88) //48000hz:  1/48000 seconds = 0.000020833 sec = 87.3 * 1/4194304
 	{
@@ -270,6 +359,7 @@ void updateAudio(uint8_t cycles)
 		uint16_t sample1 = dutyCycle[c1DutyChannel][currentDutySection1];
 		uint16_t sample2 = dutyCycle[c2DutyChannel][currentDutySection2];
 		uint16_t sample3 = 0;
+		uint16_t sample4 = 0;
 		if (waveStatus)
 		{
 			if ((wavePosition % 2) == 0)//most significant bits
@@ -285,13 +375,21 @@ void updateAudio(uint8_t cycles)
 			uint16_t proportion = defaultAmplitude / 0xf;
 			sample3 *= proportion;
 		}
-		
 
-		sample1 *= c1CurrentEnvelopeVolume / 16.0f;
-		sample2 *= c2CurrentEnvelopeVolume / 16.0f;
+		if (c4Enable)
+        {
+		    sample4 = c4Data;
+        }
 
+        if (c1CurrentEnvelopeVolume >= 16 || c2CurrentEnvelopeVolume >= 16|| c4CurrentEnvelopeVolume >= 16) //sanity check
+        {
+            logger::logErrorNoData("Volume error");
+        }
+		sample1 = (float)sample1 * (float)c1CurrentEnvelopeVolume / 16.0f;
+		sample2 = (float)sample2 * (float)c2CurrentEnvelopeVolume / 16.0f;
+        sample4 = (float)sample4 * (float)c4CurrentEnvelopeVolume / 16.0f;
 		//audioBuffer[currentSample] = (sample1 > sample2) ? sample1 : sample2;
-		audioBuffer[currentSample] = sample1 + sample2  + sample3;
+		audioBuffer[currentSample] = sample1 + sample2  + sample3 + sample4; //mixing
 	}
 }
 
@@ -338,6 +436,7 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 	case 0xff12:
 		c1Envelope = data;
 		c1CurrentEnvelopeVolume = (data >> 4);
+
 		break;
 	case 0xff13:
 		c1FrequencyL = data;
@@ -395,6 +494,30 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 		waveFrequencyH = data;
 		waveFrequency = ((((uint16_t)waveFrequencyH) & 0x0007) << 8) | (uint16_t)waveFrequencyL;
 		break;
+
+
+
+    case 0xff20:
+        c4Length = 4194304 * ((64 - (data & 0x3f)) * (((double)1) / 256));
+        c4Time = 0;
+        c4Enable = true;
+        break;
+    case 0xff21:
+        c4Envelope = data;
+        c4CurrentEnvelopeVolume = (data >> 4);
+        c4Enable = true;
+        break;
+    case 0xff22:
+        c4Polynomial = data;
+        c4Enable = true;
+        break;
+    case 0xff23:
+        c4Counter = data;
+        c4Enable = true;
+        break;
+
+
+
 	default://unimplemented
 		if (address >= 0xff30 && address <= 0xff3f)
 		{
