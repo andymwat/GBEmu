@@ -33,14 +33,14 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 ## Compatibility
 | ROM                         | Compatibility notes                                                                                                                                                                                   |
 |-----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Asteroids                   | Can get in-game, but is very slow and the ship sprite can bug out at times                                                                                                                      |
+| Asteroids                   | Fully playable, but the ship sprite occasionally bugs out.                                                                                                                     |
 | Asteroids & Missile Command | Crashes on boot when trying to select the upper bits of the ROM/RAM bank (upper bit selection is unimplemented). 
 | Blargg's Test ROMs          | Passes all tests in the cpu_instrs ROM.
 | Donkey Kong Land            | Title screen shows, and gets to a flickering menu after that.                                                                                                             |
 | Dr. Mario                   | Boots to menus, but hangs when going in-game (probably due to incomplete timer support).                                                                                                              |
-| Galaga & Galaxian           | Fully playable, but pretty slow.                                                                                                                                                                                     |
-| Kirby's Dream Land          | Playable, but sound is very broken (missing wave and noise channels along with frequency sweep, which Kirby relies on a lot)			 |
-| Super Mario Land            | Playable but slow.			 |
-| Tetris                      | Playable but slow.                                                                                                                                    |
+| Galaga & Galaxian           | Fully playable.                                                                                                                                                                                     |
+| Kirby's Dream Land          | Playable, but sound is somewhat broken (wave channel is kinda broken)			 |
+| Super Mario Land            | Fully playable.			 |
+| Tetris                      | Fully playable.                                                                                                                                    |
 | Tetris 2                    | Same as the original Tetris.                                                                                                                                                                            |
  

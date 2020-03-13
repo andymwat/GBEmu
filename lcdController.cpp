@@ -318,7 +318,7 @@ void renderSprites() {
         bool yFlip = TestBit(attributes, 6);
         bool xFlip = TestBit(attributes, 5);
 
-        int scanline = readFromAddress(0xFF44);
+        uint8_t scanline = readFromAddress(0xFF44);
 
         int ysize = 8;
 

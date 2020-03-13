@@ -331,7 +331,7 @@ void handleSoundWrite(uint16_t address, uint8_t data)
 }
 uint8_t handleSoundRead(uint16_t address)
 {
-	//logger::logWarning("Sound registers read unimplemented, returning 0x0", address, 0x0);
+	logger::logWarning("Sound registers read unimplemented, returning 0x0", address, 0x0);
 	return 0x00;
 }
 

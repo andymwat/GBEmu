@@ -6,7 +6,7 @@ SDL_AudioDeviceID dev;
 
 
 const uint16_t SAMPLES = 1024;
-const uint16_t defaultAmplitude = 36000;
+const uint16_t defaultAmplitude = 8000;
 
 uint8_t c1Sweep, c1Duty, c1Envelope, c1FrequencyL, c1FrequencyH;
 
@@ -17,6 +17,11 @@ uint8_t c1DutyChannel, c2DutyChannel;
 
 int16_t c1Freq = 0;
 int16_t c2Freq = 0;
+
+uint16_t c1FrequencySweep, c1FrequencySweepShadow;
+bool c1FrequencySweepFlag;
+
+
 unsigned int c1Length, c2Length; //length in cycles
 unsigned int c1Time, c2Time; //how many cycles they've been playing
 
@@ -37,6 +42,19 @@ uint16_t sequencer = 0;
 uint8_t c1CurrentEnvelopeVolume, c2CurrentEnvelopeVolume; //volume from 0 to 15
 
 
+uint8_t waveTable[16];//32 sample (4 bits each) wave table
+uint8_t wavePosition = 1;
+uint16_t waveCycles = 0;
+uint8_t waveOutputLevel, waveLength, waveFrequencyL, waveFrequencyH;
+uint16_t  waveFrequency;
+unsigned int waveTime;
+
+bool waveStatus;
+
+
+
+
+
 uint16_t dutyCycle[5][8] = {
 	{ 0,defaultAmplitude, defaultAmplitude, defaultAmplitude, defaultAmplitude, defaultAmplitude, defaultAmplitude, defaultAmplitude },	//12.5%
 	{ 0, defaultAmplitude, defaultAmplitude, defaultAmplitude, 0, defaultAmplitude, defaultAmplitude, defaultAmplitude },				//25%
@@ -50,56 +68,24 @@ void updateAudio(uint8_t cycles)
 {
 	cyclesLeft += cycles;
 	sequencerCycles += cycles;
-	if (sequencerCycles >= 8192 )
+	waveCycles += cycles;
+
+	if (waveCycles >= (2048 - waveFrequency) * 2)
 	{
-		sequencerCycles = 0;
-		sequencer++;
-		if (sequencer >= 512)
+		waveCycles = 0;
+		wavePosition++;
+		if (wavePosition >= 32)
 		{
-			sequencer = 0;
+			wavePosition = 0;
 		}
-
-		if (sequencerCycles % 8 == 0)//envelope every 8 steps
-		{
-			if ((c1Envelope & 0x7) != 0)//if not finished
-			{
-				c1Envelope = (c1Envelope & 0xF8) | ((c1Envelope & 0x7) - 1);//decrement envelope sweep position
-
-				if ((c1Envelope & 0x8) == 0x8) //Increase
-				{
-					c1CurrentEnvelopeVolume++;
-				}
-				else//decrease
-				{
-					c1CurrentEnvelopeVolume--;
-				}
-		
-			}
-
-			if ((c2Envelope & 0x7) != 0)//if not finished
-			{
-				c2Envelope = (c2Envelope & 0xF8) | ((c2Envelope & 0x7) - 1);//decrement envelope position
-
-				if ((c2Envelope & 0x8) == 0x8) //Increase
-				{
-					c2CurrentEnvelopeVolume++;
-				}
-				else //decrease
-				{
-					c2CurrentEnvelopeVolume--;
-				}
-			}
-			c1CurrentEnvelopeVolume = (c1Envelope >> 4);
-			c2CurrentEnvelopeVolume = (c2Envelope >> 4);
-		}
-
 	}
+
 
 
 	if (c1Freq <= 0)
 	{
-		uint16_t frequency = ((((uint16_t)c1FrequencyH) & 0x0007) << 8) | (uint16_t)c1FrequencyL;
-		c1Freq = (2048 - frequency) * 4;
+		c1Freq = (2048 - c1FrequencySweep) * 4;
+
 		currentDutySection1++;
 		if (currentDutySection1 >= 8)
 		{
@@ -107,12 +93,14 @@ void updateAudio(uint8_t cycles)
 		}
 	}
 	c1Freq -= cycles;
+	
 
 
 	if (c2Freq <= 0)
 	{
 		uint16_t frequency = ((((uint16_t)c2FrequencyH) & 0x0007) << 8) | (uint16_t)c2FrequencyL;
 		c2Freq = (2048 - frequency) * 4;
+
 		currentDutySection2++;
 		if (currentDutySection2 >= 8)
 		{
@@ -122,9 +110,93 @@ void updateAudio(uint8_t cycles)
 	c2Freq -= cycles;
 
 
+	if (sequencerCycles >= 8192 )
+	{
+		sequencerCycles = 0;
+		sequencer++;
+		if (sequencer >= 512)
+		{
+			sequencer = 0;
+		}
+
+		if (sequencerCycles % 8 == 6) //envelope every 7th step
+		{
+			if ((c1Envelope & 0x7) != 0)//if not finished
+			{
+				
+
+				if ((c1Envelope & 0x8) == 0x8 && (c1Envelope & 0x7) != 15) //Increase and not done
+				{
+					c1Envelope = (c1Envelope & 0xF8) | ((c1Envelope & 0x7) - 1);//decrement envelope sweep position
+					c1CurrentEnvelopeVolume++;
+				}
+				else if ((c1Envelope & 0x8) != 0x8 && (c1Envelope & 0x7) != 0)//decrease and not done
+				{
+					c1Envelope = (c1Envelope & 0xF8) | ((c1Envelope & 0x7) - 1);//decrement envelope sweep position
+					c1CurrentEnvelopeVolume--;
+				}
+		
+			}
+
+			if ((c2Envelope & 0x7) != 0)//if not finished
+			{
+				if ((c2Envelope & 0x8) == 0x8 && (c2Envelope & 0x7) != 15) //Increase and not done
+				{
+					c2Envelope = (c2Envelope & 0xF8) | ((c2Envelope & 0x7) - 1);//decrement envelope sweep position
+					c2CurrentEnvelopeVolume++;
+				}
+				else if ((c2Envelope & 0x8) != 0x8 && (c2Envelope & 0x7) != 0)//decrease and not done
+				{
+					c2Envelope = (c2Envelope & 0xF8) | ((c2Envelope & 0x7) - 1);//decrement envelope sweep position
+					c2CurrentEnvelopeVolume--;
+				}
+			}
+			c1CurrentEnvelopeVolume = (c1Envelope >> 4);
+			c2CurrentEnvelopeVolume = (c2Envelope >> 4);
+		}
+
+		if (sequencerCycles % 8 == 1 || sequencerCycles & 8 == 5)//Sweep every 2nd and 6th step
+		{
+			c1FrequencySweepShadow = c1FrequencySweep;
+
+			c1FrequencySweepFlag = false;
+			if ((c1Sweep & 0x70) != 0 || (c1Sweep & 0x7) != 0)
+			{
+				c1FrequencySweepFlag = true;
+			}
 
 
-	if ((c1Duty & 0x40) == 0x40) //length enable
+
+			if ((c1Sweep & 0x7) != 0)
+			{
+				c1FrequencySweepShadow >>= (c1Sweep & 0x7);
+				uint16_t temp;
+				if ((c1Sweep & 0x08) == 0x08)//subtract
+				{
+					temp = c1FrequencySweep - c1FrequencySweepShadow;
+				}
+				else//add
+				{
+					temp = c1FrequencySweep + c1FrequencySweepShadow;
+				}
+				if (temp >= 2048)
+				{
+					c1CurrentEnvelopeVolume = 0;
+				}
+				else
+				{
+					c1FrequencySweep = temp;
+					c1FrequencySweepShadow = temp;
+				}
+			}
+		}
+
+	}
+
+
+
+
+	if ((c1FrequencyH & 0x40) == 0x40) //length enable
 	{
 		if (c1Time >= c1Length)
 		{
@@ -141,7 +213,7 @@ void updateAudio(uint8_t cycles)
 		c1Time = 0;
 	}
 
-	if ((c2Duty & 0x40) == 0x40) //length enable
+	if ((c2FrequencyH & 0x40) == 0x40) //length enable
 	{
 		if (c2Time >= c2Length)
 		{
@@ -159,8 +231,25 @@ void updateAudio(uint8_t cycles)
 	}
 
 
+	if ((waveFrequencyH & 0x40) == 0x40) //length enable
+	{
+		if (waveTime >= waveLength)
+		{
+			waveStatus = false;
+		}
+		else
+		{
+			waveTime += cycles;
+		}
+	}
+	else
+	{
+		waveTime = 0;
+	}
 
-	if (cyclesLeft >= 96)
+
+
+	if (cyclesLeft >= 86)
 	{
 		cyclesLeft = 0;
 		currentSample++;
@@ -173,21 +262,41 @@ void updateAudio(uint8_t cycles)
 			if (SDL_GetQueuedAudioSize(1) <= sizeof(audioBuffer) * 2) //only push to queue if it's nearly empty (avoid infinitely growing queue)
 			{
 				SDL_QueueAudio(1, audioBuffer, sizeof(audioBuffer));
+
 			}
-			
 		}
 		uint16_t sample1 = dutyCycle[c1DutyChannel][currentDutySection1];
 		uint16_t sample2 = dutyCycle[c2DutyChannel][currentDutySection2];
+		uint16_t sample3 = 0;
+		if (waveStatus)
+		{
+			if ((wavePosition % 2) == 0)//most significant bits
+			{
+				sample3 = (waveTable[wavePosition / 2]) >> 4;
+			}
+			else //least significant bits
+			{
+				sample3 = ((waveTable[wavePosition / 2]) & 0x0f);
+			}
+			sample3 = (sample3 << waveOutputLevel) & 0xf;
+
+			uint16_t proportion = defaultAmplitude / 0xf;
+			sample3 *= proportion;
+		}
+		
+
 		sample1 *= c1CurrentEnvelopeVolume / 16.0f;
 		sample2 *= c2CurrentEnvelopeVolume / 16.0f;
 
-		audioBuffer[currentSample] = (sample1 > sample2) ? sample1 : sample2;
+		//audioBuffer[currentSample] = (sample1 > sample2) ? sample1 : sample2;
+		audioBuffer[currentSample] = sample1 + sample2  + sample3;
+		//audioBuffer[currentSample] = sample1 + sample2 + 0;
 	}
 }
 
-
 int initAudio(void)
 {
+
 	SDL_Init(SDL_INIT_AUDIO);
 	audioSpec.freq = 44100;
 	audioSpec.format = AUDIO_S16;
@@ -195,6 +304,9 @@ int initAudio(void)
 	audioSpec.samples = SAMPLES;  
 	audioSpec.callback = NULL; //fill later
 	audioSpec.userdata = NULL;
+
+
+
 
 	dev = 1; //Default?
 	//Open the audio device, forcing the desired format 
@@ -228,9 +340,11 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 		break;
 	case 0xff13:
 		c1FrequencyL = data;
+		c1FrequencySweep = ((((uint16_t)c1FrequencyH) & 0x0007) << 8) | (uint16_t)c1FrequencyL;
 		break;
 	case 0xff14:
 		c1FrequencyH = data;
+		c1FrequencySweep = ((((uint16_t)c1FrequencyH) & 0x0007) << 8) | (uint16_t)c1FrequencyL;
 		break;
 
 
@@ -253,7 +367,42 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 	case 0xff19:
 		c2FrequencyH = data;
 		break;
+
+
+	case 0xff1a:
+		waveStatus = (data & 0x80) == 0x80;
+		break;
+	case 0xff1b:
+		waveLength = data;
+		break;
+	case 0xff1c:
+		waveOutputLevel = (data >> 5) & 0x03;
+		if (waveOutputLevel == 0)
+		{
+			waveOutputLevel = 4;
+		}
+		else
+		{
+			waveOutputLevel--;
+		}
+		break;
+	case 0xff1d:
+		waveFrequencyL = data;
+		waveFrequency = ((((uint16_t)waveFrequencyH) & 0x0007) << 8) | (uint16_t)waveFrequencyL;
+		break;
+	case 0xff1e:
+		waveFrequencyH = data;
+		waveFrequency = ((((uint16_t)waveFrequencyH) & 0x0007) << 8) | (uint16_t)waveFrequencyL;
+		break;
 	default://unimplemented
+		if (address >= 0xff30 && address <= 0xff3f)
+		{
+			waveTable[address - 0xff30] = data;
+		}
+		else
+		{
+			//logger::logWarning("Unimplemented sound address", address, data);
+		}
 		break;
 	}
 }
