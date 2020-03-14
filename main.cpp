@@ -34,7 +34,7 @@ Uint64 LAST = 0;
 double deltaTime = 0;
 
 
-const unsigned int updateFrequency = 5000; //update every 5k cycles
+const unsigned int updateFrequency = 25000; //update every 5k cycles
 
 
 
@@ -198,10 +198,16 @@ int main(int argc, char* args[])
 					#else
 						if (!fastForward)
 						{
-							SDL_Delay((((1.0 / 4194304) * updateFrequency) * 1000) - deltaTime);
+							Uint32 ms = floor(((((1.0 / 4194304) * updateFrequency) * 1000) - deltaTime) - 0.75);
+							if (ms <= 1000) //dont sleep if it underflowed
+							{
+								SDL_Delay(ms);
+							}
 						}
 					#endif
 					}
+                	//LAST = NOW;
+					NOW = SDL_GetPerformanceCounter();
 
 
 
