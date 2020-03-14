@@ -35,14 +35,14 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 | ROM                         | Compatibility notes                                                                                                                                                                                   |
 |-----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Asteroids                   | Fully playable, but the ship sprite occasionally bugs out.                                                                                                                     |
-| Asteroids & Missile Command | Crashes on boot when trying to select the upper bits of the ROM/RAM bank (upper bit selection is unimplemented). 
+| Asteroids & Missile Command | Fully playable. 
 | Blargg's Test ROMs          | Passes all tests in the cpu_instrs ROM.
-| Donkey Kong Land            | Title screen shows, and gets to a flickering menu after that.                                                                                                             |
+| Donkey Kong Land            | Title screen shows, and gets to a flickering menu after that. Can get in-game, but video is messed up. I think the cartridge assumes it's running on a GBC.                                                                                                             |
 | Dr. Mario                   | Boots to menus, but hangs when going in-game (probably due to incomplete timer support).                                                                                                              |
 | Galaga & Galaxian           | Fully playable.                                                                                                                                                                                     |
-| Kirby's Dream Land          | Playable, but sound is somewhat broken (wave channel is kinda broken)			 |
+| Kirby's Dream Land          | Playable, but sound is somewhat broken (wave channel is buggy.)			 |
 | Super Mario Land            | Fully playable.			 |
-| The Legend of Zelda: Link's Awakening| Fully playable, but keeps trying to read from the sound registers, which is unimplemented.|
+| The Legend of Zelda: Link's Awakening| Fully playable. .|
 | Tetris                      | Fully playable.                                                                                                                                    |
 | Tetris 2                    | Same as the original Tetris.                                                                                                                                                                            |
  

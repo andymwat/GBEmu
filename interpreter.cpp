@@ -56,7 +56,8 @@ uint8_t tima, tma, tmc;
 cartridge* currentCartridge;
 char tempOutput;
 bool halted = false;
-
+bool ROM_RAM_Mode = false;
+uint8_t romUpperBits = 0x00;
 
 /*
  * Memory map:
@@ -135,7 +136,7 @@ void writeToAddress(uint16_t address, uint8_t data) {
 	}
 	else if (address >= 0xfea0 && address <= 0xfeff)
 	{
-		//logger::logInfo("Tried to write to an unused address, probably a ROM bug.");
+		logger::logInfo("Tried to write to an unused address, probably a ROM bug.");
 	}
 	else if (address >= 0xfe00 && address <= 0xfe9f)
 	{
@@ -243,7 +244,15 @@ void handleRomWrite(uint16_t address, uint8_t data)
 	{
 		if (address >= 0x2000 && address <= 0x3fff)//bank select
 		{
-			switchBank(data);
+			if (data == 0 || data == 0x20 || data == 0x40 || data == 0x60)
+			{
+				//logger::logWarning("Wrote 0x00, 0x20, 0x40, or 0x60 to bank select, translating to 0xX1.", address, data);
+				switchBank(data+1); //bank 0x00 translates to 0x01, 0x20 to 0x21, etc
+			}
+			else
+			{
+				switchBank(data | (romUpperBits << 5));
+			}
 			//cout<<"DEBUG: Selected ROM bank "<<to_string(data) <<hex<<"\t0x"<<(uint16_t)(data)<<dec<<endl;
 			//usleep(500000);
 		}
@@ -263,8 +272,19 @@ void handleRomWrite(uint16_t address, uint8_t data)
 		}
 		else if (address >= 0x4000 && address <= 0x5fff)
 		{
-			logger::logError("Error writing to upper bits of ROM bank/RAM bank select.", address, data);
-			throw "Wrote to unimplemented RAM bank/upper bits of ROM bank";
+			romUpperBits = data & 0x3;
+			logger::logWarning("Writing to upper bits of ROM bank/RAM bank select, untested.", address, data);
+			//throw "Wrote to unimplemented RAM bank/upper bits of ROM bank";
+		}
+		else if (address >= 0x6000 && address <= 0x7fff)
+		{
+			if (data != 0)
+			{
+				logger::logError("Error selecting RAM banking mode, unimplemented.", address, data);
+				throw "Wrote to unimplemented RAM banking mode selection.";
+			}
+			logger::logInfo("Now using upper bits of ROM bank.");
+			ROM_RAM_Mode = false;
 		}
 		else
 		{
