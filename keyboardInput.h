@@ -18,6 +18,6 @@ void KeyReleased(int key);
 extern uint8_t joypadStateInternal;
 extern uint8_t previousJoypadState;
 extern bool keyboardBreak;
-extern bool saveToFile, saved, loadFromFile, loaded;
+extern bool saveToFile, saved, loadFromFile, loaded, fastForward;
 
 #endif //GBEMU_KEYBOARDINPUT_H

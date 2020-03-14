@@ -11,6 +11,7 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
  - D-pad: Arrows
  - Save current cartridge RAM: P
  - Manually load cartridge RAM: L
+ - Fast-forward: Space
 
 ## Features
  - Passes all tests in blargg's cpu_instrs test ROM

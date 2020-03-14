@@ -18,6 +18,7 @@ bool saveToFile = false;
 bool saved = false;
 bool loadFromFile = false;
 bool loaded= false;
+bool fastForward = false;
 
 
 /*Bits:
@@ -47,6 +48,7 @@ void checkKeyboardNew()
 	b_start = keyboardState[SDL_SCANCODE_A];
 	b_select = keyboardState[SDL_SCANCODE_S];
 	keyboardBreak = keyboardState[SDL_SCANCODE_B];
+	fastForward = keyboardState[SDL_SCANCODE_SPACE];
 
 	saveToFile = keyboardState[SDL_SCANCODE_P];
 	if (!keyboardState[SDL_SCANCODE_P])

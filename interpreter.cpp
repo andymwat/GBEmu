@@ -97,7 +97,8 @@ void writeToAddress(uint16_t address, uint8_t data) {
 	}
 	else if (address == 0xff7f)
 	{
-		logger::logInfo("Wrote to 0xff7f, probably a ROM bug.");
+		if (LOG_VERBOSE)
+			logger::logInfo("Wrote to 0xff7f, probably a ROM bug.");
 	}
 	else if (address >= 0xc000 && address <= 0xdfff)
 	{
@@ -157,7 +158,8 @@ void writeToAddress(uint16_t address, uint8_t data) {
 	}
 	else if (address >= 0xfea0 && address <= 0xfeff)
 	{
-		logger::logInfo("Tried to write to an unused address, probably a ROM bug.");
+		if (LOG_VERBOSE)
+			logger::logInfo("Tried to write to an unused address, probably a ROM bug.");
 	}
 	else if (address >= 0xfe00 && address <= 0xfe9f)
 	{
@@ -259,7 +261,8 @@ uint8_t readFromAddress(uint16_t address) {
 	}
 	else if (address >= 0xfea0 && address <= 0xfeff)
 	{
-		cout << "Tried to write to an unused address, probably a ROM bug." << endl;
+		if (LOG_VERBOSE)
+			cout << "Tried to write to an unused address, probably a ROM bug." << endl;
 		return 0xff;
 	}
 	else if (address >= 0xfe00 && address <= 0xfe9f)
@@ -300,19 +303,20 @@ void handleRomWrite(uint16_t address, uint8_t data)
 			//cout << "WARNING: RAM enable and banking is not tested.\n";
 			if ((data & 0x0f) == 0x0a)
 			{
-				//logger::logInfo("CartRAM is enabled.");
+				if (LOG_VERBOSE)
+					logger::logInfo("CartRAM is enabled.");
 				ramEnable = true;
 			}
 			else
 			{
-				//logger::logInfo("CartRAM is disabled.");
+				if (LOG_VERBOSE)
+					logger::logInfo("CartRAM is disabled.");
 				ramEnable = false;
 			}
 		}
 		else if (address >= 0x4000 && address <= 0x5fff)
 		{
 			romUpperBits = data & 0x3;
-			logger::logWarning("Writing to upper bits of ROM bank/RAM bank select, untested.", address, data);
 			//throw "Wrote to unimplemented RAM bank/upper bits of ROM bank";
 		}
 		else if (address >= 0x6000 && address <= 0x7fff)
@@ -322,7 +326,8 @@ void handleRomWrite(uint16_t address, uint8_t data)
 				logger::logError("Error selecting RAM banking mode, unimplemented.", address, data);
 				throw "Wrote to unimplemented RAM banking mode selection.";
 			}
-			logger::logInfo("Now using upper bits of ROM bank.");
+			if (LOG_VERBOSE)
+				logger::logInfo("Now using upper bits of ROM bank.");
 			ROM_RAM_Mode = false;
 		}
 		else
