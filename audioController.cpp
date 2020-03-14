@@ -609,6 +609,19 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 
 uint8_t readFromAudioRegister(uint16_t address)
 {
+	switch (address)
+	{
+	case 0xff24:
+		return volumeControl;
+		break;
+	case 0xff25:
+		return channelSelection;
+		break;
+	default:
+		logger::logWarning("Unimplemented sound register read, returning 0x0.", address, 0x0);
+		return 0;
+		break;
+	}
 
 }
 
