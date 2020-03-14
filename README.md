@@ -3,7 +3,7 @@
 GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for the GUI. It can run a large portion of the Game Boy library, including popular titles such as Pokemon and Kirby.
 
 
-##Controls
+## Controls
  - Start: A
  - Select: S
  - A: Z
@@ -57,4 +57,6 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 | The Legend of Zelda: Link's Awakening| Fully playable. |
 | Tetris                      | Fully playable.                                                                                                                                    |
 | Tetris 2                    | Same as the original Tetris.                                                                                                                                                                            |
- 
+ ## Known Issues
+  - Sprites that go off-screen at all disappear. This is most easily seen in Kirby's Dreamland, when you fly up to the top of the screen
+  - Sound is buggy, and can sometime desync with the video. It is very dependent upon CPU speed. Faster systems will cause the sound to play faster and at a higher pitch. 
