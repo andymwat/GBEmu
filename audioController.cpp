@@ -9,7 +9,7 @@ SDL_AudioDeviceID dev;
 
 
 const uint16_t SAMPLES = 1024;
-const uint16_t defaultAmplitude = 8000;
+const uint16_t defaultAmplitude = 4000;
 
 uint8_t c1Sweep, c1Duty, c1Envelope, c1FrequencyL, c1FrequencyH;
 
@@ -41,20 +41,20 @@ uint16_t currentSample = 0;
 uint16_t sequencerCycles = 0;
 uint16_t sequencer = 0;
 
-
+//envelope
 uint8_t c1CurrentEnvelopeVolume, c2CurrentEnvelopeVolume; //volume from 0 to 15
+uint8_t c1EnvelopeCycles, c2EnvelopeCycles, c4EnvelopeCycles;
 
-
+//wave channel
 uint8_t waveTable[16];//32 sample (4 bits each) wave table
 uint8_t wavePosition = 1;
 uint16_t waveCycles = 0;
 uint8_t waveOutputLevel, waveLength, waveFrequencyL, waveFrequencyH;
 uint16_t  waveFrequency;
 unsigned int waveTime;
-
 bool waveStatus;
 
-
+//noise channel
 uint8_t c4Length, c4Envelope, c4Polynomial, c4Counter;
 uint8_t c4CurrentEnvelopeVolume, c4Time;
 bool c4Enable = true;
@@ -63,7 +63,12 @@ uint16_t noiseCycles;
 uint16_t noiseShiftRegister = 0xff;
 
 
-uint8_t c1EnvelopeCycles,c2EnvelopeCycles,c4EnvelopeCycles;
+
+
+
+//sound control
+uint8_t volumeControl;
+uint8_t channelSelection = 0xff;
 
 uint16_t dutyCycle[5][8] =
 {
@@ -352,7 +357,9 @@ void updateAudio(uint8_t cycles)
 	if (cyclesLeft >= 88) //48000hz:  1/48000 seconds = 0.000020833 sec = 87.3 * 1/4194304
 	{
 		cyclesLeft = 0;
-		currentSample++;
+		currentSample += 2; //+2 for 2 channels (stereo)
+
+
 		if (currentSample >= SAMPLES)
 		{
 			currentSample = 0;
@@ -394,11 +401,55 @@ void updateAudio(uint8_t cycles)
         {
             logger::logErrorNoData("Volume error");
         }
+
+
+
 		sample1 = (float)sample1 * (float)c1CurrentEnvelopeVolume / 16.0f;
 		sample2 = (float)sample2 * (float)c2CurrentEnvelopeVolume / 16.0f;
         sample4 = (float)sample4 * (float)c4CurrentEnvelopeVolume / 16.0f;
-		//audioBuffer[currentSample] = (sample1 > sample2) ? sample1 : sample2;
-		audioBuffer[currentSample] = sample1 + sample2  + sample3 + sample4; //mixing
+
+		//mixing
+		audioBuffer[currentSample] = 0;
+		audioBuffer[currentSample+1] = 0;
+		if (TestBit(channelSelection, 7))
+		{
+			audioBuffer[currentSample] += sample4;
+		}
+		if (TestBit(channelSelection, 6))
+		{
+			audioBuffer[currentSample] += sample3;
+		}
+		if (TestBit(channelSelection, 5))
+		{
+			audioBuffer[currentSample] += sample2;
+		}
+		if (TestBit(channelSelection, 4))
+		{
+			audioBuffer[currentSample] += sample1;
+		}
+
+		if (TestBit(channelSelection, 3))
+		{
+			audioBuffer[currentSample+1] += sample4;
+		}
+		if (TestBit(channelSelection, 2))
+		{
+			audioBuffer[currentSample+1] += sample3;
+		}
+		if (TestBit(channelSelection, 1))
+		{
+			audioBuffer[currentSample+1] += sample2;
+		}
+		if (TestBit(channelSelection, 0))
+		{
+			audioBuffer[currentSample+1] += sample1;
+		}
+		//audioBuffer[currentSample] = sample1 + sample2  + sample3 + sample4;	//left
+		//audioBuffer[currentSample+1] = sample1 + sample2 + sample3 + sample4;	//right
+
+		//volume
+		audioBuffer[currentSample] *= (float)((volumeControl & 0x70) >> 4) / 7.0f;//left
+		audioBuffer[currentSample+1] *= (float)(volumeControl & 0x7) / 7.0f;//right
 	}
 }
 
@@ -408,7 +459,7 @@ int initAudio(void)
 	SDL_Init(SDL_INIT_AUDIO);
 	audioSpec.freq = 48000;
 	audioSpec.format = AUDIO_S16;
-	audioSpec.channels = 1;    //mono
+	audioSpec.channels = 2;    //mono
 	audioSpec.samples = SAMPLES;  
 	audioSpec.callback = NULL; //fill later
 	audioSpec.userdata = NULL;
@@ -437,10 +488,6 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 		c1Duty = data;
 		c1DutyChannel = data >> 6;
 		c1Length = 4194304 * ((64-(data & 0x3f)) * (((double)1)/256));
-		if ((data & 0x80) == 0x80)//restart sound
-		{
-			c1Time = 0;
-		}
 		break;
 	case 0xff12:
 		c1Envelope = data;
@@ -453,6 +500,10 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 		break;
 	case 0xff14:
 		c1FrequencyH = data;
+		if ((data & 0x80) == 0x80)//restart sound
+		{
+			c1Time = 0;
+		}
 		c1FrequencySweep = ((((uint16_t)c1FrequencyH) & 0x0007) << 8) | (uint16_t)c1FrequencyL;
 		break;
 
@@ -461,10 +512,7 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 		c2Duty = data;
 		c2DutyChannel = data >> 6;
 		c2Length = 4194304 * ((64 - (data & 0x3f)) * (((double)1) / 256));
-		if ((data & 0x80) == 0x80)//restart sound
-		{
-			c2Time = 0;
-		}
+		
 		break;
 	case 0xff17:
 		c2Envelope = data;
@@ -474,6 +522,10 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 		c2FrequencyL = data;
 		break;
 	case 0xff19:
+		if ((data & 0x80) == 0x80)//restart sound
+		{
+			c2Time = 0;
+		}
 		c2FrequencyH = data;
 		break;
 
@@ -501,6 +553,10 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 		break;
 	case 0xff1e:
 		waveFrequencyH = data;
+		if ((data & 0x80) == 0x80)//restart sound
+		{
+			waveTime = 0;
+		}
 		waveFrequency = ((((uint16_t)waveFrequencyH) & 0x0007) << 8) | (uint16_t)waveFrequencyL;
 		break;
 
@@ -522,9 +578,20 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
         break;
     case 0xff23:
         c4Counter = data;
+		if ((data & 0x80) == 0x80)//restart sound
+		{
+			c4Time = 0;
+		}
         c4Enable = true;
         break;
 
+
+	case 0xff24:
+		volumeControl = data;
+		break;
+	case 0xff25:
+		channelSelection = data;
+		break;
 
 
 	default://unimplemented
@@ -538,6 +605,11 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 		}
 		break;
 	}
+}
+
+uint8_t readFromAudioRegister(uint16_t address)
+{
+
 }
 
 #pragma clang diagnostic pop
