@@ -59,6 +59,8 @@ bool halted = false;
 bool ROM_RAM_Mode = false;
 uint8_t romUpperBits = 0x00;
 
+
+
 /*
  * Memory map:
  * 0x0000-0x3FFF: ROM Bank 0 (16k)
@@ -229,16 +231,6 @@ void handleRomWrite(uint16_t address, uint8_t data)
 	if (currentCartridge->mbcType == 0x00)//ROM only, 2 banks
 	{
 		logger::logWarning("Trying to write to ROM of cart without MBC", address, data);
-		/*
-		if (data == 0x01)
-		{
-			logger::logWarning("Attempting to select ROM bank 1 on cart without MBC.", address, data);
-		} else{
-			errorAddress = address;
-			logger::logError("Attempting to invalid ROM bank on cart without MBC.", address, data);
-			throw "Tried to select an invalid ROM bank on cart without MBC";
-		}
-		*/
 	}
 	else if (currentCartridge->mbcType == 0x01)//mbc1
 	{
@@ -298,28 +290,61 @@ void handleRomWrite(uint16_t address, uint8_t data)
 		if (address >= 0x2000 && address <= 0x3fff)//bank select
 		{
 			switchBank(data);
-			//cout<<"DEBUG: Selected ROM bank "<<to_string(data) <<hex<<"\t0x"<<(uint16_t)(data)<<dec<<endl;
-			//usleep(500000);
 		}
 		else if (address <= 0x1fff)//ram enable
 		{
-			//logger::logWarning("RAM enable and banking is untested.", address, data);
 			if ((data & 0x0f) == 0x0a)
 			{
-				//logger::logInfo("CartRAM is enabled.");
 				ramEnable = true;
 			}
 			else
 			{
-				//logger::logInfo("CartRAM is disabled.");
 				ramEnable = false;
 			}
 		}
+		
 		else
 		{
 			logger::logError("Error writing to ROM address.", address, data);
 			errorAddress = address;
 			throw "Wrote to unimplemented ROM address on mbc1+ram+battery";
+		}
+	}
+	else if (currentCartridge->mbcType == 0x13)//mbc3 + RAM + battery
+	{
+		
+		if (address <= 0x1fff)//RAM and Timer enable
+		{
+			if ((data & 0x0f) == 0x0a)
+			{
+				ramEnable = true;
+			}
+			else
+			{
+				ramEnable = false;
+			}
+		}
+		else if (address >= 0x2000 && address <= 0x3fff)
+		{
+			if (data == 0)
+			{
+				switchBank(1);
+			}
+			else
+			{
+				switchBank(data & 0x7f); //7 bit bank value
+			}
+		}
+		else if (address >= 0x4000 && address <= 0x5fff)
+		{
+			if (data >= 0x00 && data <= 0x03)//select RAM bank
+			{
+				switchRamBank(data);
+			}
+			else
+			{
+				logger::logWarning("Trying to enable unimplemented RTC!", address, data);
+			}
 		}
 	}
 	else
@@ -395,7 +420,7 @@ void handleIOWrite(uint16_t address, uint8_t data) {
 	}
 	else if (address == 0xff4b)
 	{
-		windowX = data;
+		windowX = data-7;
 	}
 	else if (address == 0xff40)
 	{
@@ -490,18 +515,18 @@ uint8_t handleIORead(uint16_t address) {
 	{
 		return tempOutput;
 	}
-	else if (address == 0xff44)//lcdc y coordinate (0-153, 144-153 is vblank)
-	{
-		return line;
-	}
+	
 	else if (address == 0xff40)
 	{
 		return lcdControl;
 	}
-	else if (address == 0xff4d)//cgb key1 (prepare speed switch)
+	else if (address == 0xff41)
 	{
-		logger::logWarning("Speed control registers read unimplemented, returning 0xff", address, 0xff);
-		return 0xff;
+		return lcdStatus;
+	}
+	else if (address == 0xff44)//lcdc y coordinate (0-153, 144-153 is vblank)
+	{
+		return line;
 	}
 	else if (address == 0xff45)
 	{
@@ -511,10 +536,20 @@ uint8_t handleIORead(uint16_t address) {
 	{
 		return backgroundPalette;
 	}
-	else if (address == 0xff41)
+	else if (address == 0xff4a)
 	{
-		return lcdStatus;
+		return windowY;
 	}
+	else if (address == 0xff4b)
+	{
+		return windowX+7;
+	}
+	else if (address == 0xff4d)//cgb key1 (prepare speed switch)
+	{
+		logger::logWarning("Speed control registers read unimplemented, returning 0xff", address, 0xff);
+		return 0xff;
+	}
+	
 	else if (address == 0xff0f)
 	{
 		return interruptFlag | 0xe0;//set top 3 bits to always be true
@@ -572,8 +607,8 @@ void loadTestRom(string path)//calculates number of banks based on cartridge MBC
 	infile.read((char*)(&banks), 1);
 	infile.read((char*)(&ramBanks), 1);
 
-	cout << "ROM MBC: " << to_string(mbc) << endl << "ROM Bank identifier: " << to_string(banks) << endl;
-	cout << "RAM banks identifier: " << to_string(ramBanks) << endl;
+	cout << "ROM MBC: 0x" <<hex<< (uint16_t)(mbc)<<dec << endl << "ROM Bank identifier: 0x" <<hex<< (uint16_t)(banks)<<dec << endl;
+	cout << "RAM banks identifier: 0x" <<hex<< (uint16_t)(ramBanks)<<dec << endl;
 	currentCartridge = new cartridge(mbc, banks, ramBanks);
 	infile.seekg(0, std::ios::beg);
 	cout << "File size is " << to_string(length) << " bytes." << endl;
@@ -730,6 +765,18 @@ void or8(uint8_t &destination, uint8_t source) {
 	setZero(destination == 0x00);
 	cycles = 4;
 	pc++;
+}
+
+void switchRamBank(uint8_t number)
+{
+	if (number != 0)
+	{
+		cartRam = (uint8_t*)(currentCartridge->ramBanks + (number * currentCartridge->ramBankSize));
+	}
+	else
+	{
+		cartRam = (uint8_t*)(currentCartridge->ramBanks);
+	}
 }
 
 void switchBank(uint8_t number) //zero indexed

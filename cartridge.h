@@ -19,6 +19,7 @@ public:
     cartridge(uint8_t, uint8_t, uint8_t);
     ~cartridge();
     static const uint16_t bankSize = 16384;
+	static const uint16_t ramBankSize = 8192;
 private:
 
 };

@@ -172,6 +172,7 @@ bool zeroStatus();
 void setZero(bool);
 
 void switchBank(uint8_t number);
+void switchRamBank(uint8_t number);
 
 void checkInterrupts();
 void processTimer(uint8_t opCycle);

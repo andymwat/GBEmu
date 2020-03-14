@@ -611,6 +611,12 @@ uint8_t readFromAudioRegister(uint16_t address)
 {
 	switch (address)
 	{
+	case 0xff11:
+		return c1Duty;
+		break;
+	case 0xff16:
+		return c2Duty;
+		break;
 	case 0xff24:
 		return volumeControl;
 		break;

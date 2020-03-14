@@ -13,13 +13,14 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 ## Screenshots
 
 ![Blargg's test ROM](screenshots/blarggs.png)
+![Kirby](screenshots/kirby.png)
+![Zelda](screenshots/zelda.png)
+![Pokemon](screenshots/pkmn.png)
 ![Super Mario Land](screenshots/sml.png)
 ![Dr. Mario](screenshots/drMario.png)
 ![Tetris](screenshots/tetris.png)
 ![Asteroids](screenshots/asteroids.png)
 ![Galaga](screenshots/galaga.png)
-![Kirby](screenshots/kirby.png)
-![Zelda](screenshots/zelda.png)
 
 ## Unimplemented features/TO-DO
   - Finish sound support
@@ -41,8 +42,9 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 | Dr. Mario                   | Boots to menus, but hangs when going in-game (probably due to incomplete timer support).                                                                                                              |
 | Galaga & Galaxian           | Fully playable.                                                                                                                                                                                     |
 | Kirby's Dream Land          | Playable, but sound is somewhat broken (wave channel is buggy.)			 |
+| Pokemon Red				  | Fully playable, but sound is kinda buggy. |
 | Super Mario Land            | Fully playable.			 |
-| The Legend of Zelda: Link's Awakening| Fully playable. .|
+| The Legend of Zelda: Link's Awakening| Fully playable. |
 | Tetris                      | Fully playable.                                                                                                                                    |
 | Tetris 2                    | Same as the original Tetris.                                                                                                                                                                            |
  
