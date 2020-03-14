@@ -28,11 +28,11 @@ SDL_Window* window = nullptr;
 SDL_Surface* screenSurface = nullptr;
 SDL_Surface* renderSurface = nullptr;
 
-
+/*
 Uint64 NOW = SDL_GetPerformanceCounter();
 Uint64 LAST = 0;
 double deltaTime = 0;
-
+*/
 void initWindow() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
@@ -173,7 +173,7 @@ void renderScanline() {
 
 void pushBufferToWindow() {
     //cout<<"\033[1;32mINFO: \033[0m Pushing buffer to window."<<endl;
-	LAST = NOW;
+/*	LAST = NOW;
 	NOW = SDL_GetPerformanceCounter();
 	deltaTime = ((NOW - LAST) * 1000 / (double)SDL_GetPerformanceFrequency());
 	//string str = "Frame time: ";
@@ -188,6 +188,7 @@ void pushBufferToWindow() {
         SDL_Delay(16.666 - deltaTime);//vsync
 #endif
 	}
+	*/
     SDL_FreeSurface(renderSurface);
     renderSurface = SDL_CreateRGBSurfaceFrom(pixelArray, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 4*SCREEN_WIDTH,0x0000ff,0x00ff00,0xff0000,0 );
     SDL_BlitSurface(renderSurface, NULL, screenSurface, NULL);

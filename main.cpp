@@ -29,6 +29,14 @@
 using namespace std;
 SDL_Event events;
 
+Uint64 NOW = SDL_GetPerformanceCounter();
+Uint64 LAST = 0;
+double deltaTime = 0;
+
+
+const unsigned int updateFrequency = 20000; //update every 20k cycles
+
+
 
 int main(int argc, char* args[])
 {
@@ -143,7 +151,7 @@ int main(int argc, char* args[])
 				
                 while (pc != sel && !keyboardBreak)
                 {
-					int cyclesUntilUpdate = 25000; //check for sdl events every 25k cycles (approx 3 times a frame)
+					int cyclesUntilUpdate = updateFrequency; //check for sdl events every 20k cycles (approx 3 times a frame)
 					while (SDL_PollEvent(&events) != 0)
 					{
 						if (events.type == SDL_QUIT)
@@ -173,6 +181,28 @@ int main(int argc, char* args[])
 						updateAudio(cycles);
 						cyclesUntilUpdate -= cycles;
 					}
+
+
+					//delay to sync up with realtime
+					LAST = NOW;
+					NOW = SDL_GetPerformanceCounter();
+					deltaTime = ((NOW - LAST) * 1000 / (double)SDL_GetPerformanceFrequency());
+					//string str = "Frame time: ";
+					//str += to_string(deltaTime) + "ms";
+					//logger::logInfo(str);
+					if (deltaTime <= ((1.0 / 4194304) * updateFrequency) * 1000 )//time for 20k cycles in ms
+					{
+
+					#ifdef PLATFORM_UNIX
+						usleep(16666 - (deltaTime * 1000)); //usleep is more precise
+					#else
+						SDL_Delay((((1.0 / 4194304) * updateFrequency) * 1000) - deltaTime);
+					#endif
+					}
+
+
+
+
 					if (saveToFile && !saved)
 					{
 						saveToFile = false;

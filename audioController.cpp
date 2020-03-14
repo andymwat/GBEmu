@@ -2,7 +2,7 @@
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
 #include "audioController.h"
 #include "lcdController.h"
-
+#include <bitset>
 
 SDL_AudioSpec audioSpec;
 SDL_AudioDeviceID dev;
@@ -373,85 +373,93 @@ void updateAudio(uint8_t cycles)
 
 			}
 		}
-		uint16_t sample1 = dutyCycle[c1DutyChannel][currentDutySection1];
-		uint16_t sample2 = dutyCycle[c2DutyChannel][currentDutySection2];
-		uint16_t sample3 = 0;
-		uint16_t sample4 = 0;
-		if (waveStatus)
-		{
-			if ((wavePosition % 2) == 0)//most significant bits
-			{
-				sample3 = (waveTable[wavePosition / 2]) >> 4;
-			}
-			else //least significant bits
-			{
-				sample3 = ((waveTable[wavePosition / 2]) & 0x0f);
-			}
-			sample3 = (sample3 << waveOutputLevel) & 0xf;
 
-			uint16_t proportion = defaultAmplitude / 0xf;
-			sample3 *= proportion;
-		}
-
-		if (c4Enable)
-        {
-		    sample4 = c4Data;
-        }
-
-        if (c1CurrentEnvelopeVolume >= 16 || c2CurrentEnvelopeVolume >= 16|| c4CurrentEnvelopeVolume >= 16) //sanity check
-        {
-            logger::logErrorNoData("Volume error");
-        }
-
-
-
-		sample1 = (float)sample1 * (float)c1CurrentEnvelopeVolume / 16.0f;
-		sample2 = (float)sample2 * (float)c2CurrentEnvelopeVolume / 16.0f;
-        sample4 = (float)sample4 * (float)c4CurrentEnvelopeVolume / 16.0f;
-
-		//mixing
-		audioBuffer[currentSample] = 0;
-		audioBuffer[currentSample+1] = 0;
-		if (TestBit(channelSelection, 7))
-		{
-			audioBuffer[currentSample] += sample4;
-		}
-		if (TestBit(channelSelection, 6))
-		{
-			audioBuffer[currentSample] += sample3;
-		}
-		if (TestBit(channelSelection, 5))
-		{
-			audioBuffer[currentSample] += sample2;
-		}
-		if (TestBit(channelSelection, 4))
-		{
-			audioBuffer[currentSample] += sample1;
-		}
-
-		if (TestBit(channelSelection, 3))
-		{
-			audioBuffer[currentSample+1] += sample4;
-		}
-		if (TestBit(channelSelection, 2))
-		{
-			audioBuffer[currentSample+1] += sample3;
-		}
-		if (TestBit(channelSelection, 1))
-		{
-			audioBuffer[currentSample+1] += sample2;
-		}
-		if (TestBit(channelSelection, 0))
-		{
-			audioBuffer[currentSample+1] += sample1;
-		}
-		//audioBuffer[currentSample] = sample1 + sample2  + sample3 + sample4;	//left
-		//audioBuffer[currentSample+1] = sample1 + sample2 + sample3 + sample4;	//right
-
-		//volume
-		audioBuffer[currentSample] *= (float)((volumeControl & 0x70) >> 4) / 7.0f;//left
-		audioBuffer[currentSample+1] *= (float)(volumeControl & 0x7) / 7.0f;//right
+		mixAudio();
 	}
+}
+
+void mixAudio()
+{
+
+	uint16_t sample1 = dutyCycle[c1DutyChannel][currentDutySection1];
+	uint16_t sample2 = dutyCycle[c2DutyChannel][currentDutySection2];
+	uint16_t sample3 = 0;
+	uint16_t sample4 = 0;
+	if (waveStatus)
+	{
+		if ((wavePosition % 2) == 0)//most significant bits
+		{
+			sample3 = (waveTable[wavePosition / 2]) >> 4;
+		}
+		else //least significant bits
+		{
+			sample3 = ((waveTable[wavePosition / 2]) & 0x0f);
+		}
+		sample3 = (sample3 << waveOutputLevel) & 0xf;
+
+		uint16_t proportion = defaultAmplitude / 0xf;
+		sample3 *= proportion;
+	}
+
+	if (c4Enable)
+	{
+		sample4 = c4Data;
+	}
+
+	if (c1CurrentEnvelopeVolume >= 16 || c2CurrentEnvelopeVolume >= 16 || c4CurrentEnvelopeVolume >= 16) //sanity check
+	{
+		logger::logErrorNoData("Volume error");
+	}
+
+
+
+	sample1 = (float)sample1 * (float)c1CurrentEnvelopeVolume / 16.0f;
+	sample2 = (float)sample2 * (float)c2CurrentEnvelopeVolume / 16.0f;
+	sample4 = (float)sample4 * (float)c4CurrentEnvelopeVolume / 16.0f;
+
+	//mixing
+	audioBuffer[currentSample] = 0;
+	audioBuffer[currentSample + 1] = 0;
+	//sample1 = sample2 = sample3 = 0; //mute other sounds
+	if (TestBit(channelSelection, 7))
+	{
+		audioBuffer[currentSample] += sample4;
+	}
+	if (TestBit(channelSelection, 6))
+	{
+		audioBuffer[currentSample] += sample3;
+	}
+	if (TestBit(channelSelection, 5))
+	{
+		audioBuffer[currentSample] += sample2;
+	}
+	if (TestBit(channelSelection, 4))
+	{
+		audioBuffer[currentSample] += sample1;
+	}
+
+	if (TestBit(channelSelection, 3))
+	{
+		audioBuffer[currentSample + 1] += sample4;
+	}
+	if (TestBit(channelSelection, 2))
+	{
+		audioBuffer[currentSample + 1] += sample3;
+	}
+	if (TestBit(channelSelection, 1))
+	{
+		audioBuffer[currentSample + 1] += sample2;
+	}
+	if (TestBit(channelSelection, 0))
+	{
+		audioBuffer[currentSample + 1] += sample1;
+	}
+	//audioBuffer[currentSample] = sample1 + sample2  + sample3 + sample4;	//left
+	//audioBuffer[currentSample+1] = sample1 + sample2 + sample3 + sample4;	//right
+
+	//volume
+	audioBuffer[currentSample] *= (float)((volumeControl & 0x70) >> 4) / 7.0f;//left
+	audioBuffer[currentSample + 1] *= (float)(volumeControl & 0x7) / 7.0f;//right
 }
 
 int initAudio(void)
