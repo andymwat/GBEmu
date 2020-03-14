@@ -163,6 +163,7 @@ void updateAudio(uint8_t cycles)
 	}
 
 
+	//sequence timer for envelope and sweep
 	if (sequencerCycles >= 8192 )
 	{
 		sequencerCycles = 0;

@@ -20,8 +20,10 @@ const bool LOG_VERBOSE = false; //warn about unimplemented features
 
 
 
+time_t rawtime;
+struct tm * timeinfo;
 
-
+uint8_t rtcRegister = 0x00;
 std::string filePath;
 int errorAddress = -1;
 std::string output = "Program output: \n";
@@ -123,7 +125,15 @@ void writeToAddress(uint16_t address, uint8_t data) {
 
 			}
 			else {
-				cartRam[address - 0xa000] = data;
+				if (rtcRegister < 0x08  || rtcRegister > 0x0c)//should never be greater
+				{
+					cartRam[address - 0xa000] = data;
+				}
+				else
+				{
+					if (LOG_VERBOSE)
+						logger::logWarning("RTC write ignored.", address, data);
+				}
 			}
 		}
 		else
@@ -194,7 +204,35 @@ uint8_t readFromAddress(uint16_t address) {
 				return 0xff;
 			}
 			else {
-				return cartRam[address - 0xa000];
+				if (rtcRegister < 0x08 || rtcRegister > 0x0c)//should never be greater
+				{
+					return cartRam[address - 0xa000];
+				}
+				else //rtc read
+				{
+					time(&rawtime);
+					timeinfo = localtime(&rawtime);
+					switch (rtcRegister)
+					{
+					case 0x08://seconds
+						return timeinfo->tm_sec;
+						break;
+					case 0x09:
+						return timeinfo->tm_min;
+						break;
+					case 0x0a:
+						return timeinfo->tm_hour;
+						break;
+					case 0x0b:
+						return (timeinfo->tm_yday & 0xff);
+						break;
+					case 0x0c:
+						return (timeinfo->tm_yday & 0x0100) >> 8;
+						break;
+					default:
+						throw "RTC error!";
+					}
+				}
 			}
 		}
 		else
@@ -348,14 +386,16 @@ void handleRomWrite(uint16_t address, uint8_t data)
 		{
 			if (data >= 0x00 && data <= 0x03)//select RAM bank
 			{
+				rtcRegister = data;
 				switchRamBank(data);
+			}
+			else if (data >= 0x08 && data <= 0x0c)//switch to RTC register
+			{
+				rtcRegister = data;
 			}
 			else
 			{
-				if (LOG_VERBOSE)
-				{
-					logger::logWarning("Trying to enable unimplemented RTC!", address, data);
-				}
+				logger::logError("Writing invalid data to RAM bank/RTC select!", address, data);
 			}
 		}
 	}

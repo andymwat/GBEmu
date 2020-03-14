@@ -16,6 +16,7 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
  - Passes all tests in blargg's cpu_instrs test ROM
  - Nearly complete MBC 1 and 3 support
  - Complete (if buggy) sound support
+ - Real Time Clock (RTC) support
  - CPU stepping and breakpoints
  - Nearly complete interrupt support, including timers
  - Compiles on both Windows and Linux (and presumably MacOS as well) using CMake
@@ -36,7 +37,6 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
   - Fix sound bugs
   - HALT bug emulation
   - MBC 2 support
-  - MBC 3 RTC support
   - Savestates
   - Fast-forward/rewind
   - Advanced debugging features such as memory dumping 
@@ -52,7 +52,7 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 | Dr. Mario                   | Boots to menus, but hangs when going in-game (probably due to incomplete timer support).                                                                                                              |
 | Galaga & Galaxian           | Fully playable.                                                                                                                                                                                     |
 | Kirby's Dream Land          | Playable, but sound is somewhat broken (wave channel is buggy.)			 |
-| Pokemon Gold				  | Playable, but sound is buggy. The RTC isn't implemented either, so it randomly switches from day to night.|
+| Pokemon Gold				  | Playable, but sound is buggy.  |
 | Pokemon Red				  | Fully playable, but sound is kinda buggy. |
 | Super Mario Land            | Fully playable.			 |
 | The Legend of Zelda: Link's Awakening| Fully playable. |

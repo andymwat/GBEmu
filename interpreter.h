@@ -6,6 +6,7 @@
 
 #include <string>
 #include <iostream>
+#include <time.h>
 #include "cartridge.h"
 #include "logger.h"
 extern uint8_t a,b,c,d,e,f,h,l;
@@ -133,6 +134,12 @@ extern char tempOutput;
 extern bool halted;
 extern bool ramEnable;
 extern std::string filePath;
+
+extern uint8_t rtcRegister;
+
+extern time_t rawtime;
+extern struct tm * timeinfo;
+
 
 
 
