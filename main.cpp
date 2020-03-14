@@ -34,7 +34,7 @@ Uint64 LAST = 0;
 double deltaTime = 0;
 
 
-const unsigned int updateFrequency = 20000; //update every 20k cycles
+const unsigned int updateFrequency = 5000; //update every 5k cycles
 
 
 
@@ -67,9 +67,9 @@ int main(int argc, char* args[])
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/cpu_instrs.gb");
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/11-op a,(hl).gb");
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/10-bit ops.gb");
-	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/pkmnGld.gbc");
+	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/pkmnGld.gbc");
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/tetris.gb");
-	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/zelda.gb");
+	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/kirby.gb");
 
 
 
@@ -151,8 +151,8 @@ int main(int argc, char* args[])
 				
                 while (pc != sel && !keyboardBreak)
                 {
-					int cyclesUntilUpdate = updateFrequency; //check for sdl events every 20k cycles (approx 3 times a frame)
-					while (SDL_PollEvent(&events) != 0)
+					int cyclesUntilUpdate = updateFrequency; 
+					while (SDL_PollEvent(&events) != 0)//check for sdl events
 					{
 						if (events.type == SDL_QUIT)
 						{
