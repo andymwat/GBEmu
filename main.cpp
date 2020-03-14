@@ -59,7 +59,8 @@ int main(int argc, char* args[])
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/cpu_instrs.gb");
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/11-op a,(hl).gb");
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/10-bit ops.gb");
-	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/pkmn.gb");
+	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/pkmnGld.gbc");
+	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/pkmn.gb");
 	//loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/zelda.gb");
 
 
@@ -92,7 +93,7 @@ int main(int argc, char* args[])
 	FILE* file = fopen(savePath.c_str(), "rb");
 	if (file == nullptr)
 	{
-		std::cout << "Failed to open file!\n";
+		std::cout << "Failed to open file! This is normal the first time loading a ROM, or if a file wasn't saved previously.\n";
 	}
 	else
 	{

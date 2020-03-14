@@ -623,6 +623,9 @@ uint8_t readFromAudioRegister(uint16_t address)
 	case 0xff25:
 		return channelSelection;
 		break;
+	case 0xff26:
+		return 0xff;
+		break;
 	default:
 		logger::logWarning("Unimplemented sound register read, returning 0x0.", address, 0x0);
 		return 0;

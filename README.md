@@ -52,6 +52,7 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 | Dr. Mario                   | Boots to menus, but hangs when going in-game (probably due to incomplete timer support).                                                                                                              |
 | Galaga & Galaxian           | Fully playable.                                                                                                                                                                                     |
 | Kirby's Dream Land          | Playable, but sound is somewhat broken (wave channel is buggy.)			 |
+| Pokemon Gold				  | Playable, but sound is buggy. The RTC isn't implemented either, so it randomly switches from day to night.|
 | Pokemon Red				  | Fully playable, but sound is kinda buggy. |
 | Super Mario Land            | Fully playable.			 |
 | The Legend of Zelda: Link's Awakening| Fully playable. |

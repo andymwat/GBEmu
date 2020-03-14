@@ -14,6 +14,14 @@
 #include "audioController.h"
 using namespace std;
 
+
+
+const bool LOG_VERBOSE = false; //warn about unimplemented features
+
+
+
+
+
 std::string filePath;
 int errorAddress = -1;
 std::string output = "Program output: \n";
@@ -311,7 +319,7 @@ void handleRomWrite(uint16_t address, uint8_t data)
 			throw "Wrote to unimplemented ROM address on mbc1+ram+battery";
 		}
 	}
-	else if (currentCartridge->mbcType == 0x13)//mbc3 + RAM + battery
+	else if (currentCartridge->mbcType == 0x13 || currentCartridge->mbcType == 0x10) //mbc3 + RAM + battery (timer unimplemented)
 	{
 		
 		if (address <= 0x1fff)//RAM and Timer enable
@@ -344,7 +352,10 @@ void handleRomWrite(uint16_t address, uint8_t data)
 			}
 			else
 			{
-				logger::logWarning("Trying to enable unimplemented RTC!", address, data);
+				if (LOG_VERBOSE)
+				{
+					logger::logWarning("Trying to enable unimplemented RTC!", address, data);
+				}
 			}
 		}
 	}
@@ -452,13 +463,16 @@ void handleIOWrite(uint16_t address, uint8_t data) {
 		{
 			SetClockFreq();
 		}
-		if (TestBit(tmc, 2))
+		if (LOG_VERBOSE)
 		{
-			logger::logInfo("Timer is enabled.");
-		}
-		else
-		{
-			logger::logInfo("Timer is disabled.");
+			if (TestBit(tmc, 2))
+			{
+				logger::logInfo("Timer is enabled.");
+			}
+			else
+			{
+				logger::logInfo("Timer is disabled.");
+			}
 		}
 	}
 	else if (address == 0xff04)
@@ -480,7 +494,9 @@ void handleIOWrite(uint16_t address, uint8_t data) {
 		{
 			output += (char)tempOutput;
 		}
-		logger::logWarning("Serial control write unimplemented.", address, data);
+		if (LOG_VERBOSE)
+		{			logger::logWarning("Serial control write unimplemented.", address, data);
+		}
 	}
 	else if (address == 0xff41)
 	{
@@ -493,6 +509,16 @@ void handleIOWrite(uint16_t address, uint8_t data) {
 	else if (address == 0xff49)
 	{
 		objectPalette1Data = data;
+	}
+	else if (address == 0xff56)
+	{
+		if (LOG_VERBOSE)
+			logger::logWarningNoData("Tried to write infrared port, ignoring.");
+	}
+	else if (address == 0xff4f)
+	{
+		if (LOG_VERBOSE)
+			logger::logWarningNoData("Tried to write CGB VRAM bank, ignoring.");
 	}
 	else
 	{
@@ -508,8 +534,9 @@ uint8_t handleIORead(uint16_t address) {
 		return joypadRegister;
 	}
 	else if (address == 0xff02)
-	{
-		logger::logWarningNoData("Serial control register unimplemented, returning 0xff.");
+	{	
+		if (LOG_VERBOSE)
+			logger::logWarningNoData("Serial control register unimplemented, returning 0xff.");
 		return 0xff;
 	}
 	else if (address == 0xff01)
@@ -547,7 +574,8 @@ uint8_t handleIORead(uint16_t address) {
 	}
 	else if (address == 0xff4d)//cgb key1 (prepare speed switch)
 	{
-		logger::logWarning("Speed control registers read unimplemented, returning 0xff", address, 0xff);
+		if (LOG_VERBOSE)
+			logger::logWarning("Speed control registers read unimplemented, returning 0xff", address, 0xff);
 		return 0xff;
 	}
 	
@@ -555,10 +583,6 @@ uint8_t handleIORead(uint16_t address) {
 	{
 		return interruptFlag | 0xe0;//set top 3 bits to always be true
 	}
-	/*else if (address == 0xff47)
-	{
-		return bgPaletteData;
-	}*/
 	else if (address == 0xff48)
 	{
 		return objectPalette0Data;
@@ -582,6 +606,12 @@ uint8_t handleIORead(uint16_t address) {
 	else if (address == 0xff07)
 	{
 		return tmc;
+	}
+	else if (address == 0xff56)
+	{
+		if (LOG_VERBOSE)
+			logger::logWarningNoData("Tried to read infrared port, returning 0xff.");
+		return 0xff;
 	}
 	else
 	{
@@ -816,7 +846,8 @@ void checkInterrupts() {
 
 	if ((interruptFlag & 0x01) == 0x01 && (interruptRegister & 0x01) == 0x01)//catch v-blank interrupt
 	{
-		//logger::logInfo("Caught V-Blank interrupt.");
+		if (LOG_VERBOSE)
+			logger::logInfo("Caught V-Blank interrupt.");
 		enableInterrupts = false;
 		interruptFlag = interruptFlag & 0xfe;//clear vblank bit
 		//push pc onto stack
@@ -834,7 +865,8 @@ void checkInterrupts() {
 	}
 	else if ((interruptFlag & 0x02) == 0x02 && (interruptRegister & 0x02) == 0x02)//catch lcd stat interrupt
 	{
-		//logger::logInfo("Caught LCD STAT interrupt.");
+		if (LOG_VERBOSE)
+			logger::logInfo("Caught LCD STAT interrupt.");
 		enableInterrupts = false;
 		interruptFlag = interruptFlag & 0xfd;
 		//push pc onto stack
@@ -852,7 +884,8 @@ void checkInterrupts() {
 	}
 	else if ((interruptFlag & 0x04) == 0x04 && (interruptRegister & 0x04) == 0x04)//catch Timer interrupt
 	{
-		//logger::logInfo("Caught Timer interrupt.");
+		if (LOG_VERBOSE)
+			logger::logInfo("Caught Timer interrupt.");
 		//cout<<"Interrupt flag: 0x"<<hex<<(uint16_t)interruptFlag<<dec<<endl;
 		enableInterrupts = false;
 		interruptFlag = interruptFlag & 0xfb;
@@ -919,7 +952,9 @@ void processTimer(uint8_t opCycle)
 			if (tima == 0xff)
 			{
 				writeToAddress(0xff05, readFromAddress(0xff06));
-				//logger::logInfo("Requesting timer interrupt.");
+
+				if (LOG_VERBOSE)
+					logger::logInfo("Requesting timer interrupt.");
 				interruptFlag |= 0x04;
 			}
 			else
