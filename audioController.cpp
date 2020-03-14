@@ -18,8 +18,8 @@ uint8_t  c2Duty, c2Envelope, c2FrequencyL, c2FrequencyH;
 
 uint8_t c1DutyChannel, c2DutyChannel;
 
-int16_t c1Freq = 0;
-int16_t c2Freq = 0;
+uint16_t c1Freq = 0;
+uint16_t c2Freq = 0;
 
 uint16_t c1FrequencySweep, c1FrequencySweepShadow;
 bool c1FrequencySweepFlag;
@@ -87,6 +87,8 @@ void updateAudio(uint8_t cycles)
 	waveCycles += cycles;
     noiseCycles += cycles;
     float r = (c4Polynomial & 0x7);
+
+	//noise frequency
     if (r == 0)
     {
         r = 0.5f;
@@ -134,12 +136,11 @@ void updateAudio(uint8_t cycles)
 	}
 
 
-
-    c1Freq -= cycles;
-	if (c1Freq <= 0)
+	//c1 frequency
+    c1Freq += cycles;
+	if (c1Freq >= (2048 - c1FrequencySweep) * 4)
 	{
-		c1Freq = (2048 - c1FrequencySweep) * 4;
-
+		c1Freq = 0;
 		currentDutySection1++;
 		if (currentDutySection1 >= 8)
 		{
@@ -148,13 +149,12 @@ void updateAudio(uint8_t cycles)
 	}
 
 
-
-    c2Freq -= cycles;
-	if (c2Freq <= 0)
+	//c2 frequency
+    c2Freq += cycles;
+	if (c2Freq >= (2048 - (((((uint16_t)c2FrequencyH) & 0x0007) << 8) | (uint16_t)c2FrequencyL)) * 4)
 	{
-		uint16_t frequency = ((((uint16_t)c2FrequencyH) & 0x0007) << 8) | (uint16_t)c2FrequencyL;
-		c2Freq = (2048 - frequency) * 4;
-
+		c2Freq = 0;
+		
 		currentDutySection2++;
 		if (currentDutySection2 >= 8)
 		{
@@ -286,7 +286,7 @@ void updateAudio(uint8_t cycles)
 
 
 
-
+	//c1 length
 	if ((c1FrequencyH & 0x40) == 0x40) //length enable
 	{
 		if (c1Time >= c1Length)
@@ -304,6 +304,7 @@ void updateAudio(uint8_t cycles)
 		c1Time = 0;
 	}
 
+	//c2 length
 	if ((c2FrequencyH & 0x40) == 0x40) //length enable
 	{
 		if (c2Time >= c2Length)
@@ -322,7 +323,7 @@ void updateAudio(uint8_t cycles)
 	}
 
 
-
+	//wave length
 	if ((waveFrequencyH & 0x40) == 0x40) //length enable
 	{
 		if (waveTime >= waveLength)
@@ -339,7 +340,7 @@ void updateAudio(uint8_t cycles)
 		waveTime = 0;
 	}
 
-
+	//noise length
     if ((c4Counter & 0x40) == 0x40)//length enable
     {
         if (c4Time >= c4Length)//c4 sound ended
@@ -355,7 +356,7 @@ void updateAudio(uint8_t cycles)
         c4Enable = true;
     }
 
-	if (cyclesLeft >= 88) //48000hz:  1/48000 seconds = 0.000020833 sec = 87.3 * 1/4194304
+	if (cyclesLeft >= 87) //48000hz:  1/48000 seconds = 0.000020833 sec = 87.3 * 1/4194304
 	{
 		cyclesLeft = 0;
 		currentSample += 2; //+2 for 2 channels (stereo)
@@ -395,7 +396,7 @@ void mixAudio()
 		{
 			sample3 = ((waveTable[wavePosition / 2]) & 0x0f);
 		}
-		sample3 = (sample3 << waveOutputLevel) & 0xf;
+		sample3 = (sample3 >> waveOutputLevel) & 0xf;
 
 		uint16_t proportion = defaultAmplitude / 0xf;
 		sample3 *= proportion;
@@ -420,7 +421,7 @@ void mixAudio()
 	//mixing
 	audioBuffer[currentSample] = 0;
 	audioBuffer[currentSample + 1] = 0;
-	//sample1 = sample2 = sample3 = 0; //mute other sounds
+	//sample1 = sample2 = sample4 = 0; //mute 
 	if (TestBit(channelSelection, 7))
 	{
 		audioBuffer[currentSample] += sample4;
