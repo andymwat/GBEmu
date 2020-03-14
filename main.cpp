@@ -87,7 +87,19 @@ int main(int argc, char* args[])
 
 	}
 
-
+	std::cout << "Loading from file: " << filePath << ".sav\n";
+	std::string savePath = filePath + ".sav";
+	FILE* file = fopen(savePath.c_str(), "rb");
+	if (file == nullptr)
+	{
+		std::cout << "Failed to open file!\n";
+	}
+	else
+	{
+		fread(currentCartridge->ramBanks, sizeof(uint8_t), currentCartridge->totalRamSize, file);
+		fclose(file);
+		std::cout << "Loaded!\n";
+	}
 
     try {
         pc = 0x100;
@@ -138,7 +150,7 @@ int main(int argc, char* args[])
 							throw "User exit.";
 						}
 					}
-					while (cyclesUntilUpdate >= 0)
+					while (cyclesUntilUpdate >= 0 && !keyboardBreak)
 					{
 						keyboardBreak = false;
 
@@ -160,8 +172,39 @@ int main(int argc, char* args[])
 						updateAudio(cycles);
 						cyclesUntilUpdate -= cycles;
 					}
-					
+					if (saveToFile && !saved)
+					{
+						saveToFile = false;
+						std::cout << "Saving to file: " << filePath << ".sav\n";
+						std::string savePath = filePath + ".sav";
+						FILE* file = fopen(savePath.c_str(), "wb");
+						fwrite(currentCartridge->ramBanks, sizeof(uint8_t), currentCartridge->totalRamSize, file);
+						fclose(file);
+						std::cout << "Saved!\n";
+						saved = true;
+					}
+					if (loadFromFile && !loaded)
+					{
+						loadFromFile = false;
+						std::cout << "Loading from file: " << filePath << ".sav\n";
+						std::string savePath = filePath + ".sav";
+						FILE* file = fopen(savePath.c_str(), "rb");
+						if (file == nullptr)
+						{
+							std::cout << "Failed to open file!\n";
+						}
+						else
+						{
+							fread(currentCartridge->ramBanks, sizeof(uint8_t), currentCartridge->totalRamSize, file);
+							fclose(file);
+							std::cout << "Loaded!\n";
+						}
+						loaded = true;
+					}
                 }
+
+
+				
 
 				if (keyboardBreak)
 				{

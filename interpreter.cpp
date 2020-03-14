@@ -14,6 +14,7 @@
 #include "audioController.h"
 using namespace std;
 
+std::string filePath;
 int errorAddress = -1;
 std::string output = "Program output: \n";
 bool enableInterrupts = true;
@@ -591,6 +592,7 @@ uint8_t handleIORead(uint16_t address) {
 
 void loadTestRom(string path)//calculates number of banks based on cartridge MBC number
 {
+	filePath = path;
 	std::cout << "Loading test ROM: " << path << "...\n";
 	std::ifstream infile(path);
 	if (!infile.good())

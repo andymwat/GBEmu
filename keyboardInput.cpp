@@ -12,6 +12,14 @@
 uint8_t joypadStateInternal;
 uint8_t previousJoypadState;
 bool keyboardBreak = false;
+
+
+bool saveToFile = false;
+bool saved = false;
+bool loadFromFile = false;
+bool loaded= false;
+
+
 /*Bits:
  * NOTE: 0=selected/pressed
  * 7: not used
@@ -39,6 +47,18 @@ void checkKeyboardNew()
 	b_start = keyboardState[SDL_SCANCODE_A];
 	b_select = keyboardState[SDL_SCANCODE_S];
 	keyboardBreak = keyboardState[SDL_SCANCODE_B];
+
+	saveToFile = keyboardState[SDL_SCANCODE_P];
+	if (!keyboardState[SDL_SCANCODE_P])
+	{
+		saved = false;
+	}
+	loadFromFile = keyboardState[SDL_SCANCODE_L];
+	if (!keyboardState[SDL_SCANCODE_L])
+	{
+		loaded = false;
+	}
+
 	joypadRegister |= 0xf;//set bottom for bits, to be cleared below
 	if (!TestBit(joypadRegister, 5))//button select
 	{

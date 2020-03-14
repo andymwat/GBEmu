@@ -5,8 +5,9 @@
 #define GBEMU_INTERPRETER_H
 
 #include <string>
-#include "logger.h"
 #include <iostream>
+#include "cartridge.h"
+#include "logger.h"
 extern uint8_t a,b,c,d,e,f,h,l;
 extern uint16_t sp;
 extern uint16_t pc;
@@ -124,13 +125,15 @@ extern unsigned int clockSpeed;
 extern int m_TimerCounter;
 
 extern int errorAddress;
-//extern cartridge* currentCartridge;
+extern cartridge* currentCartridge;
 
 extern std::string output;
 extern char tempOutput;
 
 extern bool halted;
 extern bool ramEnable;
+extern std::string filePath;
+
 
 
 

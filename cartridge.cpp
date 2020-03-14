@@ -15,6 +15,7 @@ cartridge::cartridge(uint8_t mbcNumber, uint8_t bankNum, uint8_t ramBankNum) {
     this->bankCount = bankNum;
     this->ramBankIdentifier = ramBankNum;
     this->banks = nullptr;
+	
     uint8_t numberOfBanks;
     if (bankNum <= 0x07)//2^(n+1) banks
     {
@@ -36,16 +37,19 @@ cartridge::cartridge(uint8_t mbcNumber, uint8_t bankNum, uint8_t ramBankNum) {
             logger::logInfo("Loaded cart with 2048 bytes of RAM");
             //std::cout<<"INFO: Loaded cart with 2048 bytes of cartRAM.\n";
             this->ramBanks = new uint8_t[2048];
+			this->totalRamSize = 2048;
             break;
         case 2:
             logger::logInfo("Loaded cart with 8192 bytes of RAM");
             //std::cout<<"INFO: Loaded cart with 8192 bytes of cartRAM.\n";
             this->ramBanks = new uint8_t[8192];
+			this->totalRamSize = 8192;
             break;
         case 3:
             logger::logInfo("Loaded cart with 32768 bytes of RAM");
            // std::cout<<"INFO: Loaded cart with 32768 bytes (4*8192 bytes) of cartRAM.\n";
             this->ramBanks = new uint8_t[32768];
+			this->totalRamSize = 32768;
             break;
         default:
             logger::logErrorNoData("ramBankNum is " + to_string(ramBankNum));
