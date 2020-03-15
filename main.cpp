@@ -56,14 +56,14 @@ int main(int argc, char* args[])
     lcdEnable = true;
     a=b=c=d=e=f=h=l=sp=pc=0;
     cout<<"Loading ROM..."<<endl;
-   //loadTestRom("/home/andrew/Downloads/GBemu/cpu_instrs/cpu_instrs.gb");
+    //loadTestRom("/home/andrew/Downloads/GBemu/cpu_instrs/cpu_instrs.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/tetris.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/sml.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/cpu_instrs/individual/11-op a,(hl).gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/drMario.gb");
-    //loadTestRom("/home/andrew/Downloads/GBemu/kirby.gb");
+    loadTestRom("/home/andrew/Downloads/GBemu/kirby.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/loz.gb");
-    loadTestRom("/home/andrew/Downloads/GBemu/pkmn.gb");
+    //loadTestRom("/home/andrew/Downloads/GBemu/pkmn.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/sml2.gb");
     //loadTestRom("/home/andrew/Downloads/GBemu/new/dkl.gb");
     //loadTestRom("/home/andrew/Downloads/DMG_ROM.bin");
@@ -190,7 +190,7 @@ int main(int argc, char* args[])
                     //delay to sync up with realtime
                     LAST = NOW;
                     NOW = SDL_GetPerformanceCounter();
-                    deltaTime = ((NOW - LAST) * 1000 / (double)SDL_GetPerformanceFrequency());
+                    deltaTime = ((NOW - LAST) * 1000 / (double)SDL_GetPerformanceFrequency()); //in ms
                     //string str = "Frame time: ";
                     //str += to_string(deltaTime) + "ms";
                     //logger::logInfo(str);
@@ -200,7 +200,7 @@ int main(int argc, char* args[])
                     #ifdef PLATFORM_UNIX
                         if (!fastForward)
                         {
-                            usleep( (uint32_t)(((((1.0 / 4194304) * updateFrequency) * 1000) - deltaTime) * 1000 )); //usleep is more precise
+                            usleep( (uint32_t)(((((1.0 / 4194304) * updateFrequency)) - ((NOW - LAST) / (double)SDL_GetPerformanceFrequency())) * 1000000 )); //usleep is more precise
                         }
                     #else
                         if (!fastForward)

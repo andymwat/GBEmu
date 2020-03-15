@@ -60,5 +60,4 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 | Tetris                      | Fully playable.                                                                                                                                    |
 | Tetris 2                    | Same as the original Tetris.                                                                                                                                                                            |
  ## Known Issues
-  - Sprites that go off-screen at all disappear. This is most easily seen in Kirby's Dreamland, when you fly up to the top of the screen
-  - Sound is buggy, and can sometime desync with the video. It is very dependent upon CPU speed. Faster systems will cause the sound to play faster and at a higher pitch. 
+  - Sound is buggy, and can sometime desync with the video. It is very dependent upon CPU speed. Faster systems will cause the sound to play faster and at a higher pitch. This also seems to affect Windows more than Linux, possibly due to the higher precision of usleep vs. SDL_Delay.

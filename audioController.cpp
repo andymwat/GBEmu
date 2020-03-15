@@ -65,7 +65,6 @@ uint16_t noiseShiftRegister = 0xff;
 
 
 
-
 //sound control
 uint8_t volumeControl;
 uint8_t channelSelection = 0xff;
@@ -76,7 +75,7 @@ uint16_t dutyCycle[5][8] =
         {defaultAmplitude,0,0,0,0,0,0,defaultAmplitude},                                                                //25%
         {defaultAmplitude,0,0,0,0,defaultAmplitude,defaultAmplitude,defaultAmplitude},                                  //50%
         {0,defaultAmplitude,defaultAmplitude,defaultAmplitude,defaultAmplitude,defaultAmplitude,defaultAmplitude,0},    //75%
-	    {0,0,0,0,0,0,0,0}																								//0% (for when channel is disabled)
+        {0,0,0,0,0,0,0,0}																								//0% (for when channel is disabled)
 };
 
 

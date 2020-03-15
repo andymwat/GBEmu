@@ -302,10 +302,12 @@ void renderSprites() {
     for (int sprite = 0; sprite < 40; sprite++)
     {
         uint8_t index = sprite * 4;
-        uint8_t yPos = readFromAddress(0xFE00 + index) - 16;
-        uint8_t xPos = readFromAddress(0xFE00 + index + 1) - 8;
+        int yPos = readFromAddress(0xFE00 + index) - 16;
+        int xPos = readFromAddress(0xFE00 + index + 1) - 8;
         uint8_t tileLocation = readFromAddress(0xFE00 + index + 2);
         uint8_t attributes = readFromAddress(0xFE00 + index + 3);
+
+
 
         bool yFlip = TestBit(attributes, 6);
         bool xFlip = TestBit(attributes, 5);
@@ -317,7 +319,8 @@ void renderSprites() {
         if (use8x16)
             ysize = 16;
 
-        if ((scanline >= yPos) && (scanline < (yPos + ysize)))
+
+        if (((scanline >= yPos) && (scanline < (yPos + ysize))))
         {
             int line = scanline - yPos;
 
@@ -351,10 +354,9 @@ void renderSprites() {
                 if (colourNum == 0)
                     continue;
 
-                int xPix = 0 - tilePixel;
-                xPix += 7;
 
-                int pixel = xPos + xPix;
+
+                int pixel = xPos + 7 - tilePixel;
 
                 if ((scanline < 0) || (scanline > 143) || (pixel < 0) || (pixel > 159))
                 {
