@@ -35,10 +35,6 @@
 using namespace std;
 SDL_Event events;
 
-Uint64 NOW = SDL_GetPerformanceCounter();
-Uint64 LAST = 0;
-double deltaTime = 0;
-
 
 const unsigned int updateFrequency = 25000; //update every 5k cycles
 
@@ -71,9 +67,9 @@ int main(int argc, char* args[])
     //loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/cpu_instrs.gb");
     //loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/11-op a,(hl).gb");
     //loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/10-bit ops.gb");
-    //loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/pkmnGld.gbc");
+    loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/pkmnGld.gbc");
     //loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/tetris.gb");
-    loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/kirby.gb");
+    //loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/sml.gb");
 
 
 
@@ -187,33 +183,6 @@ int main(int argc, char* args[])
                     }
 
 
-                    //delay to sync up with realtime
-                    LAST = NOW;
-                    NOW = SDL_GetPerformanceCounter();
-                    deltaTime = ((NOW - LAST) * 1000 / (double)SDL_GetPerformanceFrequency()); //in ms
-                    //string str = "Frame time: ";
-                    //str += to_string(deltaTime) + "ms";
-                    //logger::logInfo(str);
-                    if (deltaTime <= ((1.0 / 4194304) * updateFrequency) * 1000 )//time for 20k cycles in ms
-                    {
-
-                    #ifdef PLATFORM_UNIX
-                        if (!fastForward)
-                        {
-                            usleep( (uint32_t)(((((1.0 / 4194304) * updateFrequency)) - ((NOW - LAST) / (double)SDL_GetPerformanceFrequency())) * 1000000 ));  //usleep for linux because it has microsecond accuracy
-                        }
-                    #else
-                        if (!fastForward)
-                        {
-							//int i = 0;
-							while ( deltaTime + ((SDL_GetPerformanceCounter() - NOW)  /  (double)SDL_GetPerformanceFrequency()) * 1000 <= ((1.0 / 4194304) * updateFrequency) * 1000) 
-							{
-								//wait until done
-							}
-                        }
-                    #endif
-                    }
-                    NOW = SDL_GetPerformanceCounter();
 
 
                     if (saveToFile && !saved)

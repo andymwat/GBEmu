@@ -12,7 +12,7 @@
 #include <SDL.h>
 #include "interpreter.h"
 #include "lcdController.h"
-
+#include "keyboardInput.h"
 
 
 using namespace std;
@@ -26,11 +26,11 @@ SDL_Window* window = nullptr;
 SDL_Surface* screenSurface = nullptr;
 SDL_Surface* renderSurface = nullptr;
 
-/*
+
 Uint64 NOW = SDL_GetPerformanceCounter();
 Uint64 LAST = 0;
 double deltaTime = 0;
-*/
+
 void initWindow() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
@@ -171,13 +171,47 @@ void renderScanline() {
 
 void pushBufferToWindow() {
 
-    SDL_FreeSurface(renderSurface);
+
+	//delay to sync up with realtime
+	LAST = NOW;
+	NOW = SDL_GetPerformanceCounter();
+	deltaTime = ((NOW - LAST) * 1000 / (double)SDL_GetPerformanceFrequency()); //time for frame in ms
+	//string str = "Frame time: ";
+	//str += to_string(deltaTime) + "ms";
+	//logger::logInfo(str);
+
+	if (deltaTime <= ((1.0 / 4194304) * fullFrameCycles) * 1000)//time for full frame of cycles in ms
+	{
+
+#ifdef PLATFORM_UNIX
+		if (!fastForward)
+		{
+			usleep((uint32_t)(((((1.0 / 4194304) * updateFrequency)) - ((NOW - LAST) / (double)SDL_GetPerformanceFrequency())) * 1000000));  //usleep for linux because it has microsecond accuracy
+		}
+#else
+		if (!fastForward)
+		{
+			while (deltaTime + ((SDL_GetPerformanceCounter() - NOW) / (double)SDL_GetPerformanceFrequency()) * 1010 <= ((1.0 / 4194304) * fullFrameCycles) * 1000)
+			{
+				//wait until done
+			}
+		}
+#endif
+	}
+
+	NOW = SDL_GetPerformanceCounter();
+
+
+	//doesn't appear to be needed
+    //SDL_FreeSurface(renderSurface);
+
     renderSurface = SDL_CreateRGBSurfaceFrom(pixelArray, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 4*SCREEN_WIDTH,0x0000ff,0x00ff00,0xff0000,0 );
     SDL_BlitSurface(renderSurface, NULL, screenSurface, NULL);
     SDL_UpdateWindowSurface(window);
 
 	
-  
+
+	
 	
 
 
