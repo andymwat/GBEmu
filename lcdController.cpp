@@ -15,6 +15,7 @@
 #include "keyboardInput.h"
 
 
+
 using namespace std;
 
 uint32_t pixelArray[SCREEN_HEIGHT][SCREEN_WIDTH];
@@ -172,6 +173,7 @@ void renderScanline() {
 void pushBufferToWindow() {
 
 
+	
 	//delay to sync up with realtime
 	LAST = NOW;
 	NOW = SDL_GetPerformanceCounter();
@@ -191,7 +193,7 @@ void pushBufferToWindow() {
 #else
 		if (!fastForward)
 		{
-			while (deltaTime + ((SDL_GetPerformanceCounter() - NOW) / (double)SDL_GetPerformanceFrequency()) * 1010 <= ((1.0 / 4194304) * fullFrameCycles) * 1000)
+			while (deltaTime + ((SDL_GetPerformanceCounter() - NOW) / (double)SDL_GetPerformanceFrequency()) * 1000 <= ((1.0 / 4194304) * fullFrameCycles) * 1000)
 			{
 				//wait until done
 			}
@@ -199,17 +201,19 @@ void pushBufferToWindow() {
 #endif
 	}
 
-	NOW = SDL_GetPerformanceCounter();
-
 
 	//doesn't appear to be needed
     //SDL_FreeSurface(renderSurface);
 
+
+	//create SDL surface from pixel array, then push to screen
     renderSurface = SDL_CreateRGBSurfaceFrom(pixelArray, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 4*SCREEN_WIDTH,0x0000ff,0x00ff00,0xff0000,0 );
     SDL_BlitSurface(renderSurface, NULL, screenSurface, NULL);
     SDL_UpdateWindowSurface(window);
 
 	
+
+	NOW = SDL_GetPerformanceCounter();
 
 	
 	
