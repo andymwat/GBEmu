@@ -772,6 +772,7 @@ void dumpRegisters()
 
 }
 void initRegisters() {
+	pc = 0x100;
 	writePair(a, f, 0x01b0);
 	writePair(b, c, 0x0013);
 	writePair(d, e, 0x00d8);

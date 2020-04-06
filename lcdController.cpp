@@ -173,7 +173,6 @@ void renderScanline() {
 void pushBufferToWindow() {
 
 
-	
 	//delay to sync up with realtime
 	LAST = NOW;
 	NOW = SDL_GetPerformanceCounter();
