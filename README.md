@@ -52,12 +52,17 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 | Donkey Kong Land            | Title screen shows, and gets to a flickering menu after that. Can get in-game, but video is messed up. I think the cartridge assumes it's running on a GBC.                                                                                                             |
 | Dr. Mario                   | Boots to menus, but hangs when going in-game (probably due to incomplete timer support).                                                                                                              |
 | Galaga & Galaxian           | Fully playable.                                                                                                                                                                                     |
-| Kirby's Dream Land          | Playable, but sound is somewhat broken (wave channel is buggy.)			 |
+| Kirby's Dream Land          | Playable, but sound is buggy.			 |
 | Pokemon Gold				  | Playable, but sound is buggy.  |
 | Pokemon Red				  | Fully playable, but sound is kinda buggy. |
 | Super Mario Land            | Fully playable.			 |
 | The Legend of Zelda: Link's Awakening| Fully playable. |
 | Tetris                      | Fully playable.                                                                                                                                    |
-| Tetris 2                    | Same as the original Tetris.                                                                                                                                                                            |
- ## Known Issues
+| Tetris 2                    | Fully playable.                                                                                                                                                                            |
+ 
+## Known Issues
   - Sound is buggy, and can sometime desync with the video. It is very dependent upon CPU speed. Faster systems will cause the sound to play faster and at a higher pitch. This also seems to affect Windows more than Linux, possibly due to the higher precision of usleep vs. SDL_Delay. This is slightly fixed with the change to just waiting until the SDL high-precision counter increments enough times, but it still isn't perfect.
+
+## Misc.
+
+This software uses SDL, which is [licensed](https://www.libsdl.org/license.php) under the [zlib license](https://www.zlib.net/zlib_license.html).
