@@ -422,6 +422,31 @@ void handleRomWrite(uint16_t address, uint8_t data)
 			}
 		}
 	}
+	else if (currentCartridge->mbcType == 0x1b) //MBC5 + RAM + Battery
+	{
+		if (address >= 0x2000 && address <= 0x2fff)//bank select low 8 bits
+		{
+			switchBank(data);
+		}
+		else if (address <= 0x1fff)//ram enable
+		{
+			if ((data & 0x0f) == 0x0a)
+			{
+				ramEnable = true;
+			}
+			else
+			{
+				ramEnable = false;
+			}
+		}
+		else
+		{
+			logger::logError("Error writing to ROM address.", address, data);
+			errorAddress = address;
+			throw "Wrote to unimplemented ROM address on mbc5+ram+battery";
+		}
+	}
+	
 	else
 	{
 		logger::logError("Error writing to ROM address.", address, data);
@@ -496,6 +521,12 @@ void handleIOWrite(uint16_t address, uint8_t data) {
 	else if (address == 0xff4b)
 	{
 		windowX = data-7;
+	}
+	else if (address == 0xff4f)
+	{
+		if (LOG_VERBOSE)
+			logger::logWarningNoData("VRAM bank registers write unimplemented.");
+		//CGB only
 	}
 	else if (address == 0xff40)
 	{
@@ -641,7 +672,13 @@ uint8_t handleIORead(uint16_t address) {
 			logger::logWarning("Speed control registers read unimplemented, returning 0xff", address, 0xff);
 		return 0xff;
 	}
-	
+	else if (address == 0xff4f)
+	{
+		if (LOG_VERBOSE)
+			logger::logWarning("VRAM bank registers read unimplemented, returning 0xff", address, 0xff);
+		return 0xff;
+		//CGB only
+	}
 	else if (address == 0xff0f)
 	{
 		return interruptFlag | 0xe0;//set top 3 bits to always be true

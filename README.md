@@ -55,6 +55,7 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 | Kirby's Dream Land          | Playable, but sound is buggy.			 |
 | Pokemon Gold				  | Playable, but sound is buggy.  |
 | Pokemon Red				  | Fully playable, but sound is kinda buggy. |
+| Pokemon Yellow			  | Intro plays, but crashes on an unimplemented ROM write (MBC5) |
 | Super Mario Land            | Fully playable.			 |
 | The Legend of Zelda: Link's Awakening| Fully playable. |
 | Tetris                      | Fully playable.                                                                                                                                    |
