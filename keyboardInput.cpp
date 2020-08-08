@@ -49,7 +49,9 @@ bool fastForward = false;
  * 1: Left or B
  * 0: Right or A
  */
-bool b_up, b_down, b_left, b_right, b_a, b_b, b_start, b_select;
+bool b_up, b_down, b_left, b_right, b_a, b_b, b_start, b_select, b_increaseScreenSize, b_decreaseScreenSize;
+
+bool screenSizePressedLastFrame = false;
 void checkKeyboardNew()
 {
 	//SDL_PumpEvents();
@@ -64,10 +66,14 @@ void checkKeyboardNew()
 	b_b = keyboardState[SDL_SCANCODE_X];
 	b_start = keyboardState[SDL_SCANCODE_A];
 	b_select = keyboardState[SDL_SCANCODE_S];
+	
 	keyboardBreak = keyboardState[SDL_SCANCODE_B];
 	fastForward = keyboardState[SDL_SCANCODE_SPACE];
-
 	saveToFile = keyboardState[SDL_SCANCODE_P];
+	b_increaseScreenSize = keyboardState[SDL_SCANCODE_RIGHTBRACKET];
+	b_decreaseScreenSize = keyboardState[SDL_SCANCODE_LEFTBRACKET];
+
+
 	if (!keyboardState[SDL_SCANCODE_P])
 	{
 		saved = false;
@@ -77,6 +83,22 @@ void checkKeyboardNew()
 	{
 		loaded = false;
 	}
+
+	if (!screenSizePressedLastFrame && b_increaseScreenSize)
+	{
+		//increaseScreenSize();
+	}
+	if (!screenSizePressedLastFrame && b_decreaseScreenSize)
+	{
+		//decreaseScreenSize();
+	}
+
+	screenSizePressedLastFrame = false;
+	if (b_increaseScreenSize || b_decreaseScreenSize)
+	{
+		screenSizePressedLastFrame = true;
+	}
+
 
 	joypadRegister |= 0xf;//set bottom for bits, to be cleared below
 	if (!TestBit(joypadRegister, 5))//button select

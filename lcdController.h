@@ -48,6 +48,8 @@ extern SDL_Window* window;
 extern SDL_Surface* screenSurface;
 extern SDL_Surface* renderSurface;
 
+extern int currentScreenScaling;
+
 void initWindow();
 void updateScreen(uint8_t cycleCount);
 
@@ -56,6 +58,9 @@ void pushBufferToWindow();
 
 void renderTiles();
 void renderSprites();
+
+void increaseScreenSize();
+void decreaseScreenSize();
 
 template <typename T>
 bool TestBit(T data, int position)

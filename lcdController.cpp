@@ -36,6 +36,7 @@
 using namespace std;
 
 uint32_t pixelArray[SCREEN_HEIGHT][SCREEN_WIDTH];
+
 unsigned int gpuModeClock = 0;
 uint8_t gpuMode = 0;
 uint8_t line=0;
@@ -49,13 +50,15 @@ Uint64 NOW = SDL_GetPerformanceCounter();
 Uint64 LAST = 0;
 double deltaTime = 0;
 
+int currentScreenScaling = 1;
+
 void initWindow() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
         cout<<"Could not initialize, error: " <<SDL_GetError()<<endl;
         throw "SDL could not initialize";
     } else{
-        window = SDL_CreateWindow( "GBEmu", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+        window = SDL_CreateWindow( "GBEmu", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
         if (window == NULL)
         {
             cout <<"Window could not be created, error: "<<SDL_GetError()<<endl;
@@ -67,6 +70,7 @@ void initWindow() {
             SDL_UpdateWindowSurface(window);
         }
     }
+
 }
 
 void updateScreen(uint8_t cycleCount) {
@@ -217,14 +221,64 @@ void pushBufferToWindow() {
 #endif
 	}
 
+	/*
+	//screenArray pointer points to array of pixels to draw
+	//Changes depending on scaling
+	uint32_t** screenArray = (uint32_t**)pixelArray;
+	if (currentScreenScaling > 1)
+	{
+		uint32_t x = pixelArray[0][0];
+		screenArray = (uint32_t**)scaledArrays[currentScreenScaling - 2];
 
-	//doesn't appear to be needed
-    //SDL_FreeSurface(renderSurface);
+		for (int i = 0; i < SCREEN_HEIGHT * currentScreenScaling; i++)
+		{
+			for (int j = 0; j < SCREEN_WIDTH * currentScreenScaling; j++)
+			{
+				((uint32_t*)screenArray)[SCREEN_HEIGHT*i + j] = pixelArray[i / currentScreenScaling][j / currentScreenScaling];
+			}
+		}
+	}
+	*/
+	SDL_FreeSurface(renderSurface);
 
+	screenSurface = SDL_GetWindowSurface(window);
+	//SDL_FillRect(screenSurface, NULL, 0x000000);//clear screen BG
+	//get rec
+	SDL_Rect destRec;
+
+	float scaleFactor;
+	bool widthBigger;
+	screenSurface->w > screenSurface->h ? widthBigger = true : widthBigger = false;
+
+	if (widthBigger) //if width is the bigger of the two dimensions, then scale GB screen height
+	{
+		scaleFactor = screenSurface->h / (float)SCREEN_HEIGHT;
+	}
+	else
+	{
+		scaleFactor = screenSurface->w / (float)SCREEN_WIDTH;
+	}
+
+	widthBigger ? destRec.h = screenSurface->h : destRec.h = SCREEN_HEIGHT * scaleFactor;
+	widthBigger ? destRec.w = SCREEN_WIDTH * scaleFactor : destRec.w = screenSurface->w;
+
+	widthBigger ? destRec.x = ((screenSurface->w) / 2) - ((SCREEN_WIDTH * scaleFactor) / 2) : destRec.x = 0;
+	widthBigger ? destRec.y = 0 : destRec.y = ((screenSurface->h) / 2) - ((SCREEN_HEIGHT* scaleFactor) / 2);
+
+	//sanity check
+	if (destRec.x < 0 || destRec.y < 0 || destRec.h < 0 || destRec.w < 0 || destRec.h > screenSurface->h || destRec.w > screenSurface->w)
+	{
+		//logger::logErrorNoData("Failed scaling sanity check!");
+		//fill the screen if something goes wrong. Only happens when the scaling is almost the same, so doesnt do much anyways
+		destRec.x = 0;
+		destRec.y = 0;
+		destRec.w = screenSurface->w;
+		destRec.h = screenSurface->h;
+	}
 
 	//create SDL surface from pixel array, then push to screen
-    renderSurface = SDL_CreateRGBSurfaceFrom(pixelArray, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 4*SCREEN_WIDTH,0x0000ff,0x00ff00,0xff0000,0 );
-    SDL_BlitSurface(renderSurface, NULL, screenSurface, NULL);
+    renderSurface = SDL_CreateRGBSurfaceFrom(pixelArray, SCREEN_WIDTH * currentScreenScaling, SCREEN_HEIGHT * currentScreenScaling, 32, 4*SCREEN_WIDTH*currentScreenScaling, 0x0000ff,0x00ff00,0xff0000,0 );
+	SDL_BlitScaled(renderSurface, NULL, screenSurface, &destRec);
     SDL_UpdateWindowSurface(window);
 
 	
@@ -434,6 +488,22 @@ void renderSprites() {
 }
 
 
+void increaseScreenSize()
+{
+	logger::logInfo("Increasing screen size.");
+	if (currentScreenScaling < 8)
+		currentScreenScaling++;
+
+	SDL_SetWindowSize(window, SCREEN_WIDTH * currentScreenScaling, SCREEN_HEIGHT * currentScreenScaling);
+}
+void decreaseScreenSize()
+{
+	logger::logInfo("Decreasing screen size.");
+	if (currentScreenScaling >= 1)
+		currentScreenScaling--;
+
+	SDL_SetWindowSize(window, SCREEN_WIDTH * currentScreenScaling, SCREEN_HEIGHT * currentScreenScaling);
+}
 
 
 #pragma clang diagnostic pop
