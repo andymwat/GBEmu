@@ -88,7 +88,7 @@ int main(int argc, char* args[])
     //loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/11-op a,(hl).gb");
     //loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/10-bit ops.gb");
     //loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/pkmnYel.gbc");
-	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/tetris.gb");
+	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/kirby.gb");
     //loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/bgbtest.gb");
 
 

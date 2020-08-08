@@ -378,7 +378,7 @@ void updateAudio(uint8_t cycles)
 		currentSample += 2; //+2 for 2 channels (stereo)
 
 
-		if (currentSample >= SAMPLES)
+		if (currentSample >= SAMPLES) //if 1024 samples have been generated, queue buffer to be played
 		{
 			currentSample = 0;
 

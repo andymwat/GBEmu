@@ -202,48 +202,32 @@ void pushBufferToWindow() {
 	//str += to_string(deltaTime) + "ms";
 	//logger::logInfo(str);
 
-	if (deltaTime <= ((1.0 / 4194304) * fullFrameCycles) * 1000)//time for full frame of cycles in ms
+	if (!fastForward)
 	{
+		if (deltaTime <= ((1.0 / 4194304) * fullFrameCycles) * 1000)//time for full frame of cycles in ms
+		{
 
 #ifdef PLATFORM_UNIX
-		if (!fastForward)
-		{
+
 			usleep((uint32_t)(((((1.0 / 4194304) * updateFrequency)) - ((NOW - LAST) / (double)SDL_GetPerformanceFrequency())) * 1000000));  //usleep for linux because it has microsecond accuracy
-		}
+
 #else
-		if (!fastForward)
-		{
+
 			while (deltaTime + ((SDL_GetPerformanceCounter() - NOW) / (double)SDL_GetPerformanceFrequency()) * 1000 <= ((1.0 / 4194304) * fullFrameCycles) * 1000)
 			{
 				//wait until done
 			}
-		}
 #endif
-	}
-
-	/*
-	//screenArray pointer points to array of pixels to draw
-	//Changes depending on scaling
-	uint32_t** screenArray = (uint32_t**)pixelArray;
-	if (currentScreenScaling > 1)
-	{
-		uint32_t x = pixelArray[0][0];
-		screenArray = (uint32_t**)scaledArrays[currentScreenScaling - 2];
-
-		for (int i = 0; i < SCREEN_HEIGHT * currentScreenScaling; i++)
-		{
-			for (int j = 0; j < SCREEN_WIDTH * currentScreenScaling; j++)
-			{
-				((uint32_t*)screenArray)[SCREEN_HEIGHT*i + j] = pixelArray[i / currentScreenScaling][j / currentScreenScaling];
-			}
 		}
 	}
-	*/
+
+	NOW = SDL_GetPerformanceCounter(); //reset timer to begin timing the next frame
+
+	
 	SDL_FreeSurface(renderSurface);
 
 	screenSurface = SDL_GetWindowSurface(window);
-	//SDL_FillRect(screenSurface, NULL, 0x000000);//clear screen BG
-	//get rec
+
 	SDL_Rect destRec;
 
 	float scaleFactor;
@@ -276,16 +260,18 @@ void pushBufferToWindow() {
 		destRec.h = screenSurface->h;
 	}
 
+
+
+
 	//create SDL surface from pixel array, then push to screen
     renderSurface = SDL_CreateRGBSurfaceFrom(pixelArray, SCREEN_WIDTH * currentScreenScaling, SCREEN_HEIGHT * currentScreenScaling, 32, 4*SCREEN_WIDTH*currentScreenScaling, 0x0000ff,0x00ff00,0xff0000,0 );
+	
 	SDL_BlitScaled(renderSurface, NULL, screenSurface, &destRec);
     SDL_UpdateWindowSurface(window);
 
 	
 
-	NOW = SDL_GetPerformanceCounter();
 
-	
 	
 
 
