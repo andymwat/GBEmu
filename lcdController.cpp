@@ -52,6 +52,12 @@ double deltaTime = 0;
 
 int currentScreenScaling = 1;
 
+
+filterMode currentFilterMode = None;
+uint32_t** filterBuffer;
+unsigned int bufferScale = 4;
+
+
 void initWindow() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
@@ -261,11 +267,38 @@ void pushBufferToWindow() {
 	}
 
 
+	if (currentFilterMode == Glow)
+	{
+
+		uint32_t glowColor = 0x0f0f0f0f;//color to be added to surrounding pixels. Decreased by 1 for each pixel away
+		if (filterBuffer == nullptr)
+		{
+			filterBuffer = (uint32_t**)malloc(sizeof(uint32_t) * SCREEN_HEIGHT * SCREEN_WIDTH * bufferScale); //allocate buffer for filters
+			if (filterBuffer == nullptr)
+				logger::logErrorNoData("Could not allocate buffer for filter!");
+		}
+
+		for (uint8_t i = 0; i < SCREEN_HEIGHT; i++)
+		{
+			for (uint8_t j = 0; j < SCREEN_WIDTH; j++)
+			{
+				if (pixelArray[SCREEN_HEIGHT][SCREEN_WIDTH] == color3)
+				{
+					
+				}
+			}
+		}
+	}
+	else if (currentFilterMode == None)
+	{
+		free(filterBuffer);
+
+		//render normal screen without scaling
+		renderSurface = SDL_CreateRGBSurfaceFrom(pixelArray, SCREEN_WIDTH * currentScreenScaling, SCREEN_HEIGHT * currentScreenScaling, 32, 4 * SCREEN_WIDTH*currentScreenScaling, 0x0000ff, 0x00ff00, 0xff0000, 0);
+	}
 
 
 	//create SDL surface from pixel array, then push to screen
-    renderSurface = SDL_CreateRGBSurfaceFrom(pixelArray, SCREEN_WIDTH * currentScreenScaling, SCREEN_HEIGHT * currentScreenScaling, 32, 4*SCREEN_WIDTH*currentScreenScaling, 0x0000ff,0x00ff00,0xff0000,0 );
-	
 	SDL_BlitScaled(renderSurface, NULL, screenSurface, &destRec);
     SDL_UpdateWindowSurface(window);
 

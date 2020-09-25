@@ -50,6 +50,9 @@ extern SDL_Surface* renderSurface;
 
 extern int currentScreenScaling;
 
+extern unsigned int bufferScale;
+enum filterMode { None, Glow };
+
 void initWindow();
 void updateScreen(uint8_t cycleCount);
 

@@ -41,6 +41,8 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
   - Savestates
   - Rewind
   - Advanced debugging features such as memory dumping 
+  - Screen upscaling/filters
+  - UI
 
 
 ## Compatibility
@@ -62,7 +64,9 @@ GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for 
 | Tetris 2                    | Fully playable.                                                                                                                                                                            |
  
 ## Known Issues
-  - Sound is buggy, and can sometime desync with the video. It is very dependent upon CPU speed. Faster systems will cause the sound to play faster and at a higher pitch. This also seems to affect Windows more than Linux, possibly due to the higher precision of usleep vs. SDL_Delay. This is slightly fixed with the change to just waiting until the SDL high-precision counter increments enough times, but it still isn't perfect.
+  - Sound is buggy, and can sometime desync with the video. It is very dependent upon CPU speed. Faster systems will cause the sound to play faster and at a higher pitch. This also seems to affect Windows more than Linux, possibly due to the higher precision of usleep vs. SDL_Delay.
+  - Incomplete timer support causes some games to hang.
+  - Not all MBC configurations are supported.
 
 ## Misc.
 
