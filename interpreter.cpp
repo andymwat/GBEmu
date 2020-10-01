@@ -727,7 +727,7 @@ void loadTestRom(string path)//calculates number of banks based on cartridge MBC
 	std::ifstream infile(path);
 	if (!infile.good())
 	{
-		cout << "ROM file not found!" << endl;
+		logger::logErrorNoData("ROM file not found!");
 		throw "ROM not found, exiting...";
 	}
 	uint8_t mbc, banks, ramBanks;

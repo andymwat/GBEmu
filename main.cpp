@@ -61,34 +61,30 @@ SDL_Event events;
 int main(int argc, char* args[])
 {
 	cout << "GBEmu  Copyright (C) 2020 Andrew Watson\nThis program comes with ABSOLUTELY NO WARRANTY; for details, see the included LICENSE file or visit https://www.gnu.org/licenses/ \n";
-    cout<<"Initializing window..."<<endl;
+    logger::logInfo("Initializing window...");
     initWindow();
-    cout << "Initializing audio..." << endl;
+	logger::logInfo("Initializing audio...");
     if (initAudio() != 0)
     {
+		logger::logErrorNoData("Could not initialize audio!");
         return -1;
     }
     lcdEnable = true;
     a=b=c=d=e=f=h=l=sp=pc=0;
-    cout<<"Loading ROM..."<<endl;
-    //loadTestRom("/home/andrew/Downloads/GBemu/cpu_instrs/cpu_instrs.gb");
-    //loadTestRom("/home/andrew/Downloads/GBemu/tetris.gb");
-    //loadTestRom("/home/andrew/Downloads/GBemu/sml.gb");
-    //loadTestRom("/home/andrew/Downloads/GBemu/cpu_instrs/individual/11-op a,(hl).gb");
-    //loadTestRom("/home/andrew/Downloads/GBemu/drMario.gb");
-    //loadTestRom("/home/andrew/Downloads/GBemu/kirby.gb");
-    //loadTestRom("/home/andrew/Downloads/GBemu/loz.gb");
-    //loadTestRom("/home/andrew/Downloads/GBemu/pkmn.gb");
-    //loadTestRom("/home/andrew/Downloads/GBemu/sml2.gb");
-    //loadTestRom("/home/andrew/Downloads/GBemu/new/dkl.gb");
-    //loadTestRom("/home/andrew/Downloads/DMG_ROM.bin");
+	logger::logInfo("Loading ROM...");
+	if (argc == 1)
+	{
+		loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/kirby.gb");
+	}
+	else if (argc == 2)
+	{
+		loadTestRom(args[1]);
+	}
+	else
+	{
+		cout << "Provide a ROM to run as an argument, or run GBEmu with no arguments to run the test ROM.\n";
+	}
 
-    //loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/instr_timing/instr_timing.gb");
-    //loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/11-op a,(hl).gb");
-    //loadTestRom("C:/Users/andym/Downloads/ROMs/gb-test-roms-master/cpu_instrs/individual/10-bit ops.gb");
-    //loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/pkmnYel.gbc");
-	loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/kirby.gb");
-    //loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/bgbtest.gb");
 
 
 
