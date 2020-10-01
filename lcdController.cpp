@@ -24,10 +24,6 @@
 
 #include <iostream>
 #include <fstream>
-#if defined PLATFORM_UNIX || defined(unix) || defined(__unix__) || defined(__unix)
-#include <unistd.h>
-#endif
-
 #include <SDL.h>
 #include "interpreter.h"
 #include "lcdController.h"
@@ -214,18 +210,10 @@ void pushBufferToWindow() {
 	{
 		if (deltaTime <= ((1.0 / 4194304) * fullFrameCycles) * 1000)//time for full frame of cycles in ms
 		{
-
-#if defined PLATFORM_UNIX || defined(unix) || defined(__unix__) || defined(__unix)
-
-			usleep((uint32_t)(((((1.0 / 4194304) * updateFrequency)) - ((NOW - LAST) / (double)SDL_GetPerformanceFrequency())) * 1000000));  //usleep for linux because it has microsecond accuracy
-
-#else
-
 			while (deltaTime + ((SDL_GetPerformanceCounter() - NOW) / (double)SDL_GetPerformanceFrequency()) * 1000 <= ((1.0 / 4194304) * fullFrameCycles) * 1000)
 			{
 				//wait until done
 			}
-#endif
 		}
 	}
 
@@ -298,8 +286,6 @@ void pushBufferToWindow() {
 		//render normal screen without scaling
 		renderSurface = SDL_CreateRGBSurfaceFrom(pixelArray, SCREEN_WIDTH * currentScreenScaling, SCREEN_HEIGHT * currentScreenScaling, 32, 4 * SCREEN_WIDTH*currentScreenScaling, 0x0000ff, 0x00ff00, 0xff0000, 0);
 	}
-
-
 	//create SDL surface from pixel array, then push to screen
 	SDL_BlitScaled(renderSurface, NULL, screenSurface, &destRec);
     SDL_UpdateWindowSurface(window);
