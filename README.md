@@ -2,6 +2,17 @@
 
 GBEmu is a simple Nintendo Gameboy (DMG) emulator written in C++, using SDL for the GUI. It can run a large portion of the Game Boy library, including popular titles such as Pokemon and Kirby.
 
+## Building
+
+To build from source, clone the repository and `cd` into the directory. From there, run the following command to build the Release target:
+```
+cmake -DCMAKE_BUILD_TYPE=Release -S . -B build/Release/ && cd build/Release/ && make
+```
+To build the Debug target, run:
+```
+cmake -DCMAKE_BUILD_TYPE=Debug -S . -B build/Debug/ && cd build/Debug/ && make
+```
+Run the `GBEmu` executable in the corresponding directory to run the emulator.
 
 ## Controls
  - Start: A
