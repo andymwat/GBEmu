@@ -5,6 +5,8 @@
 #Compiled files
 cmake-build-debug/**
 cmake-build-debug/**/*
+build/
+
 
 #Visual Studio files
 .vs/**
