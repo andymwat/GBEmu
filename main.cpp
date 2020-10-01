@@ -67,7 +67,12 @@ int main(int argc, char* args[])
     if (initAudio() != 0)
     {
 		logger::logErrorNoData("Could not initialize audio!");
-        return -1;
+		std::cout << "Continue [y/n]? ";
+		char input = getchar();
+		if (input != 'Y' && input != 'y')
+		{
+			return -1;
+		}
     }
     lcdEnable = true;
     a=b=c=d=e=f=h=l=sp=pc=0;
