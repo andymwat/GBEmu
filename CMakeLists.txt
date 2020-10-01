@@ -21,8 +21,15 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(CMAKE_CXX_STANDARD 17)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
+	
 if(WIN32)
+	set(CMAKE_CXX_FLAGS_DEBUG "-Od")
+	set(CMAKE_CXX_FLAGS_RELEASE "-Ox")
 
     # Find SDL2
     set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/modules")
@@ -37,6 +44,10 @@ if(WIN32)
     #INCLUDE(FindPkgConfig)
     #PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
 else()
+	set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+	set(CMAKE_CXX_FLAGS_DEBUG "-g")
+	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
     add_executable(GBEmu main.cpp main.h audioController.h audioController.cpp tests.cpp tests.h cartridge.cpp cartridge.h interpreter.cpp interpreter.h lcdController.cpp lcdController.h keyboardInput.cpp keyboardInput.h instructionDecoder.cpp bitIntstructionDecoder.cpp logger.cpp logger.h)
     INCLUDE(FindPkgConfig)
     PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
