@@ -24,7 +24,7 @@
 
 #include <iostream>
 #include <fstream>
-#ifdef PLATFORM_UNIX
+#if defined PLATFORM_UNIX || defined(unix) || defined(__unix__) || defined(__unix)
 #include <unistd.h>
 #endif
 
@@ -215,7 +215,7 @@ void pushBufferToWindow() {
 		if (deltaTime <= ((1.0 / 4194304) * fullFrameCycles) * 1000)//time for full frame of cycles in ms
 		{
 
-#ifdef PLATFORM_UNIX
+#if defined PLATFORM_UNIX || defined(unix) || defined(__unix__) || defined(__unix)
 
 			usleep((uint32_t)(((((1.0 / 4194304) * updateFrequency)) - ((NOW - LAST) / (double)SDL_GetPerformanceFrequency())) * 1000000));  //usleep for linux because it has microsecond accuracy
 
