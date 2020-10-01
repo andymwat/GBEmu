@@ -40,6 +40,9 @@ const uint16_t vBlankCycles = 4560;//4560 cycles for vblank
 const unsigned int fullFrameCycles = 70224;
 
 
+const unsigned int updateFrequency = 25000; //update every 25k cycles
+
+
 extern unsigned int gpuModeClock;
 extern uint8_t gpuMode;
 extern uint8_t line;

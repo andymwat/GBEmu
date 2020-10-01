@@ -55,7 +55,6 @@ using namespace std;
 SDL_Event events;
 
 
-const unsigned int updateFrequency = 25000; //update every 25k cycles
 
 
 

@@ -24,7 +24,9 @@
 
 #include <iostream>
 #include <fstream>
-
+#ifdef PLATFORM_UNIX
+#include <unistd.h>
+#endif
 
 #include <SDL.h>
 #include "interpreter.h"
