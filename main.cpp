@@ -115,25 +115,28 @@ int main(int argc, char* args[])
             return 0;
 
     }
-
-    std::cout << "Loading from file: " << filePath << ".sav\n";
+    std::string str = "Loading from file: " + filePath + ".sav";
+    logger::logInfo(str);
     std::string savePath = filePath + ".sav";
     FILE* file = fopen(savePath.c_str(), "rb");
     if (file == nullptr)
     {
-        std::cout << "Failed to open save file! This is normal the first time loading a ROM, if a file wasn't saved previously, or if the ROM has no battery-backed RAM.\n";
+        logger::logWarningNoData( "Failed to open save file! This is normal the first time loading a ROM, if a file wasn't saved previously, or if the ROM has no battery-backed RAM.");
     }
     else
     {
-        fread(currentCartridge->ramBanks, sizeof(uint8_t), currentCartridge->totalRamSize, file);
+        int result = fread(currentCartridge->ramBanks, sizeof(uint8_t), currentCartridge->totalRamSize, file);
+        if (result != currentCartridge->totalRamSize)
+        {
+            logger::logErrorNoData("Error reading from save file!");
+        }
         fclose(file);
-        std::cout << "Loaded!\n";
     }
 
     try {
         m_TimerCounter = 1024;
         initRegisters();//ignore bootrom
-        cout<<"ROM loaded. Starting emulation..."<<endl;
+        logger::logInfo("ROM loaded. Starting emulation...");
         //usleep(50000);
         while(true)
         {

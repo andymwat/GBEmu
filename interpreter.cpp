@@ -723,7 +723,8 @@ uint8_t handleIORead(uint16_t address) {
 void loadTestRom(string path)//calculates number of banks based on cartridge MBC number
 {
 	filePath = path;
-	std::cout << "Loading test ROM: " << path << "...\n";
+	std::string str = "Loading test ROM: " + path;
+	logger::logInfo(str);
 	std::ifstream infile(path);
 	if (!infile.good())
 	{
@@ -739,11 +740,11 @@ void loadTestRom(string path)//calculates number of banks based on cartridge MBC
 	infile.read((char*)(&banks), 1);
 	infile.read((char*)(&ramBanks), 1);
 
-	cout << "ROM MBC: 0x" <<hex<< (uint16_t)(mbc)<<dec << endl << "ROM Bank identifier: 0x" <<hex<< (uint16_t)(banks)<<dec << endl;
-	cout << "RAM banks identifier: 0x" <<hex<< (uint16_t)(ramBanks)<<dec << endl;
+	//cout << "ROM MBC: 0x" <<hex<< (uint16_t)(mbc)<<dec << endl << "ROM Bank identifier: 0x" <<hex<< (uint16_t)(banks)<<dec << endl;
+	//cout << "RAM banks identifier: 0x" <<hex<< (uint16_t)(ramBanks)<<dec << endl;
 	currentCartridge = new cartridge(mbc, banks, ramBanks);
 	infile.seekg(0, std::ios::beg);
-	cout << "File size is " << to_string(length) << " bytes." << endl;
+	//cout << "File size is " << to_string(length) << " bytes." << endl;
 	infile.read((char*)(currentCartridge->banks), length);
 	rom0 = currentCartridge->banks;//pointer to beginning of banks
 	cartRam = currentCartridge->ramBanks;
