@@ -491,12 +491,11 @@ int initAudio(void)
 	audioSpec.userdata = NULL;
 
 
-
-
 	dev = 1; //Default?
 	//Open the audio device, forcing the desired format 
 	if (SDL_OpenAudio(&audioSpec, NULL) < 0) {
-		fprintf(stderr, "Couldn't open audio: %s\n", SDL_GetError());
+	    logger::logErrorNoData("Couldn't open audio! Error:");
+		fprintf(stderr, "%s\n", SDL_GetError());
 		return(-1);
 	}
 	SDL_PauseAudio(0);
@@ -518,7 +517,6 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 	case 0xff12:
 		c1Envelope = data;
 		c1CurrentEnvelopeVolume = (data >> 4);
-
 		break;
 	case 0xff13:
 		c1FrequencyL = data;
@@ -538,7 +536,6 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 		c2Duty = data;
 		c2DutyChannel = data >> 6;
 		c2Length = 4194304 * ((64 - (data & 0x3f)) * (((double)1) / 256));
-		
 		break;
 	case 0xff17:
 		c2Envelope = data;

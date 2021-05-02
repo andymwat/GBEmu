@@ -56,8 +56,6 @@ SDL_Event events;
 
 
 
-
-
 int main(int argc, char* args[])
 {
 	cout << "GBEmu  Copyright (C) 2020 Andrew Watson\nThis program comes with ABSOLUTELY NO WARRANTY; for details, see the included LICENSE file or visit https://www.gnu.org/licenses/ \n";
@@ -92,29 +90,6 @@ int main(int argc, char* args[])
 	
 
 
-
-    if (RUN_DEBUG_TESTS)
-    {
-            std::vector<uint8_t> instructions = { 0x00, 0x00, 0x04,0x05,0x14,0x15,0x24,0x25 };
-            cpuRegisterState startState, endState;
-            startState.a = startState.b = startState.c = startState.d = startState.e = startState.f = startState.h = startState.l = 0x00;
-            startState.pc = 0x0000;
-            startState.sp = 0x0000;
-
-            endState = startState;
-            endState.f = 0xc0;
-
-            if (runTest(startState, instructions, endState) == 0)
-            {
-                    cout << "All tests executed successfully.\n";
-            }
-
-#if defined(_WIN32)
-            system("pause");
-#endif
-            return 0;
-
-    }
     std::string str = "Loading from file: " + filePath + ".sav";
     logger::logInfo(str);
     std::string savePath = filePath + ".sav";
@@ -205,13 +180,11 @@ int main(int argc, char* args[])
                     }
 
 
-
-
                     if (saveToFile && !saved)
                     {
                         saveToFile = false;
                         std::cout << "Saving to file: " << filePath << ".sav\n";
-                        std::string savePath = filePath + ".sav";
+                        savePath = filePath + ".sav";
                         FILE* file = fopen(savePath.c_str(), "wb");
                         fwrite(currentCartridge->ramBanks, sizeof(uint8_t), currentCartridge->totalRamSize, file);
                         fclose(file);
@@ -222,7 +195,7 @@ int main(int argc, char* args[])
                     {
                         loadFromFile = false;
                         std::cout << "Loading from file: " << filePath << ".sav\n";
-                        std::string savePath = filePath + ".sav";
+                        savePath = filePath + ".sav";
                         FILE* file = fopen(savePath.c_str(), "rb");
                         if (file == nullptr)
                         {

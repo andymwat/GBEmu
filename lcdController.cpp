@@ -164,7 +164,9 @@ void updateScreen(uint8_t cycleCount) {
                 }
             }
             break;
-
+        default:
+            logger::logError("Invalid GPU mode detected!", pc, gpuMode);
+            break;
     }
     switch (gpuMode)
     {
@@ -180,6 +182,9 @@ void updateScreen(uint8_t cycleCount) {
         case 3:
             lcdStatus = ((lcdStatus & 0xfc) | 0x03);//set bits 0 and 1
             break;
+        default:
+            logger::logError("Invalid GPU mode detected!", pc, gpuMode);
+            break;
     }
 }
 
@@ -192,16 +197,14 @@ void renderScanline() {
     {
         renderSprites();
     }
-    //  cout<<"\033[1;32mINFO:\033[0m Rendering scanline " <<to_string(line)<<endl;
 }
 
 void pushBufferToWindow() {
 
-
 	//delay to sync up with realtime
 	LAST = NOW;
 	NOW = SDL_GetPerformanceCounter();
-	deltaTime = ((NOW - LAST) * 1000 / (double)SDL_GetPerformanceFrequency()); //time for frame in ms
+	deltaTime = (NOW - LAST) * 1000 / (double)SDL_GetPerformanceFrequency(); //time for frame in ms
 	//string str = "Frame time: ";
 	//str += to_string(deltaTime) + "ms";
 	//logger::logInfo(str);
@@ -289,11 +292,6 @@ void pushBufferToWindow() {
 	//create SDL surface from pixel array, then push to screen
 	SDL_BlitScaled(renderSurface, NULL, screenSurface, &destRec);
     SDL_UpdateWindowSurface(window);
-
-	
-
-
-	
 
 
 }
@@ -489,8 +487,6 @@ void renderSprites() {
             }
         }
     }
-
-
 
 }
 

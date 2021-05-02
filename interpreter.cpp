@@ -363,14 +363,7 @@ void handleRomWrite(uint16_t address, uint8_t data)
 		}
 		else if (address <= 0x1fff)//ram enable
 		{
-			if ((data & 0x0f) == 0x0a)
-			{
-				ramEnable = true;
-			}
-			else
-			{
-				ramEnable = false;
-			}
+            ramEnable = (data & 0x0f) == 0x0a;
 		}
 		
 		else
@@ -385,14 +378,7 @@ void handleRomWrite(uint16_t address, uint8_t data)
 		
 		if (address <= 0x1fff)//RAM and Timer enable
 		{
-			if ((data & 0x0f) == 0x0a)
-			{
-				ramEnable = true;
-			}
-			else
-			{
-				ramEnable = false;
-			}
+            ramEnable = (data & 0x0f) == 0x0a;
 		}
 		else if (address >= 0x2000 && address <= 0x3fff)
 		{
@@ -430,14 +416,7 @@ void handleRomWrite(uint16_t address, uint8_t data)
 		}
 		else if (address <= 0x1fff)//ram enable
 		{
-			if ((data & 0x0f) == 0x0a)
-			{
-				ramEnable = true;
-			}
-			else
-			{
-				ramEnable = false;
-			}
+            ramEnable = (data & 0x0f) == 0x0a;
 		}
 		else
 		{
@@ -827,6 +806,8 @@ void dumpRegisters()
 	cout << "pc:\t" << to_string(pc) << "\t" << "0x" << hex << pc << dec << endl;
 
 }
+
+// Initializes the registers to the state they would be in after the bootrom finishes.
 void initRegisters() {
 	pc = 0x100;
 	writePair(a, f, 0x01b0);
@@ -841,8 +822,6 @@ void initRegisters() {
 	writeToAddress(0xff47, 0xfc);
 	writeToAddress(0xff48, 0xff);
 	writeToAddress(0xff49, 0xff);
-
-
 
 }
 
