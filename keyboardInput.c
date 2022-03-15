@@ -22,8 +22,6 @@
 #include "keyboardInput.h"
 #include "interpreter.h"
 #include "lcdController.h"
-#include <SDL.h>
-#include <iostream>
 #include "logger.h"
 
 uint8_t joypadStateInternal;
@@ -54,8 +52,10 @@ bool b_up, b_down, b_left, b_right, b_a, b_b, b_start, b_select, b_increaseScree
 bool screenSizePressedLastFrame = false;
 void checkKeyboardNew()
 {
-	//SDL_PumpEvents();
-
+    //TODO: check input
+    logErrorNoData("Unimplemented input check");
+    exit(-1);
+    /*
 	uint8_t *keyboardState = (uint8_t*)SDL_GetKeyboardState(NULL); //get keyboard state
 	b_up = keyboardState[SDL_SCANCODE_UP];
 	b_down = keyboardState[SDL_SCANCODE_DOWN];
@@ -72,8 +72,12 @@ void checkKeyboardNew()
 	saveToFile = keyboardState[SDL_SCANCODE_P];
 	b_increaseScreenSize = keyboardState[SDL_SCANCODE_RIGHTBRACKET];
 	b_decreaseScreenSize = keyboardState[SDL_SCANCODE_LEFTBRACKET];
+    */
 
-
+    //TODO: load and save from file
+    logErrorNoData("Unimplemented load and save to file.");
+    exit(-1);
+    /*
 	if (!keyboardState[SDL_SCANCODE_P])
 	{
 		saved = false;
@@ -83,21 +87,7 @@ void checkKeyboardNew()
 	{
 		loaded = false;
 	}
-
-	if (!screenSizePressedLastFrame && b_increaseScreenSize)
-	{
-		//increaseScreenSize();
-	}
-	if (!screenSizePressedLastFrame && b_decreaseScreenSize)
-	{
-		//decreaseScreenSize();
-	}
-
-	screenSizePressedLastFrame = false;
-	if (b_increaseScreenSize || b_decreaseScreenSize)
-	{
-		screenSizePressedLastFrame = true;
-	}
+    */
 
 
 	joypadRegister |= 0xf;//set bottom for bits, to be cleared below
@@ -141,7 +131,7 @@ void checkKeyboardNew()
 	}
 	if ((TestBit(joypadRegister, 5))&& (TestBit(joypadRegister, 4)))
 	{
-		//logger::logWarningNoData("No joypad selection set!");
+		//logWarningNoData("No joypad selection set!");
 	}
 
 	//test to see if button was pressed just this frame
@@ -156,80 +146,11 @@ void checkKeyboardNew()
 
 	if (TestBit(interruptFlag, 4))
 	{
-		//logger::logInfo("Requesting joypad interrupt.");
+		//logInfo("Requesting joypad interrupt.");
 	}
-	//std::cout << "JOYPAD: 0x" << std::hex<<(uint16_t)joypadRegister<<std::dec << std::endl;
 	previousJoypadState = joypadRegister;
 }
 
-
-void checkKeyboard(SDL_Event events) 
-{
-    if (events.type == SDL_KEYDOWN)
-    {
-		logger::logInfo("[JOYPAD]: Got key down.");
-        switch (events.key.keysym.sym)
-        {
-            case SDLK_UP:
-                KeyPressed(2);
-                break;
-            case SDLK_DOWN:
-                KeyPressed(3);
-                break;
-            case SDLK_LEFT:
-                KeyPressed(1);
-                break;
-            case SDLK_RIGHT:
-                KeyPressed(2);
-                break;
-
-            case SDLK_a:
-                KeyPressed(4);
-                break;
-            case SDLK_s:
-                KeyPressed(5);
-                break;
-            case SDLK_RETURN:
-                KeyPressed(7);
-                break;
-            case SDLK_SPACE:
-                KeyPressed(6);
-                break;
-        }
-    }
-    if (events.type == SDL_KEYUP)
-    {
-		logger::logInfo("[JOYPAD]: Got key up.");
-        switch (events.key.keysym.sym)
-        {
-            case SDLK_UP:
-                KeyReleased(2);
-                break;
-            case SDLK_DOWN:
-                KeyReleased(3);
-                break;
-            case SDLK_LEFT:
-                KeyReleased(1);
-                break;
-            case SDLK_RIGHT:
-                KeyReleased(2);
-                break;
-
-            case SDLK_a:
-                KeyReleased(4);
-                break;
-            case SDLK_s:
-                KeyReleased(5);
-                break;
-            case SDLK_RETURN:
-                KeyReleased(7);
-                break;
-            case SDLK_SPACE:
-                KeyReleased(6);
-                break;
-        }
-    }
-}
 
 uint8_t getJoypadState() {
     joypadRegister ^= 0xff;

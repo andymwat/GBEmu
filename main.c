@@ -15,9 +15,6 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <stdio.h>
-#include <stdlib.h>
-
 //Define as true to run tests
 #define RUN_DEBUG_TESTS false
 
@@ -30,7 +27,6 @@
 #include "logger.h"
 
 #include "audioController.h"
-#include "tests.h"
 
 
 const char* testRomPath = "C:/Users/andym/Downloads/ROMs/GBEmu/kirby.gb";

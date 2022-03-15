@@ -15,14 +15,9 @@
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "hicpp-signed-bitwise"
 #include "audioController.h"
 #include "lcdController.h"
-#include <bitset>
 
-SDL_AudioSpec audioSpec;
-SDL_AudioDeviceID dev;
 
 
 const uint16_t SAMPLES = 1024;
@@ -384,11 +379,10 @@ void updateAudio(uint8_t cycles)
 
 			//TODO
 			//Fix popping (when buffer runs out)
-			if (SDL_GetQueuedAudioSize(1) <= sizeof(audioBuffer) * 2) //only push to queue if it's nearly empty (avoid infinitely growing queue)
-			{
-				SDL_QueueAudio(1, audioBuffer, sizeof(audioBuffer));
 
-			}
+            //TODO: Audio push to buffer
+            logErrorNoData("Unimplemented audio push to buffer.");
+            exit(-1);
 		}
 
 		mixAudio();
@@ -425,7 +419,7 @@ void mixAudio()
 
 	if (c1CurrentEnvelopeVolume >= 16 || c2CurrentEnvelopeVolume >= 16 || c4CurrentEnvelopeVolume >= 16) //sanity check
 	{
-		logger::logErrorNoData("Volume error");
+		logErrorNoData("Volume error");
 	}
 
 
@@ -481,24 +475,10 @@ void mixAudio()
 
 int initAudio(void)
 {
+    //TODO: Audio init
+    logErrorNoData("Unimplemented audio init.");
+    exit(-1);
 
-	SDL_Init(SDL_INIT_AUDIO);
-	audioSpec.freq = 48000;
-	audioSpec.format = AUDIO_S16;
-	audioSpec.channels = 2;    //mono
-	audioSpec.samples = SAMPLES;  
-	audioSpec.callback = NULL; //fill later
-	audioSpec.userdata = NULL;
-
-
-	dev = 1; //Default?
-	//Open the audio device, forcing the desired format 
-	if (SDL_OpenAudio(&audioSpec, NULL) < 0) {
-	    logger::logErrorNoData("Couldn't open audio! Error:");
-		fprintf(stderr, "%s\n", SDL_GetError());
-		return(-1);
-	}
-	SDL_PauseAudio(0);
 	return  0;
 }
 
@@ -624,7 +604,7 @@ void writeToAudioRegister(uint16_t address, uint8_t data)
 		}
 		else
 		{
-			//logger::logWarning("Unimplemented sound address", address, data);
+			//logWarning("Unimplemented sound address", address, data);
 		}
 		break;
 	}
@@ -650,11 +630,9 @@ uint8_t readFromAudioRegister(uint16_t address)
 		return 0xff;
 		break;
 	default:
-		logger::logWarning("Unimplemented sound register read, returning 0x0.", address, 0x0);
+		logWarning("Unimplemented sound register read, returning 0x0.", address, 0x0);
 		return 0;
 		break;
 	}
 
 }
-
-#pragma clang diagnostic pop

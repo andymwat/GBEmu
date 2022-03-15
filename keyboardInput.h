@@ -23,9 +23,11 @@
 #ifndef GBEMU_KEYBOARDINPUT_H
 #define GBEMU_KEYBOARDINPUT_H
 
-#include <cstdint>
-#include <SDL.h>
-void checkKeyboard(SDL_Event events);
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
 void checkKeyboardNew();
 extern uint8_t keys;
 //void

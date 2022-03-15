@@ -20,11 +20,10 @@
 //
 // Created by andrew on 11/25/19.
 //
-#include <iostream>
+#include <stdio.h>
 #include "interpreter.h"
 #include "lcdController.h"
 
-using namespace std;
 void executePrefixedInstruction(uint8_t opcode)
 {
     uint8_t targetRegister = opcode & 0x07;     //bottom 3 bits are which register (b,c,d,e,h,l,(hl),a
@@ -71,7 +70,8 @@ void executePrefixedInstruction(uint8_t opcode)
                 break;
             default:
                 reg = &a;
-                throw "Error in bit instruction, invalid target register";
+                logErrorNoData("Error in bit instruction, invalid target register");
+                exit(-1);
         }
     }
     else //read from address in hl
@@ -229,8 +229,6 @@ void executePrefixedInstruction(uint8_t opcode)
     else
     {
         errorAddress = -1;
-        cout<<"Suffix: 0x"<<hex<<(uint16_t)(opcode)<<dec<<endl;
-        throw "PREFIXED OPCODE NOT IMPLEMENTED";
+        logErrorNoData("PREFIXED OPCODE NOT IMPLEMENTED");
     }
 }
-#pragma clang diagnostic pop

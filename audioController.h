@@ -17,10 +17,11 @@
  */
 #ifndef GBEMU_AUDIOCONTROLLER_H
 #define GBEMU_AUDIOCONTROLLER_H
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <SDL.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <math.h>
 #include "logger.h"
 
 int initAudio(void);
