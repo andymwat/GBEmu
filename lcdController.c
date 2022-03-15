@@ -22,16 +22,12 @@
 // Created by andrew on 11/17/19.
 //
 
-#include <iostream>
-#include <fstream>
-#include <SDL.h>
+#include <stdio.h>
 #include "interpreter.h"
 #include "lcdController.h"
 #include "keyboardInput.h"
 
 
-
-using namespace std;
 
 uint32_t pixelArray[SCREEN_HEIGHT][SCREEN_WIDTH];
 
@@ -39,42 +35,16 @@ unsigned int gpuModeClock = 0;
 uint8_t gpuMode = 0;
 uint8_t line=0;
 
-SDL_Window* window = nullptr;
-SDL_Surface* screenSurface = nullptr;
-SDL_Surface* renderSurface = nullptr;
-
-
-Uint64 NOW = SDL_GetPerformanceCounter();
-Uint64 LAST = 0;
 double deltaTime = 0;
 
 int currentScreenScaling = 1;
 
 
-filterMode currentFilterMode = None;
-uint32_t** filterBuffer;
-unsigned int bufferScale = 4;
-
 
 void initWindow() {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-    {
-        cout<<"Could not initialize, error: " <<SDL_GetError()<<endl;
-        throw "SDL could not initialize";
-    } else{
-        window = SDL_CreateWindow( "GBEmu", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-        if (window == NULL)
-        {
-            cout <<"Window could not be created, error: "<<SDL_GetError()<<endl;
-            throw "Window could not initialize";
-        } else
-        {
-            screenSurface = SDL_GetWindowSurface(window);
-            SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xff,0xff,0xff));
-            SDL_UpdateWindowSurface(window);
-        }
-    }
-
+    //TODO: VIDEO INITIALIZATION GOES HERE
+    printf("Unimplemented video initialization");
+    exit(-1);
 }
 
 void updateScreen(uint8_t cycleCount) {
@@ -165,7 +135,7 @@ void updateScreen(uint8_t cycleCount) {
             }
             break;
         default:
-            logger::logError("Invalid GPU mode detected!", pc, gpuMode);
+            logError("Invalid GPU mode detected!", pc, gpuMode);
             break;
     }
     switch (gpuMode)
@@ -183,7 +153,7 @@ void updateScreen(uint8_t cycleCount) {
             lcdStatus = ((lcdStatus & 0xfc) | 0x03);//set bits 0 and 1
             break;
         default:
-            logger::logError("Invalid GPU mode detected!", pc, gpuMode);
+            logError("Invalid GPU mode detected!", pc, gpuMode);
             break;
     }
 }
@@ -201,98 +171,26 @@ void renderScanline() {
 
 void pushBufferToWindow() {
 
-	//delay to sync up with realtime
-	LAST = NOW;
-	NOW = SDL_GetPerformanceCounter();
-	deltaTime = (NOW - LAST) * 1000 / (double)SDL_GetPerformanceFrequency(); //time for frame in ms
-	//string str = "Frame time: ";
-	//str += to_string(deltaTime) + "ms";
-	//logger::logInfo(str);
+    //TODO: Delay to sync with realtime
+    logErrorNoData("Unimplemented sync to realtime.");
+	exit(-1);
+
 
 	if (!fastForward)
 	{
 		if (deltaTime <= ((1.0 / 4194304) * fullFrameCycles) * 1000)//time for full frame of cycles in ms
 		{
-			while (deltaTime + ((SDL_GetPerformanceCounter() - NOW) / (double)SDL_GetPerformanceFrequency()) * 1000 <= ((1.0 / 4194304) * fullFrameCycles) * 1000)
-			{
-				//wait until done
-			}
+		    //while (frameNotDone) {do nothing}
 		}
 	}
 
-	NOW = SDL_GetPerformanceCounter(); //reset timer to begin timing the next frame
+	//TODO: Reset timer
+    logErrorNoData("Unimplemented reset of timer.");
+    exit(-1);
 
-	
-	SDL_FreeSurface(renderSurface);
-
-	screenSurface = SDL_GetWindowSurface(window);
-
-	SDL_Rect destRec;
-
-	float scaleFactor;
-	bool widthBigger;
-	screenSurface->w > screenSurface->h ? widthBigger = true : widthBigger = false;
-
-	if (widthBigger) //if width is the bigger of the two dimensions, then scale GB screen height
-	{
-		scaleFactor = screenSurface->h / (float)SCREEN_HEIGHT;
-	}
-	else
-	{
-		scaleFactor = screenSurface->w / (float)SCREEN_WIDTH;
-	}
-
-	widthBigger ? destRec.h = screenSurface->h : destRec.h = SCREEN_HEIGHT * scaleFactor;
-	widthBigger ? destRec.w = SCREEN_WIDTH * scaleFactor : destRec.w = screenSurface->w;
-
-	widthBigger ? destRec.x = ((screenSurface->w) / 2) - ((SCREEN_WIDTH * scaleFactor) / 2) : destRec.x = 0;
-	widthBigger ? destRec.y = 0 : destRec.y = ((screenSurface->h) / 2) - ((SCREEN_HEIGHT* scaleFactor) / 2);
-
-	//sanity check
-	if (destRec.x < 0 || destRec.y < 0 || destRec.h < 0 || destRec.w < 0 || destRec.h > screenSurface->h || destRec.w > screenSurface->w)
-	{
-		//logger::logErrorNoData("Failed scaling sanity check!");
-		//fill the screen if something goes wrong. Only happens when the scaling is almost the same, so doesnt do much anyways
-		destRec.x = 0;
-		destRec.y = 0;
-		destRec.w = screenSurface->w;
-		destRec.h = screenSurface->h;
-	}
-
-
-	if (currentFilterMode == Glow)
-	{
-
-		uint32_t glowColor = 0x0f0f0f0f;//color to be added to surrounding pixels. Decreased by 1 for each pixel away
-		if (filterBuffer == nullptr)
-		{
-			filterBuffer = (uint32_t**)malloc(sizeof(uint32_t) * SCREEN_HEIGHT * SCREEN_WIDTH * bufferScale); //allocate buffer for filters
-			if (filterBuffer == nullptr)
-				logger::logErrorNoData("Could not allocate buffer for filter!");
-		}
-
-		for (uint8_t i = 0; i < SCREEN_HEIGHT; i++)
-		{
-			for (uint8_t j = 0; j < SCREEN_WIDTH; j++)
-			{
-				if (pixelArray[SCREEN_HEIGHT][SCREEN_WIDTH] == color3)
-				{
-					
-				}
-			}
-		}
-	}
-	else if (currentFilterMode == None)
-	{
-		free(filterBuffer);
-
-		//render normal screen without scaling
-		renderSurface = SDL_CreateRGBSurfaceFrom(pixelArray, SCREEN_WIDTH * currentScreenScaling, SCREEN_HEIGHT * currentScreenScaling, 32, 4 * SCREEN_WIDTH*currentScreenScaling, 0x0000ff, 0x00ff00, 0xff0000, 0);
-	}
-	//create SDL surface from pixel array, then push to screen
-	SDL_BlitScaled(renderSurface, NULL, screenSurface, &destRec);
-    SDL_UpdateWindowSurface(window);
-
+    //TODO: push pixelArray to screen
+    logErrorNoData("Unimplemented push of buffer to screen");
+    exit(-1);
 
 }
 
@@ -490,23 +388,3 @@ void renderSprites() {
 
 }
 
-
-void increaseScreenSize()
-{
-	logger::logInfo("Increasing screen size.");
-	if (currentScreenScaling < 8)
-		currentScreenScaling++;
-
-	SDL_SetWindowSize(window, SCREEN_WIDTH * currentScreenScaling, SCREEN_HEIGHT * currentScreenScaling);
-}
-void decreaseScreenSize()
-{
-	logger::logInfo("Decreasing screen size.");
-	if (currentScreenScaling >= 1)
-		currentScreenScaling--;
-
-	SDL_SetWindowSize(window, SCREEN_WIDTH * currentScreenScaling, SCREEN_HEIGHT * currentScreenScaling);
-}
-
-
-#pragma clang diagnostic pop

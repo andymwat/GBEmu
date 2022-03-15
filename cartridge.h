@@ -22,25 +22,27 @@
 #ifndef GBEMU_CARTRIDGE_H
 #define GBEMU_CARTRIDGE_H
 
+#include <stdint.h>
+#include <stdlib.h>
+#include <math.h>
+#include <stdio.h>
 
-//#include <stdint-gcc.h>
-#include <cstdint>
-
-class cartridge {
-public:
+typedef struct {
     uint8_t mbcType;
     uint8_t bankCount;
     uint8_t* banks;
     uint8_t* ramBanks;
     uint8_t ramBankIdentifier;
 	uint16_t totalRamSize;
-    cartridge(uint8_t, uint8_t, uint8_t);
-    ~cartridge();
-    static const uint16_t bankSize = 16384;
-	static const uint16_t ramBankSize = 8192;
-private:
 
-};
+} cartridge;
 
+
+const uint16_t bankSize = 16384;
+const uint16_t ramBankSize = 8192;
+
+
+cartridge* newCartridge(uint8_t, uint8_t, uint8_t);
+void destroyCartridge(cartridge*);
 
 #endif //GBEMU_CARTRIDGE_H

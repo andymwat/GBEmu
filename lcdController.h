@@ -18,7 +18,6 @@
 //
 // Created by andrew on 11/17/19.
 //
-#include <SDL.h>
 
 #ifndef GBEMU_LCDCONTROLLER_H
 #define GBEMU_LCDCONTROLLER_H
@@ -47,14 +46,6 @@ extern unsigned int gpuModeClock;
 extern uint8_t gpuMode;
 extern uint8_t line;
 
-extern SDL_Window* window;
-extern SDL_Surface* screenSurface;
-extern SDL_Surface* renderSurface;
-
-extern int currentScreenScaling;
-
-extern unsigned int bufferScale;
-enum filterMode { None, Glow };
 
 void initWindow();
 void updateScreen(uint8_t cycleCount);
@@ -65,32 +56,26 @@ void pushBufferToWindow();
 void renderTiles();
 void renderSprites();
 
-void increaseScreenSize();
-void decreaseScreenSize();
 
-template <typename T>
-bool TestBit(T data, int position)
+bool TestBit(unsigned int data, int position)
 {
-    T mask = 1<<position;
+    unsigned int mask = 1<<position;
     return (data & mask) ? true : false;
 }
-template <typename T>
-T BitGetVal(T data, int position)
+unsigned int BitGetVal(unsigned int data, int position)
 {
-    T mask = 1<<position;
+    unsigned int mask = 1<<position;
     return (data&mask)? 1:0;
 }
-template <typename T>
-T BitReset(T data, int position)
+unsigned int BitReset(unsigned int data, int position)
 {
-    T mask = 1<<position;
+    unsigned int mask = 1<<position;
     data &= ~mask;
     return data;
 }
-template <typename T>
-T BitSet(T data, int position)
+unsigned int BitSet(unsigned int data, int position)
 {
-    T mask = 1<<position;
+    unsigned int mask = 1<<position;
     data |= mask;
     return data;
 }

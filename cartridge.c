@@ -21,17 +21,20 @@
 
 #include "cartridge.h"
 #include "main.h"
-#include <cmath>
-#include <iostream>
 #include "logger.h"
 
-//#include <unistd.h>
+void destroyCartridge(cartridge* cart) {
+    free(cart->banks);
+    free(cart->ramBanks);
+    free(cart);
+}
 
-cartridge::cartridge(uint8_t mbcNumber, uint8_t bankNum, uint8_t ramBankNum) {
-    this->mbcType = mbcNumber;
-    this->bankCount = bankNum;
-    this->ramBankIdentifier = ramBankNum;
-    this->banks = nullptr;
+cartridge* newCartridge(uint8_t mbcNumber, uint8_t bankNum, uint8_t ramBankNum) {
+    cartridge* cart = malloc(sizeof(cartridge));
+    cart->mbcType = mbcNumber;
+    cart->bankCount = bankNum;
+    cart->ramBankIdentifier = ramBankNum;
+    cart->banks = nullptr;
 	
     uint8_t numberOfBanks;
     if (bankNum <= 0x07)//2^(n+1) banks
@@ -40,53 +43,48 @@ cartridge::cartridge(uint8_t mbcNumber, uint8_t bankNum, uint8_t ramBankNum) {
     }
     else
     {
-	    throw "UNIMPLEMENTED BANK COUNT";
+	    logErrorNoData("Unimplemented bank count");
+	    exit(-1);
     }
-    this->banks = new uint8_t[bankSize*numberOfBanks];
+    cart->banks = malloc(bankSize*numberOfBanks);
 
     switch (ramBankNum)
     {
         case 0:
-            logger::logInfo("Loaded cart with no cartRAM.");
+            logInfo("Loaded cart with no cartRAM.");
             //std::cout<<"INFO: Loaded cart with no cartRAM.\n";
             break;
         case 1:
-            logger::logInfo("Loaded cart with 2048 bytes of RAM");
+            logInfo("Loaded cart with 2048 bytes of RAM");
             //std::cout<<"INFO: Loaded cart with 2048 bytes of cartRAM.\n";
-            this->ramBanks = new uint8_t[2048];
-			this->totalRamSize = 2048;
+            cart->ramBanks = malloc(2048);
+			cart->totalRamSize = 2048;
             break;
         case 2:
-            logger::logInfo("Loaded cart with 8192 bytes of RAM");
+            logInfo("Loaded cart with 8192 bytes of RAM");
             //std::cout<<"INFO: Loaded cart with 8192 bytes of cartRAM.\n";
-            this->ramBanks = new uint8_t[8192];
-			this->totalRamSize = 8192;
+            cart->ramBanks = malloc(8192);
+			cart->totalRamSize = 8192;
             break;
         case 3:
-            logger::logInfo("Loaded cart with 32768 bytes of RAM");
+            logInfo("Loaded cart with 32768 bytes of RAM");
            // std::cout<<"INFO: Loaded cart with 32768 bytes (4*8192 bytes) of cartRAM.\n";
-            this->ramBanks = new uint8_t[32768];
-			this->totalRamSize = 32768;
+            cart->ramBanks = malloc(32768);
+			cart->totalRamSize = 32768;
             break;
         default:
-            logger::logErrorNoData("ramBankNum is " + to_string(ramBankNum));
+            logError("Invalid ramBankNum ", 0xffff, ramBankNum);
             //std::cout<<"ramBankNum is 0x"<<std::hex<<(uint16_t)ramBankNum<<std::dec<<std::endl;
-            throw "Invalid ramBank identifier!";
+            exit(-1);
 
     }
 
-    if (banks == nullptr)
+    if (cart->banks == NULL)
     {
-        logger::logErrorNoData("Could not allocate memory for ROM.");
+        logErrorNoData("Could not allocate memory for ROM.");
         //std::cout<<"ERROR: Could not allocate memory for ROM."<<std::endl;
     }
-    logger::logInfo("Allocated " + to_string(bankSize*numberOfBanks) + " bytes for cartridge ROM.");
+    printf("Allocated 0x%X bytes for cartridge ROM.", bankSize*numberOfBanks);
     //std::cout<<"CARTRIDGE INFO: Allocated " <<to_string(bankSize*numberOfBanks)<<" bytes for cartridge ROM."<<std::endl;
     //std::cout<<"Bank size: "<<to_string(bankSize)<<std::endl;
-}
-cartridge::~cartridge() {
-    std::cout<<"Freeing ROM and RAM memory..."<<std::endl;
-   // usleep(5000000);
-    delete banks;
-    delete ramBanks;
 }

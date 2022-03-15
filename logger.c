@@ -19,15 +19,37 @@
 // Created by andrew on 1/31/20.
 //
 
-#ifndef GBEMU_LOGGER_H
-#define GBEMU_LOGGER_H
+#include <stdio.h>
+#include <stdint.h>
+#include "logger.h"
 
 
-    static void logInfo(const char* str);
-    static void logError(const char*,  uint16_t address, uint8_t data);
-    static void logWarning(const char* str,  uint16_t address, uint8_t data);
-    static void logErrorNoData(const char* str);
-	static void logWarningNoData(const char* str);
+
+void logInfo(const char* str) {
+    printf("\033[1;32m[INFO]: \033[0m%s\n", str);
+}
+
+void logError(const char* str, uint16_t address, uint8_t data) {
+
+    printf("\033[1;31m[ERROR]: \033[0m%s\n", str);
+    printf("Address: 0x%X, data: 0x%X", address, data);
+
+}
+
+void logWarning(const char* str, uint16_t address, uint8_t data) {
 
 
-#endif //GBEMU_LOGGER_H
+    printf("\033[1;33m[WARNING]: \033[0m%s\n", str);
+    printf("Address: 0x%X, data: 0x%X", address, data);
+
+}
+
+void logErrorNoData(const char* str) {
+    printf("\033[1;31m[ERROR]: \033[0m%s\n", str);
+}
+
+void logWarningNoData(const char* str)
+{
+    printf("\033[1;33m[WARNING]: \033[0m%s\n", str);
+}
+

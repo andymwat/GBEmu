@@ -16,13 +16,6 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "hicpp-exception-baseclass"
-#pragma ide diagnostic ignored "readability-static-accessed-through-instance"
-#pragma ide diagnostic ignored "hicpp-signed-bitwise"
-
-#include <iostream>
-#include <fstream>
 #include "cartridge.h"
 #include "interpreter.h"
 #include "lcdController.h"
@@ -30,21 +23,18 @@
 #include "main.h"
 #include "logger.h"
 #include "audioController.h"
-using namespace std;
 
-
-
-const bool LOG_VERBOSE = false; //warn about unimplemented features
-
+//warn about unimplemented features
+#define LOG_VERBOSE false
 
 
 time_t rawtime;
 struct tm * timeinfo;
 
 uint8_t rtcRegister = 0x00;
-std::string filePath;
+const char* filePath;
 int errorAddress = -1;
-std::string output = "Program output: \n";
+const char* output = "Program output: \n";
 bool enableInterrupts = true;
 bool lcdEnable = true;
 bool windowDisplayEnable = true;
@@ -116,7 +106,7 @@ void writeToAddress(uint16_t address, uint8_t data) {
 	else if (address == 0xff7f)
 	{
 		if (LOG_VERBOSE)
-			logger::logInfo("Wrote to 0xff7f, probably a ROM bug.");
+			logInfo("Wrote to 0xff7f, probably a ROM bug.");
 	}
 	else if (address >= 0xc000 && address <= 0xdfff)
 	{
@@ -140,7 +130,7 @@ void writeToAddress(uint16_t address, uint8_t data) {
 		{
 			if (currentCartridge->ramBankIdentifier == 0x00)//no cartRAM
 			{
-				logger::logWarningNoData(" Attempting to write to cartRAM on cartridge without RAM, ignoring.");
+				logWarningNoData(" Attempting to write to cartRAM on cartridge without RAM, ignoring.");
 
 			}
 			else {
@@ -151,13 +141,13 @@ void writeToAddress(uint16_t address, uint8_t data) {
 				else
 				{
 					if (LOG_VERBOSE)
-						logger::logWarning("RTC write ignored.", address, data);
+						logWarning("RTC write ignored.", address, data);
 				}
 			}
 		}
 		else
 		{
-			//logger::logWarningNoData(" Attempting to write to cartRAM while RAM is disabled, ignoring.");
+			//logWarningNoData(" Attempting to write to cartRAM while RAM is disabled, ignoring.");
 		}
 		//cout<<"WARNING: Cart RAM banking is not tested. Writing to address 0x" <<hex<<address<<dec<<".\n";
 
@@ -177,7 +167,7 @@ void writeToAddress(uint16_t address, uint8_t data) {
 	else if (address >= 0xfea0 && address <= 0xfeff)
 	{
 		if (LOG_VERBOSE)
-			logger::logInfo("Tried to write to an unused address, probably a ROM bug.");
+			logInfo("Tried to write to an unused address, probably a ROM bug.");
 	}
 	else if (address >= 0xfe00 && address <= 0xfe9f)
 	{
@@ -186,7 +176,7 @@ void writeToAddress(uint16_t address, uint8_t data) {
 	}
 	else {
 		errorAddress = address;
-		throw "WRITE ADDRESS NOT IMPLEMENTED";
+		logError("WRITE ADDRESS NOT IMPLEMENTED", address, data);
 	}
 
 }
@@ -220,7 +210,7 @@ uint8_t readFromAddress(uint16_t address) {
 		{
 			if (currentCartridge->ramBankIdentifier == 0x00)//no cartRAM
 			{
-				cout << "WARNING: Attempting to read from cartRAM on cartridge without RAM, returning 0xff...\n";
+				logWarning("Attempting to read from cartRAM on cartridge without RAM, returning 0xff.", address, 0xff);
 				return 0xff;
 			}
 			else {
@@ -250,14 +240,15 @@ uint8_t readFromAddress(uint16_t address) {
 						return (timeinfo->tm_yday & 0x0100) >> 8;
 						break;
 					default:
-						throw "RTC error!";
+					    logErrorNoData("RTC error!");
+                        exit(-1);
 					}
 				}
 			}
 		}
 		else
 		{
-			cout << "WARNING: Attempting to read from cartRAM while RAM is disabled, returning 0xff...\n";
+			logWarning("Attempting to read from cartRAM while RAM is disabled, returning 0xff.", address, 0xff);
 			return 0xff;
 		}
 	}
@@ -280,7 +271,7 @@ uint8_t readFromAddress(uint16_t address) {
 	else if (address >= 0xfea0 && address <= 0xfeff)
 	{
 		if (LOG_VERBOSE)
-			cout << "Tried to write to an unused address, probably a ROM bug." << endl;
+			logWarning("Tried to read from to an unused address, probably a ROM bug, returning 0xff.", address, 0xff);
 		return 0xff;
 	}
 	else if (address >= 0xfe00 && address <= 0xfe9f)
@@ -289,7 +280,8 @@ uint8_t readFromAddress(uint16_t address) {
 	}
 	else {
 		errorAddress = address;
-		throw "READ ADDRESS NOT IMPLEMENTED";
+		logError("Read address not imprlemented, returning 0xff.", address, 0xff);
+		return 0xff;
 	}
 }
 
@@ -298,7 +290,7 @@ void handleRomWrite(uint16_t address, uint8_t data)
 {
 	if (currentCartridge->mbcType == 0x00)//ROM only, 2 banks
 	{
-		logger::logWarning("Trying to write to ROM of cart without MBC", address, data);
+		logWarning("Trying to write to ROM of cart without MBC", address, data);
 	}
 	else if (currentCartridge->mbcType == 0x01)//mbc1
 	{
@@ -306,7 +298,7 @@ void handleRomWrite(uint16_t address, uint8_t data)
 		{
 			if (data == 0 || data == 0x20 || data == 0x40 || data == 0x60)
 			{
-				//logger::logWarning("Wrote 0x00, 0x20, 0x40, or 0x60 to bank select, translating to 0xX1.", address, data);
+				//logWarning("Wrote 0x00, 0x20, 0x40, or 0x60 to bank select, translating to 0xX1.", address, data);
 				switchBank(data+1); //bank 0x00 translates to 0x01, 0x20 to 0x21, etc
 			}
 			else
@@ -322,13 +314,13 @@ void handleRomWrite(uint16_t address, uint8_t data)
 			if ((data & 0x0f) == 0x0a)
 			{
 				if (LOG_VERBOSE)
-					logger::logInfo("CartRAM is enabled.");
+					logInfo("CartRAM is enabled.");
 				ramEnable = true;
 			}
 			else
 			{
 				if (LOG_VERBOSE)
-					logger::logInfo("CartRAM is disabled.");
+					logInfo("CartRAM is disabled.");
 				ramEnable = false;
 			}
 		}
@@ -341,18 +333,18 @@ void handleRomWrite(uint16_t address, uint8_t data)
 		{
 			if (data != 0)
 			{
-				logger::logError("Error selecting RAM banking mode, unimplemented.", address, data);
-				throw "Wrote to unimplemented RAM banking mode selection.";
+				logError("Error selecting RAM banking mode, unimplemented.", address, data);
+                exit(-1);
 			}
 			if (LOG_VERBOSE)
-				logger::logInfo("Now using upper bits of ROM bank.");
+				logInfo("Now using upper bits of ROM bank.");
 			ROM_RAM_Mode = false;
 		}
 		else
 		{
-			logger::logError("Error writing to ROM address.", address, data);
+			logError("Error writing to ROM address.", address, data);
 			errorAddress = address;
-			throw "Wrote to invalid ROM address on mbc1 only";
+            exit(-1);
 		}
 	}
 	else if (currentCartridge->mbcType == 0x03)//mbc1 + RAM + Battery
@@ -368,9 +360,9 @@ void handleRomWrite(uint16_t address, uint8_t data)
 		
 		else
 		{
-			logger::logError("Error writing to ROM address.", address, data);
+			logError("Error writing to ROM address.", address, data);
 			errorAddress = address;
-			throw "Wrote to unimplemented ROM address on mbc1+ram+battery";
+            exit(-1);
 		}
 	}
 	else if (currentCartridge->mbcType == 0x13 || currentCartridge->mbcType == 0x10) //mbc3 + RAM + battery (timer unimplemented)
@@ -404,7 +396,7 @@ void handleRomWrite(uint16_t address, uint8_t data)
 			}
 			else
 			{
-				logger::logError("Writing invalid data to RAM bank/RTC select!", address, data);
+				logError("Writing invalid data to RAM bank/RTC select!", address, data);
 			}
 		}
 	}
@@ -420,17 +412,17 @@ void handleRomWrite(uint16_t address, uint8_t data)
 		}
 		else
 		{
-			logger::logError("Error writing to ROM address.", address, data);
+			logError("Error writing to ROM address.", address, data);
 			errorAddress = address;
-			throw "Wrote to unimplemented ROM address on mbc5+ram+battery";
+            exit(-1);
 		}
 	}
 	
 	else
 	{
-		logger::logError("Error writing to ROM address.", address, data);
+		logError("Error writing to ROM address.", address, data);
 		errorAddress = address;
-		throw "Attempting to write to ROM on unimplemented MBC type.";
+		exit(-1);
 	}
 }
 
@@ -438,12 +430,12 @@ uint16_t concat(uint8_t high, uint8_t low) {
 	return high * 256 + low;
 }
 
-void writePair(uint8_t &x, uint8_t &y, uint16_t data) {
+void writePair(uint8_t *x, uint8_t *y, uint16_t data) {
 	//cout<<"data: " <<to_string(data) <<endl<<"x before: " <<to_string(x)<<endl;
-	x = ((data & 0xff00) >> 8);
+	*x = ((data & 0xff00) >> 8);
 	//cout<<" and after: " <<to_string(x)<<endl;
 	//cout<<"y before: " <<to_string(y)<<endl;
-	y = data & 0x00ff;
+	*y = data & 0x00ff;
 	//cout<<"and after " <<to_string(y)<<endl;
 	//cout<<"concat after: " <<to_string(concat(x,y))<<endl;
 }
@@ -451,22 +443,22 @@ void writePair(uint8_t &x, uint8_t &y, uint16_t data) {
 void handleSoundWrite(uint16_t address, uint8_t data)
 {
 	writeToAudioRegister(address, data);
-	//logger::logWarning("Sound registers write unimplemented, ignoring.", address, data);
+	//logWarning("Sound registers write unimplemented, ignoring.", address, data);
 }
 uint8_t handleSoundRead(uint16_t address)
 {
-	//logger::logWarning("Sound registers read unimplemented, returning 0x0", address, 0x0);
+	//logWarning("Sound registers read unimplemented, returning 0x0", address, 0x0);
 	return readFromAudioRegister(address);
 }
 
 void handleIOWrite(uint16_t address, uint8_t data) {
 	if (address == 0xff4d)
 	{
-		//logger::logWarning("Speed control register write unimplemented.", address, data);
+		//logWarning("Speed control register write unimplemented.", address, data);
 	}
 	else if (address == 0xff00)
 	{
-		//logger::logWarning("Joypad Write", pc, joypadRegister);
+		//logWarning("Joypad Write", pc, joypadRegister);
 		joypadRegister = data & 0xf0;
 	}
 	else if (address == 0xff42)
@@ -504,7 +496,7 @@ void handleIOWrite(uint16_t address, uint8_t data) {
 	else if (address == 0xff4f)
 	{
 		if (LOG_VERBOSE)
-			logger::logWarningNoData("VRAM bank registers write unimplemented.");
+			logWarningNoData("VRAM bank registers write unimplemented.");
 		//CGB only
 	}
 	else if (address == 0xff40)
@@ -540,11 +532,11 @@ void handleIOWrite(uint16_t address, uint8_t data) {
 		{
 			if (TestBit(tmc, 2))
 			{
-				logger::logInfo("Timer is enabled.");
+				logInfo("Timer is enabled.");
 			}
 			else
 			{
-				logger::logInfo("Timer is disabled.");
+				logInfo("Timer is disabled.");
 			}
 		}
 	}
@@ -568,7 +560,7 @@ void handleIOWrite(uint16_t address, uint8_t data) {
 			output += (char)tempOutput;
 		}
 		if (LOG_VERBOSE)
-		{			logger::logWarning("Serial control write unimplemented.", address, data);
+		{			logWarning("Serial control write unimplemented.", address, data);
 		}
 	}
 	else if (address == 0xff41)
@@ -586,30 +578,30 @@ void handleIOWrite(uint16_t address, uint8_t data) {
 	else if (address == 0xff56)
 	{
 		if (LOG_VERBOSE)
-			logger::logWarningNoData("Tried to write infrared port, ignoring.");
+			logWarningNoData("Tried to write infrared port, ignoring.");
 	}
 	else if (address == 0xff4f)
 	{
 		if (LOG_VERBOSE)
-			logger::logWarningNoData("Tried to write CGB VRAM bank, ignoring.");
+			logWarningNoData("Tried to write CGB VRAM bank, ignoring.");
 	}
 	else
 	{
 		errorAddress = address;
-		throw "IO WRITE NOT IMPLEMENTED";
+		logError("IO WRITE NOT IMPLEMENTED", address, data);
 	}
 }
 uint8_t handleIORead(uint16_t address) {
 	if (address == 0xff00)
 	{
 		// return getJoypadState();
-		 //logger::logWarning("Joypad Read", pc, joypadRegister);
+		 //logWarning("Joypad Read", pc, joypadRegister);
 		return joypadRegister;
 	}
 	else if (address == 0xff02)
 	{	
 		if (LOG_VERBOSE)
-			logger::logWarningNoData("Serial control register unimplemented, returning 0xff.");
+			logWarningNoData("Serial control register unimplemented, returning 0xff.");
 		return 0xff;
 	}
 	else if (address == 0xff01)
@@ -648,13 +640,13 @@ uint8_t handleIORead(uint16_t address) {
 	else if (address == 0xff4d)//cgb key1 (prepare speed switch)
 	{
 		if (LOG_VERBOSE)
-			logger::logWarning("Speed control registers read unimplemented, returning 0xff", address, 0xff);
+			logWarning("Speed control registers read unimplemented, returning 0xff", address, 0xff);
 		return 0xff;
 	}
 	else if (address == 0xff4f)
 	{
 		if (LOG_VERBOSE)
-			logger::logWarning("VRAM bank registers read unimplemented, returning 0xff", address, 0xff);
+			logWarning("VRAM bank registers read unimplemented, returning 0xff", address, 0xff);
 		return 0xff;
 		//CGB only
 	}
@@ -689,47 +681,44 @@ uint8_t handleIORead(uint16_t address) {
 	else if (address == 0xff56)
 	{
 		if (LOG_VERBOSE)
-			logger::logWarningNoData("Tried to read infrared port, returning 0xff.");
+			logWarningNoData("Tried to read infrared port, returning 0xff.");
 		return 0xff;
 	}
 	else
 	{
 		errorAddress = address;
-		throw "IO READ NOT IMPLEMENTED";
+		logError("IO READ NOT IMPLEMENTED, returning 0xff", address, 0xff);
+		return 0xff;
 	}
 }
 
-void loadTestRom(string path)//calculates number of banks based on cartridge MBC number
+void loadTestRom(const char* path)//calculates number of banks based on cartridge MBC number
 {
 	filePath = path;
-	std::string str = "Loading test ROM: " + path;
-	logger::logInfo(str);
-	std::ifstream infile(path);
-	if (!infile.good())
+	logInfo("Loading test ROM. Path:");
+	logInfo(path);
+	FILE* infile = fopen(path, "r");
+	if (infile != NULL)
 	{
-		logger::logErrorNoData("ROM file not found!");
-		throw "ROM not found, exiting...";
+		logErrorNoData("ROM file not found!");
+		exit(-1);
 	}
 	uint8_t mbc, banks, ramBanks;
 
-	infile.seekg(0, std::ios::end);
-	size_t length = infile.tellg();
-	infile.seekg(0x0147, std::ios::beg);
-	infile.read((char*)(&mbc), 1);
-	infile.read((char*)(&banks), 1);
-	infile.read((char*)(&ramBanks), 1);
 
-	//cout << "ROM MBC: 0x" <<hex<< (uint16_t)(mbc)<<dec << endl << "ROM Bank identifier: 0x" <<hex<< (uint16_t)(banks)<<dec << endl;
-	//cout << "RAM banks identifier: 0x" <<hex<< (uint16_t)(ramBanks)<<dec << endl;
-	currentCartridge = new cartridge(mbc, banks, ramBanks);
-	infile.seekg(0, std::ios::beg);
-	//cout << "File size is " << to_string(length) << " bytes." << endl;
-	infile.read((char*)(currentCartridge->banks), length);
+	fseek(infile, 0, SEEK_END);
+	size_t length = ftell(infile);
+	fseek(infile, 0x0147, SEEK_SET);
+	fread(&mbc, 1, 1, infile);
+	fread(&banks, 1, 1, infile);
+	fread(&ramBanks, 1, 1, infile);
+
+	currentCartridge = newCartridge(mbc, banks, ramBanks);
+    fseek(infile, 0, SEEK_SET);
+	fread(currentCartridge->banks, length, 1, infile);
 	rom0 = currentCartridge->banks;//pointer to beginning of banks
 	cartRam = currentCartridge->ramBanks;
-	romSwitchable = (uint8_t*)(currentCartridge->banks + currentCartridge->bankSize);//romSwitchable points to 2nd bank at first
-	//cout<<"Romswitchable and rom0: "<<hex<<"0x"<<(unsigned long)(romSwitchable)<<" 0x"<<(unsigned long)(rom0)<<dec<<endl;
-	//cout<<"romSwitchable is now 0x" <<hex<<((unsigned long)(romSwitchable-rom0))<<dec<<" bytes more than rom0"<<endl;
+	romSwitchable = (uint8_t*)(currentCartridge->banks + bankSize);//romSwitchable points to 2nd bank at first
 }
 
 bool carryStatus()
@@ -789,31 +778,28 @@ void setZero(bool value)
 	}
 }
 
-void dumpToConsole(std::string path)
+void dumpToConsole(const char* path)
 {
-	ofstream outfile(path);
-	outfile.write((char*)rom0, 0x4000);
-	outfile.close();
+	logErrorNoData("dumpToConsole is unimplemented");
 }
 
 void dumpRegisters()
 {
-	cout << "af:\t" << to_string(concat(a, f)) << "\t" << "0x" << hex << (concat(a, f)) << dec << endl;
-	cout << "bc:\t" << to_string(concat(b, c)) << "\t" << "0x" << hex << concat(b, c) << dec << endl;
-	cout << "de:\t" << to_string(concat(d, e)) << "\t" << "0x" << hex << concat(d, e) << dec << endl;
-	cout << "hl:\t" << to_string(concat(h, l)) << "\t" << "0x" << hex << concat(h, l) << dec << endl;
-	cout << "sp:\t" << to_string(sp) << "\t" << "0x" << hex << sp << dec << endl;
-	cout << "pc:\t" << to_string(pc) << "\t" << "0x" << hex << pc << dec << endl;
-
+	printf("af:\t %X", concat(a, f));
+    printf("bc:\t %X", concat(b, c));
+    printf("de:\t %X", concat(d, e));
+    printf("hl:\t %X", concat(h, l));
+    printf("sp:\t %X", sp);
+    printf("pc:\t %X", pc);
 }
 
 // Initializes the registers to the state they would be in after the bootrom finishes.
 void initRegisters() {
 	pc = 0x100;
-	writePair(a, f, 0x01b0);
-	writePair(b, c, 0x0013);
-	writePair(d, e, 0x00d8);
-	writePair(h, l, 0x014d);
+	writePair(&a, &f, 0x01b0);
+	writePair(&b, &c, 0x0013);
+	writePair(&d, &e, 0x00d8);
+	writePair(&h, &l, 0x014d);
 	sp = 0xfffe;
 	tima = 0;
 	tma = 0;
@@ -825,57 +811,57 @@ void initRegisters() {
 
 }
 
-void inc8(uint8_t &x) {
+void inc8(uint8_t* x) {
 
-	setHalf(((x & 0x0f) + (1 & 0x0f)) > 0xf);
-	x++;
+	setHalf(((*x & 0x0f) + (1 & 0x0f)) > 0xf);
+    (*x)++;
 	setSubtract(false);
-	setZero(x == 0);
+	setZero(*x == 0);
 	pc++;
 	cycles = 4;
 }
-void dec8(uint8_t &x) {
+void dec8(uint8_t* x) {
 	setSubtract(true);
-	setHalf((int)(x & 0xf) - (int)(1 & 0xf) < 0);
-	x--;
-	setZero(x == 0x00);
+	setHalf((int)(*x & 0xf) - (int)(1 & 0xf) < 0);
+    (*x)--;
+	setZero(*x == 0x00);
 	pc++;
 	cycles = 4;
 }
-void add8(uint8_t& destination, uint8_t source) {
+void add8(uint8_t* destination, uint8_t source) {
 	setSubtract(false);
 	setCarry((uint16_t)destination + (uint16_t)source > 0xff);
-	setHalf(((destination & 0x0f) + (source & 0x0f)) > 0xf);
-	destination += source;
-	setZero(destination == 0);
+	setHalf(((*destination & 0x0f) + (source & 0x0f)) > 0xf);
+	*destination += source;
+	setZero(*destination == 0);
 	cycles = 4;
 	pc++;
 }
-void sub8(uint8_t & destination, uint8_t source) {
+void sub8(uint8_t* destination, uint8_t source) {
 	setSubtract(true);
-	setCarry((int)destination - (int)source < 0);
-	setHalf(((int)(destination & 0x0f) - (int)(source & 0x0f)) < 0x0);
-	destination -= source;
-	setZero(destination == 0);
+	setCarry((int)*destination - (int)source < 0);
+	setHalf(((int)(*destination & 0x0f) - (int)(source & 0x0f)) < 0x0);
+	*destination -= source;
+	setZero(*destination == 0);
 	cycles = 4;
 	pc++;
 }
-void add16(uint16_t &destination, uint16_t source) {
+void add16(uint16_t* destination, uint16_t source) {
 
-	setHalf(((destination & 0xFFF) + (source & 0xFFF)) & 0x1000); //taken from SameBoy
-	setCarry(((unsigned long)destination + (unsigned long)source) & 0x10000);//taken from SameBoy
+	setHalf(((*destination & 0xFFF) + (source & 0xFFF)) & 0x1000); //taken from SameBoy
+	setCarry(((unsigned long)*destination + (unsigned long)source) & 0x10000);//taken from SameBoy
 
-	destination += source;
+	*destination += source;
 	setSubtract(false);
 	cycles = 8;
 	pc++;
 }
-void or8(uint8_t &destination, uint8_t source) {
+void or8(uint8_t* destination, uint8_t source) {
 	setCarry(false);
 	setHalf(false);
 	setSubtract(false);
-	destination = destination | source;
-	setZero(destination == 0x00);
+	*destination = *destination | source;
+	setZero(*destination == 0x00);
 	cycles = 4;
 	pc++;
 }
@@ -884,7 +870,7 @@ void switchRamBank(uint8_t number)
 {
 	if (number != 0)
 	{
-		cartRam = (uint8_t*)(currentCartridge->ramBanks + (number * currentCartridge->ramBankSize));
+		cartRam = (uint8_t*)(currentCartridge->ramBanks + (number * ramBankSize));
 	}
 	else
 	{
@@ -896,19 +882,17 @@ void switchBank(uint8_t number) //zero indexed
 {
 	if (number != 0)
 	{
-		romSwitchable = (uint8_t*)(currentCartridge->banks + (number * currentCartridge->bankSize));
+		romSwitchable = (uint8_t*)(currentCartridge->banks + (number * bankSize));
 	}
 	else
 	{
-		romSwitchable = (uint8_t*)(currentCartridge->banks + (currentCartridge->bankSize));
+		romSwitchable = (uint8_t*)(currentCartridge->banks + bankSize);
 	}
 
 }
 
-void dumpWorkRamToFile(std::string path) {
-	ofstream outfile(path);
-	outfile.write((char*)workRam, sizeof(workRam));
-	outfile.close();
+void dumpWorkRamToFile(const char* path) {
+	logErrorNoData("Dumping workRAM to file is currently unimplemented.");
 }
 
 void checkInterrupts() {
@@ -916,7 +900,7 @@ void checkInterrupts() {
 	{
 		if (!enableInterrupts && (interruptFlag != 0x00))//if halted and caught interrupt but IME=0
 		{
-			logger::logWarningNoData("HALT bug.");
+			logWarningNoData("HALT bug.");
 			halted = false;
 		}
 	}
@@ -927,8 +911,9 @@ void checkInterrupts() {
 
 	if ((interruptFlag & 0x01) == 0x01 && (interruptRegister & 0x01) == 0x01)//catch v-blank interrupt
 	{
-		if (LOG_VERBOSE)
-			logger::logInfo("Caught V-Blank interrupt.");
+		if (LOG_VERBOSE){
+            logInfo("Caught V-Blank interrupt.");
+		}
 		enableInterrupts = false;
 		interruptFlag = interruptFlag & 0xfe;//clear vblank bit
 		//push pc onto stack
@@ -947,7 +932,7 @@ void checkInterrupts() {
 	else if ((interruptFlag & 0x02) == 0x02 && (interruptRegister & 0x02) == 0x02)//catch lcd stat interrupt
 	{
 		if (LOG_VERBOSE)
-			logger::logInfo("Caught LCD STAT interrupt.");
+			logInfo("Caught LCD STAT interrupt.");
 		enableInterrupts = false;
 		interruptFlag = interruptFlag & 0xfd;
 		//push pc onto stack
@@ -966,7 +951,7 @@ void checkInterrupts() {
 	else if ((interruptFlag & 0x04) == 0x04 && (interruptRegister & 0x04) == 0x04)//catch Timer interrupt
 	{
 		if (LOG_VERBOSE)
-			logger::logInfo("Caught Timer interrupt.");
+			logInfo("Caught Timer interrupt.");
 		//cout<<"Interrupt flag: 0x"<<hex<<(uint16_t)interruptFlag<<dec<<endl;
 		enableInterrupts = false;
 		interruptFlag = interruptFlag & 0xfb;
@@ -979,13 +964,13 @@ void checkInterrupts() {
 		if (halted)
 		{
 			halted = false;
-			//logger::logWarningNoData("Ignoring HALT bug.");
+			//logWarningNoData("Ignoring HALT bug.");
 		}
 		pc = 0x50;
 	}
 	else if ((interruptFlag & 0x08) == 0x08 && (interruptRegister & 0x08) == 0x08)//catch serial interrupt
 	{
-		//logger::logInfo("Caught serial interrupt.");
+		//logInfo("Caught serial interrupt.");
 		enableInterrupts = false;
 		interruptFlag = interruptFlag & 0xf7;
 		//push pc onto stack
@@ -997,13 +982,13 @@ void checkInterrupts() {
 		if (halted)
 		{
 			halted = false;
-			//logger::logWarningNoData("Ignoring HALT bug.");
+			//logWarningNoData("Ignoring HALT bug.");
 		}
 		pc = 0x58;
 	}
 	else if ((interruptFlag & 0x10) == 0x10 && (interruptRegister & 0x10) == 0x10)//catch joypad interrupt
 	{
-		//logger::logInfo("Caught joypad interrupt.");
+		//logInfo("Caught joypad interrupt.");
 		enableInterrupts = false;
 		interruptFlag = interruptFlag & 0xef;
 		//push pc onto stack
@@ -1015,7 +1000,7 @@ void checkInterrupts() {
 		if (halted)
 		{
 			halted = false;
-			//logger::logWarningNoData("Ignoring HALT bug.");
+			//logWarningNoData("Ignoring HALT bug.");
 		}
 		pc = 0x60;
 	}
@@ -1035,7 +1020,7 @@ void processTimer(uint8_t opCycle)
 				writeToAddress(0xff05, readFromAddress(0xff06));
 
 				if (LOG_VERBOSE)
-					logger::logInfo("Requesting timer interrupt.");
+					logInfo("Requesting timer interrupt.");
 				interruptFlag |= 0x04;
 			}
 			else
@@ -1067,25 +1052,16 @@ void SetClockFreq()
 	case 1: m_TimerCounter = 16; break;
 	case 2: m_TimerCounter = 64; break;
 	case 3: m_TimerCounter = 256; break;
-	default: throw "Invalid clock freq";
+	default: logErrorNoData("Invalid clock freq");
 	}
 }
 
 void doDMATransfer(uint8_t data) {
 
-	//dumpRegisters();
 	uint16_t address = data << 8;
-	std::stringstream stream;
-	stream << "Executing DMA transfer, reading from 0x" << std::hex << address << "-0x" << address + 0xa0 << dec;
-	//logger::logInfo(stream.str());
 	for (uint8_t i = 0; i < 0xa0; i++)
 	{
 		writeToAddress(0xfe00 + i, readFromAddress(address + i));
 	}
 }
 
-
-
-
-
-#pragma clang diagnostic pop
