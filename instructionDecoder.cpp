@@ -405,8 +405,6 @@ void execute(uint16_t address)
 	}
 	else if (opcode == 0xe8)//add sp, i8
 	{
-	    //logger::logWarning("Carry/half-carry with \"add sp, i8\" is untested", pc, opcode);
-
 		int8_t next = (int8_t)readFromAddress(address + 1);
 		setCarry((((uint16_t)sp & 0xFF) + ((int16_t)next & 0xFF) > 0xFF));
 		setHalf(((sp & 0x0f) + (next & 0x0f)) > 0xf );	//check only bit 3 to 4 --->>https://stackoverflow.com/questions/57958631/game-boy-half-carry-flag-and-16-bit-instructions-especially-opcode-0xe8
@@ -560,6 +558,7 @@ void execute(uint16_t address)
 		pc++;
 		cycles = 12;
 	}
+
 	else if (opcode == 0x35)//dec (hl)
 	{
 		uint8_t temp = readFromAddress(concat(h, l));
@@ -595,6 +594,7 @@ void execute(uint16_t address)
 	{
 		dec8(e);
 	}
+
 	else if (opcode == 0x22)//ldi (hl),a
 	{
 		writeToAddress(concat(h, l), a);
@@ -903,8 +903,6 @@ void execute(uint16_t address)
 		}
 		setSubtract(false);
 		setZero(false);
-		//cout << "\033[1;33mWARNING:\033[0m Carry and Half-carry flags with the \"ld hl, sp+i8\" instruction are not tested." << endl;
-
 	}
 	else if (opcode == 0xf9)//ld sp, hl
 	{
@@ -963,15 +961,13 @@ void execute(uint16_t address)
 	}
 	else if (opcode == 0xcb)//prefix for extended instructions
 	{
-		//logger::logWarning("Running prefixed instruction, probably bugged.", address, readFromAddress(address+1));
 		executePrefixedInstruction(readFromAddress(address + 1));
 	}
 	else {
 		if (!executeStructural(opcode, address))
 		{
 			errorAddress = -1;
-			std::cout << "At address 0x" << hex << address << dec << std::endl;
-			cout << "Opcode: 0x" << hex << (int)opcode << dec << std::endl;
+			logger::logError("Opcode not implemented", address, opcode);
 			throw "OPCODE NOT IMPLEMENTED";
 			
 		}
@@ -988,26 +984,13 @@ void execute(uint16_t address)
 bool executeStructural(uint8_t opcode, uint16_t address)
 {
 
-	 if (opcode == 0x10)//stop
+	if (opcode == 0x10)//stop
 	{
-	throw "ERROR: Encountered stop opcode! (0x10)";
+		throw "ERROR: Encountered stop opcode! (0x10)";
 	}
 	else if (opcode == 0xcd)//call nn
 	{
-	pc += 3;
-	uint8_t high = (((uint16_t)pc & 0xff00) >> 8);
-	uint8_t low = pc & 0x00ff;
-	writeToAddress(sp - 1, high);
-	writeToAddress(sp - 2, low);
-	pc = concat(readFromAddress(address + 2), readFromAddress(address + 1));
-	sp -= 2;
-	cycles = 24;
-	}
-	else if (opcode == 0xcc)//call z, nn
-	{
-	pc += 3;
-	if (zeroStatus())
-	{
+		pc += 3;
 		uint8_t high = (((uint16_t)pc & 0xff00) >> 8);
 		uint8_t low = pc & 0x00ff;
 		writeToAddress(sp - 1, high);
@@ -1016,117 +999,129 @@ bool executeStructural(uint8_t opcode, uint16_t address)
 		sp -= 2;
 		cycles = 24;
 	}
-	else
+	else if (opcode == 0xcc)//call z, nn
 	{
-		cycles = 12;
-	}
+		pc += 3;
+		if (zeroStatus())
+		{
+			uint8_t high = (((uint16_t)pc & 0xff00) >> 8);
+			uint8_t low = pc & 0x00ff;
+			writeToAddress(sp - 1, high);
+			writeToAddress(sp - 2, low);
+			pc = concat(readFromAddress(address + 2), readFromAddress(address + 1));
+			sp -= 2;
+			cycles = 24;
+		}
+		else
+		{
+			cycles = 12;
+		}
 
 	}
 	else if (opcode == 0xc4)//call nz, nn
 	{
-	pc += 3;
-	if (!zeroStatus())
-	{
-		uint8_t high = (((uint16_t)pc & 0xff00) >> 8);
-		uint8_t low = pc & 0x00ff;
-		writeToAddress(sp - 1, high);
-		writeToAddress(sp - 2, low);
-		pc = concat(readFromAddress(address + 2), readFromAddress(address + 1));
-		sp -= 2;
-		cycles = 24;
-	}
-	else
-	{
-		cycles = 12;
-	}
-
+		pc += 3;
+		if (!zeroStatus())
+		{
+			uint8_t high = (((uint16_t)pc & 0xff00) >> 8);
+			uint8_t low = pc & 0x00ff;
+			writeToAddress(sp - 1, high);
+			writeToAddress(sp - 2, low);
+			pc = concat(readFromAddress(address + 2), readFromAddress(address + 1));
+			sp -= 2;
+			cycles = 24;
+		}
+		else
+		{
+			cycles = 12;
+		}
 	}
 	else if (opcode == 0xd4)//call nc, nn
 	{
-	pc += 3;
-	if (!carryStatus())
-	{
-		uint8_t high = (((uint16_t)pc & 0xff00) >> 8);
-		uint8_t low = pc & 0x00ff;
-		writeToAddress(sp - 1, high);
-		writeToAddress(sp - 2, low);
-		pc = concat(readFromAddress(address + 2), readFromAddress(address + 1));
-		sp -= 2;
-		cycles = 24;
-	}
-	else
-	{
-		cycles = 12;
-	}
+		pc += 3;
+		if (!carryStatus())
+		{
+			uint8_t high = (((uint16_t)pc & 0xff00) >> 8);
+			uint8_t low = pc & 0x00ff;
+			writeToAddress(sp - 1, high);
+			writeToAddress(sp - 2, low);
+			pc = concat(readFromAddress(address + 2), readFromAddress(address + 1));
+			sp -= 2;
+			cycles = 24;
+		}
+		else
+		{
+			cycles = 12;
+		}
 
 	}
 	else if (opcode == 0xdc)//call c, nn
 	{
-	pc += 3;
-	if (carryStatus())
-	{
-		uint8_t high = (((uint16_t)pc & 0xff00) >> 8);
-		uint8_t low = pc & 0x00ff;
-		writeToAddress(sp - 1, high);
-		writeToAddress(sp - 2, low);
-		pc = concat(readFromAddress(address + 2), readFromAddress(address + 1));
-		sp -= 2;
-		cycles = 24;
-	}
+		pc += 3;
+		if (carryStatus())
+		{
+			uint8_t high = (((uint16_t)pc & 0xff00) >> 8);
+			uint8_t low = pc & 0x00ff;
+			writeToAddress(sp - 1, high);
+			writeToAddress(sp - 2, low);
+			pc = concat(readFromAddress(address + 2), readFromAddress(address + 1));
+			sp -= 2;
+			cycles = 24;
+		}
 
-	else
-	{
-		cycles = 12;
-	}
+		else
+		{
+			cycles = 12;
+		}
 
 	}
 	else if (opcode == 0xc9)//ret
 	{
-	pc = concat(readFromAddress(sp + 1), readFromAddress(sp));
-	sp += 2;
-	cycles = 16;
+		pc = concat(readFromAddress(sp + 1), readFromAddress(sp));
+		sp += 2;
+		cycles = 16;
 	}
 	else if (opcode == 0xd0)//ret nc
 	{
-	if (!carryStatus())
-	{
-		pc = concat(readFromAddress(sp + 1), readFromAddress(sp));
-		sp += 2;
-		cycles = 20;
-	}
-	else
-	{
-		pc++;
-		cycles = 8;
-	}
+		if (!carryStatus())
+		{
+			pc = concat(readFromAddress(sp + 1), readFromAddress(sp));
+			sp += 2;
+			cycles = 20;
+		}
+		else
+		{
+			pc++;
+			cycles = 8;
+		}
 	}
 	else if (opcode == 0xc0)//ret nz
 	{
-	if (!zeroStatus())
-	{
-		pc = concat(readFromAddress(sp + 1), readFromAddress(sp));
-		sp += 2;
-		cycles = 20;
-	}
-	else
-	{
-		pc++;
-		cycles = 8;
-	}
+		if (!zeroStatus())
+		{
+			pc = concat(readFromAddress(sp + 1), readFromAddress(sp));
+			sp += 2;
+			cycles = 20;
+		}
+		else
+		{
+			pc++;
+			cycles = 8;
+		}
 	}
 	else if (opcode == 0xc8)//ret z
 	{
-	if (zeroStatus())
-	{
-		pc = concat(readFromAddress(sp + 1), readFromAddress(sp));
-		sp += 2;
-		cycles = 20;
-	}
-	else
-	{
-		pc++;
-		cycles = 8;
-	}
+		if (zeroStatus())
+		{
+			pc = concat(readFromAddress(sp + 1), readFromAddress(sp));
+			sp += 2;
+			cycles = 20;
+		}
+		else
+		{
+			pc++;
+			cycles = 8;
+		}
 	}
 	else if (opcode == 0xd8)//ret c
 	{
