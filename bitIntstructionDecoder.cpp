@@ -196,7 +196,6 @@ void executePrefixedInstruction(uint8_t opcode)
 		{
 			writeToAddress(concat(h, l), *reg);
 		}
-        //cout<<"WARNING: Arithmetic right shift is untested.\n";
     }
     else if (opcode >= 0x38 && opcode <= 0x3f)//srl
     {
@@ -229,7 +228,7 @@ void executePrefixedInstruction(uint8_t opcode)
     else
     {
         errorAddress = -1;
-        cout<<"Suffix: 0x"<<hex<<(uint16_t)(opcode)<<dec<<endl;
+        logger::logError("Prefixed opcode not implemented.", 0xffff, opcode);
         throw "PREFIXED OPCODE NOT IMPLEMENTED";
     }
 }

@@ -161,7 +161,8 @@ void execute(uint16_t address)
 		{
 			if (memoryReference)
 			{
-				throw "You done messed up.";
+				logger::logError("Error in instruction decoder", address, opcode);
+				throw "Error in instruction decoder";
 			}
 			writeToAddress(concat(h, l), *dest);
 		}
@@ -986,6 +987,7 @@ bool executeStructural(uint8_t opcode, uint16_t address)
 
 	if (opcode == 0x10)//stop
 	{
+		logger::logError("Encountered stop opcode!", address, opcode);
 		throw "ERROR: Encountered stop opcode! (0x10)";
 	}
 	else if (opcode == 0xcd)//call nn
@@ -1195,6 +1197,7 @@ bool executeStructural(uint8_t opcode, uint16_t address)
 		cycles = 16;
 		if (pc == 0x0000)
 		{
+			logger::logWarning("Jumped to 0x0000, probably a bug.", address, opcode);
 			throw "Jumped to 0, probably a bug";
 		}
 	}
@@ -1248,7 +1251,6 @@ bool executeStructural(uint8_t opcode, uint16_t address)
 	}
 	else if (opcode == 0xf3)//di(disable interrupts)
 	{
-		//logger::logInfo("Disabling interrupts.");
 		enableInterrupts = false;
 		pc++;
 		cycles = 4;
@@ -1262,7 +1264,6 @@ bool executeStructural(uint8_t opcode, uint16_t address)
 	}
 	else if (opcode == 0xfb)//ei (enable interrupts)
 	{
-		//logger::logInfo("Enabling interrupts.");
 		enableInterrupts = true;
 		pc++;
 		cycles = 4;
@@ -1350,9 +1351,11 @@ bool executeStructural(uint8_t opcode, uint16_t address)
 		cycles = 4;
 		pc++;
 		halted = true;
-		//logger::logWarningNoData("HALT bug is not implemented.");
+		if (LOG_VERBOSE) {
+			logger::logWarningNoData("HALT bug is not implemented.");
+		}
 	}
-	else
+	else //Unimplemented opcode
 	{
 		return false;
 	}

@@ -34,9 +34,6 @@ using namespace std;
 
 
 
-const bool LOG_VERBOSE = false; //warn about unimplemented features
-
-
 
 time_t rawtime;
 struct tm * timeinfo;

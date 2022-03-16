@@ -34,6 +34,9 @@
 #include <windows.h> // WinApi header
 #endif
 
+const bool LOG_VERBOSE = false; //warn about unimplemented features
+
+
 class logger {
 public:
     static void logInfo(std::string str);
