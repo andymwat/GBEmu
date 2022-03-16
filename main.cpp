@@ -77,7 +77,7 @@ int main(int argc, char* args[])
 	logger::logInfo("Loading ROM...");
 	if (argc == 1)
 	{
-		loadTestRom("C:/Users/andym/Downloads/ROMs/GBEmu/kirby.gb");
+		loadTestRom("/home/andrew/Downloads/GBemu/sml.gb");
 	}
 	else if (argc == 2)
 	{

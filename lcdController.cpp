@@ -304,6 +304,7 @@ void renderTiles()
     bool unsig = true;
     bool usingWindow = false;
 
+    // If
     if (windowDisplayEnable && windowY <= line)
     {
         usingWindow = true;
