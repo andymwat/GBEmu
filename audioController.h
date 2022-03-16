@@ -21,6 +21,7 @@
 #include <fstream>
 #include <vector>
 #include <SDL.h>
+#include <cmath>
 #include "logger.h"
 
 int initAudio(void);
