@@ -80,11 +80,12 @@ uint16_t noiseCycles;
 uint16_t noiseShiftRegister = 0xff;
 
 
-
-
 //sound control
 uint8_t volumeControl;
 uint8_t channelSelection = 0xff;
+
+double masterVolume = 0.25;
+
 
 uint16_t dutyCycle[5][8] =
 {
@@ -387,7 +388,6 @@ void updateAudio(uint8_t cycles)
 			if (SDL_GetQueuedAudioSize(1) <= sizeof(audioBuffer) * 2) //only push to queue if it's nearly empty (avoid infinitely growing queue)
 			{
 				SDL_QueueAudio(1, audioBuffer, sizeof(audioBuffer));
-
 			}
 		}
 
@@ -477,6 +477,11 @@ void mixAudio()
 	//volume
 	audioBuffer[currentSample] *= (float)((volumeControl & 0x70) >> 4) / 7.0f;//left
 	audioBuffer[currentSample + 1] *= (float)(volumeControl & 0x7) / 7.0f;//right
+
+	//Master volume
+	audioBuffer[currentSample] *= masterVolume;
+	audioBuffer[currentSample+1] *= masterVolume;
+
 }
 
 int initAudio(void)

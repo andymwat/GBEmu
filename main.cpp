@@ -60,7 +60,12 @@ int main(int argc, char* args[])
 {
 	cout << "GBEmu  Copyright (C) 2020 Andrew Watson\nThis program comes with ABSOLUTELY NO WARRANTY; for details, see the included LICENSE file or visit https://www.gnu.org/licenses/ \n";
     
+#ifdef PLATFORM_UNIX
 	string testROMPath = "/home/andrew/Downloads/GBemu/sml.gb";
+#else
+	string testROMPath = "C:/Users/andym/Downloads/ROMs/GBEmu/sml.gb";
+#endif
+
 	logger::logInfo("Initializing window...");
     initWindow();
 	logger::logInfo("Initializing audio...");

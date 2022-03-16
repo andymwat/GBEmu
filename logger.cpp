@@ -38,6 +38,7 @@ void logger::logInfo(std::string str) {
 	std::cout << str << std::endl;
 
 	SetConsoleTextAttribute(hConsole, 15);
+	
 #endif
 
 }
