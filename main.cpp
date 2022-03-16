@@ -63,7 +63,7 @@ int main(int argc, char* args[])
 #ifdef PLATFORM_UNIX
 	string testROMPath = "/home/andrew/Downloads/GBemu/sml.gb";
 #else
-	string testROMPath = "C:/Users/andym/Downloads/ROMs/GBEmu/sml.gb";
+	string testROMPath = "C:/Users/andym/Downloads/ROMs/GBEmu/tetris.gb";
 #endif
 
 	logger::logInfo("Initializing window...");
@@ -110,7 +110,7 @@ int main(int argc, char* args[])
         int result = fread(currentCartridge->ramBanks, sizeof(uint8_t), currentCartridge->totalRamSize, file);
         if (result != currentCartridge->totalRamSize)
         {
-            logger::logErrorNoData("Error reading from save file!");
+            logger::logErrorNoData("Error reading from save file! Number of bytes read is ot the same as the cartridge's RAM size!");
         }
         fclose(file);
     }

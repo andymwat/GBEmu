@@ -27,10 +27,11 @@ SDL_AudioDeviceID dev;
 
 const uint16_t SAMPLES = 1024;
 const uint16_t defaultAmplitude = 4000;
+const unsigned int sampleRate = 48000;
 
 uint8_t c1Sweep, c1Duty, c1Envelope, c1FrequencyL, c1FrequencyH;
 
-uint8_t  c2Duty, c2Envelope, c2FrequencyL, c2FrequencyH;
+uint8_t c2Duty, c2Envelope, c2FrequencyL, c2FrequencyH;
 
 
 uint8_t c1DutyChannel, c2DutyChannel;
@@ -84,7 +85,7 @@ uint16_t noiseShiftRegister = 0xff;
 uint8_t volumeControl;
 uint8_t channelSelection = 0xff;
 
-double masterVolume = 0.25;
+double masterVolume = 0.25; // Volume for whole system
 
 
 uint16_t dutyCycle[5][8] =
@@ -141,7 +142,7 @@ void updateAudio(uint8_t cycles)
         }
     }
 
-
+	//Wave position
 	if (waveCycles >= (2048 - waveFrequency) * 2)
 	{
 		waveCycles = 0;
@@ -151,7 +152,6 @@ void updateAudio(uint8_t cycles)
 			wavePosition = 0;
 		}
 	}
-
 
 	//c1 frequency
     c1Freq += cycles;
@@ -165,7 +165,6 @@ void updateAudio(uint8_t cycles)
 		}
 	}
 
-
 	//c2 frequency
     c2Freq += cycles;
 	if (c2Freq >= (2048 - (((((uint16_t)c2FrequencyH) & 0x0007) << 8) | (uint16_t)c2FrequencyL)) * 4)
@@ -178,7 +177,6 @@ void updateAudio(uint8_t cycles)
 			currentDutySection2 = 0;
 		}
 	}
-
 
 	//sequence timer for envelope and sweep
 	if (sequencerCycles >= 8192 )
@@ -301,8 +299,6 @@ void updateAudio(uint8_t cycles)
 
 	}
 
-
-
 	//c1 length
 	if ((c1FrequencyH & 0x40) == 0x40) //length enable
 	{
@@ -339,7 +335,6 @@ void updateAudio(uint8_t cycles)
 		c2Time = 0;
 	}
 
-
 	//wave length
 	if ((waveFrequencyH & 0x40) == 0x40) //length enable
 	{
@@ -373,24 +368,23 @@ void updateAudio(uint8_t cycles)
         c4Enable = true;
     }
 
-	if (cyclesLeft >= 87) //48000hz:  1/48000 seconds = 0.000020833 sec = 87.3 * 1/4194304
+	unsigned int cyclesPerSample = (1 / (double)sampleRate) * 4194304;
+	if (cyclesLeft >= cyclesPerSample) //Calculates how many cycles it takes for one sample
 	{
 		cyclesLeft = 0;
 		currentSample += 2; //+2 for 2 channels (stereo)
-
-
+		
 		if (currentSample >= SAMPLES) //if 1024 samples have been generated, queue buffer to be played
 		{
-			currentSample = 0;
+			currentSample = 0;  // Reset sample counter
 
 			//TODO
 			//Fix popping (when buffer runs out)
-			if (SDL_GetQueuedAudioSize(1) <= sizeof(audioBuffer) * 2) //only push to queue if it's nearly empty (avoid infinitely growing queue)
+			if (SDL_GetQueuedAudioSize(dev) <= sizeof(audioBuffer) * 8) // Push to buffer if it needs more
 			{
-				SDL_QueueAudio(1, audioBuffer, sizeof(audioBuffer));
+				SDL_QueueAudio(dev, audioBuffer, sizeof(audioBuffer));
 			}
 		}
-
 		mixAudio();
 	}
 }
@@ -437,7 +431,7 @@ void mixAudio()
 	//mixing
 	audioBuffer[currentSample] = 0;
 	audioBuffer[currentSample + 1] = 0;
-	//sample1 = sample2 = sample4 = 0; //mute 
+
 	if (TestBit(channelSelection, 7))
 	{
 		audioBuffer[currentSample] += sample4;
@@ -471,8 +465,7 @@ void mixAudio()
 	{
 		audioBuffer[currentSample + 1] += sample1;
 	}
-	//audioBuffer[currentSample] = sample1 + sample2  + sample3 + sample4;	//left
-	//audioBuffer[currentSample+1] = sample1 + sample2 + sample3 + sample4;	//right
+
 
 	//volume
 	audioBuffer[currentSample] *= (float)((volumeControl & 0x70) >> 4) / 7.0f;//left
@@ -488,11 +481,11 @@ int initAudio(void)
 {
 
 	SDL_Init(SDL_INIT_AUDIO);
-	audioSpec.freq = 48000;
+	audioSpec.freq = sampleRate;
 	audioSpec.format = AUDIO_S16;
-	audioSpec.channels = 2;    //mono
+	audioSpec.channels = 2;  // Stereo
 	audioSpec.samples = SAMPLES;  
-	audioSpec.callback = NULL; //fill later
+	audioSpec.callback = NULL; // Fill later
 	audioSpec.userdata = NULL;
 
 
