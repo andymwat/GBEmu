@@ -272,9 +272,9 @@ void execute(uint16_t address)
 	}
 	else if (opcode >= 0xb8 && opcode <= 0xbf)//cp a, x
 	{
-		uint8_t temporary = a;
+		uint8_t temp = a;
 		sub8(a, *reg);
-		a = temporary;
+		a = temp;
 		if (memoryReference)
 			cycles = 8;
 	}
@@ -318,27 +318,27 @@ void execute(uint16_t address)
 	}
 	else if (opcode == 0x29)//add hl, hl
 	{
-		uint16_t result = concat(h, l);
-		add16(result, result);
-		writePair(h, l, result);
+		uint16_t temp = concat(h, l);
+		add16(temp, temp);
+		writePair(h, l, temp);
 	}
 	else if (opcode == 0x09)//add hl, bc
 	{
-		uint16_t result = concat(h, l);
-		add16(result, concat(b, c));
-		writePair(h, l, result);
+		uint16_t temp = concat(h, l);
+		add16(temp, concat(b, c));
+		writePair(h, l, temp);
 	}
 	else if (opcode == 0x19)//add hl, de
 	{
-		uint16_t result = concat(h, l);
-		add16(result, concat(d, e));
-		writePair(h, l, result);
+		uint16_t temp = concat(h, l);
+		add16(temp, concat(d, e));
+		writePair(h, l, temp);
 	}
 	else if (opcode == 0x39)//add hl, sp
 	{
-		uint16_t temporary = concat(h, l);
-		add16(temporary, sp);
-		writePair(h, l, temporary);
+		uint16_t temp = concat(h, l);
+		add16(temp, sp);
+		writePair(h, l, temp);
 	}
 	else if (opcode == 0xd6)//sub a, n
 	{
