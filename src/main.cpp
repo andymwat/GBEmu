@@ -28,7 +28,8 @@
 #include <SDL.h>
 //Define as true to run tests
 #define RUN_DEBUG_TESTS false
-
+//Define as true to show single-stepping prompt before running ROM
+#define STEPPING false
 
 
 
@@ -119,16 +120,23 @@ int main(int argc, char* args[])
         m_TimerCounter = 1024;
         initRegisters();//ignore bootrom
         logger::logInfo("ROM loaded. Starting emulation...");
-        
+
+
+
+
+        //main loop
         while(true)
         {
-			keyboardBreak = false;
-            dumpRegisters();
-            int sel;
-            cout<<"pc to run until, or 0 for step: ";
-            cin.unsetf(ios::dec);
-            cin.unsetf(ios::hex);
-            cin>>sel;
+            keyboardBreak = false;
+            int sel = -1;
+            if (STEPPING) {
+                dumpRegisters();
+                cout<<"pc to run until, or 0 for step: ";
+                cin.unsetf(ios::dec);
+                cin.unsetf(ios::hex);
+                cin>>sel;
+            }
+
             if (sel==0)
             {
                 while (SDL_PollEvent(&events) != 0)
