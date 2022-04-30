@@ -63,7 +63,7 @@ int main(int argc, char* args[])
 #ifdef PLATFORM_UNIX
 	string testROMPath = "/home/andrew/Downloads/GBemu/sml.gb";
 #else
-	string testROMPath = "C:/Users/andym/Downloads/ROMs/GBEmu/tetris.gb";
+	string testROMPath = "C:/Users/andym/Downloads/ROMs/GBEmu/zelda.gb";
 #endif
 
 	logger::logInfo("Initializing window...");

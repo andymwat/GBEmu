@@ -46,6 +46,7 @@ const unsigned int updateFrequency = 25000; //update every 25k cycles
 extern unsigned int gpuModeClock;
 extern uint8_t gpuMode;
 extern uint8_t line;
+extern uint8_t windowLine;
 
 extern SDL_Window* window;
 extern SDL_Surface* screenSurface;
@@ -64,6 +65,7 @@ void pushBufferToWindow();
 
 void renderTiles();
 void renderSprites();
+void renderWindow();
 
 void increaseScreenSize();
 void decreaseScreenSize();

@@ -37,7 +37,8 @@ uint32_t pixelArray[SCREEN_HEIGHT][SCREEN_WIDTH];
 
 unsigned int gpuModeClock = 0;
 uint8_t gpuMode = 0;
-uint8_t line=0;
+uint8_t line = 0;
+uint8_t windowLine = 0;
 
 SDL_Window* window = nullptr;
 SDL_Surface* screenSurface = nullptr;
@@ -81,6 +82,7 @@ void updateScreen(uint8_t cycleCount) {
     if (!lcdEnable)
     {
         line = 0;
+        windowLine = 0;
         gpuModeClock = 0;
         gpuMode = 1;
         return;
@@ -123,6 +125,9 @@ void updateScreen(uint8_t cycleCount) {
             if (gpuModeClock >= hBlankCycles)
             {
                 line++;//next line if end of hblank
+                if (windowDisplayEnable && windowX >= 0 && windowX <= 166 && windowY >= 0 && windowY <= 143) {
+                    windowLine++;
+                }
                 gpuModeClock = 0;
                 if (line == 143)
                 {
@@ -150,6 +155,9 @@ void updateScreen(uint8_t cycleCount) {
             {
                 gpuModeClock = 0;
                 line++;
+                if (windowDisplayEnable && windowX >= 0 && windowX <= 166 && windowY >= 0 && windowY <= 143) {
+                    windowLine++;
+                }
                 if (line > 153)
                 {
                     //restart gpu scanning
@@ -161,6 +169,7 @@ void updateScreen(uint8_t cycleCount) {
                     }
                     gpuMode = 2;
                     line = 0;
+                    windowLine = 0;
                 }
             }
             break;
@@ -192,6 +201,9 @@ void renderScanline() {
     if (bgDisplayEnable)
     {
         renderTiles();
+    }
+    if (windowDisplayEnable) {
+        renderWindow();
     }
     if (spriteDisplayEnable)
     {
@@ -297,36 +309,13 @@ void pushBufferToWindow() {
 }
 
 
-void renderTiles()
-{
+void renderWindow() {
     uint16_t tileData = 0;
     uint16_t backgroundMemory = 0;
     bool unsig = true;
-    bool usingWindow = false;
 
-    // If
-    if (windowDisplayEnable && windowY <= line)
+    if (windowDisplayEnable && windowY <= line) //Is the window visible on the current scanline?
     {
-        usingWindow = true;
-    }
-    if (bgAndWindowTileDataSelect)
-    {
-        tileData = 0x8000;
-    } else{
-        tileData = 0x8800;
-        unsig = false;
-    }
-    if (!usingWindow)
-    {
-        if (bgTilemapDisplaySelect)
-        {
-            backgroundMemory = 0x9c00;
-        }
-        else
-        {
-            backgroundMemory = 0x9800;
-        }
-    } else{
 
         if (windowTilemapDisplaySelect)
         {
@@ -334,22 +323,90 @@ void renderTiles()
         } else{
             backgroundMemory = 0x9800;
         }
+        if (bgAndWindowTileDataSelect)
+        {
+            tileData = 0x8000;
+        } else{
+            tileData = 0x8800;
+            unsig = false;
+        }
+
+        uint8_t yPos = 0;
+        yPos = windowLine - windowY;
+        uint16_t tileRow = (((uint8_t)(yPos/8))*32);
+
+        uint8_t lineNum = yPos % 8;
+        lineNum *= 2;
+        if (windowX == 255) {
+            windowX = 0;//work around WX 255 bug
+        }
+        for (uint8_t pixel = windowX; pixel < 160; pixel++)
+        {
+            uint8_t xPos = pixel-windowX;
+            uint16_t tileCol = (xPos / 8);
+            int16_t tileNum;
+            uint16_t tileAddress = backgroundMemory+tileRow+tileCol;
+            if (unsig)
+                tileNum = (uint8_t)readFromAddress(tileAddress);
+            else
+                tileNum = (int8_t)readFromAddress(tileAddress);
+            uint16_t tileLocation = tileData;
+            if (unsig)
+                tileLocation += (tileNum * 16);
+            else
+                tileLocation += ((tileNum+128)*16);
+            uint8_t data1 = readFromAddress(tileLocation + lineNum);
+            uint8_t data2 = readFromAddress(tileLocation + lineNum + 1);
+            int colorBit = xPos%8;
+            colorBit -=7;
+            colorBit *= -1;
+
+            int colorNum = BitGetVal(data2, colorBit);
+            colorNum <<=1;
+            colorNum |= BitGetVal(data1, colorBit);
+            uint32_t color = GetColor(colorNum, 0xff47);
+            if ((line < 0) || (line>143) || (pixel < 0) || (pixel > 159)){
+                continue;
+            }
+            pixelArray[line][pixel] = color;
+        }
+    }
+    else {
+        return; //Don't do anything if window won't be shown
+    }
+
+
+
+
+}
+
+void renderTiles()
+{
+    uint16_t tileData = 0;
+    uint16_t backgroundMemory = 0;
+    bool unsig = true;
+
+    if (bgAndWindowTileDataSelect)
+    {
+        tileData = 0x8000;
+    } else{
+        tileData = 0x8800;
+        unsig = false;
+    }
+    if (bgTilemapDisplaySelect)
+    {
+        backgroundMemory = 0x9c00;
+    }
+    else
+    {
+        backgroundMemory = 0x9800;
     }
     uint8_t yPos = 0;
-    if (!usingWindow)
-    {
-        yPos = scrollY + line;
-    } else{
-        yPos = line - windowY;
-    }
+    yPos = scrollY + line;
     uint16_t tileRow = (((uint8_t)(yPos/8))*32);
     for (uint8_t pixel = 0; pixel < 160; pixel++)
     {
-        uint8_t xPos = pixel+scrollX;
-        if (usingWindow && pixel >= windowX)
-        {
-            xPos = pixel-windowX;
-        }
+		uint8_t xPos = pixel + scrollX;
         uint16_t tileCol = (xPos / 8);
         int16_t tileNum;
         uint16_t tileAddress = backgroundMemory+tileRow+tileCol;
