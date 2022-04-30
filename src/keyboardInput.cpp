@@ -22,6 +22,7 @@
 #include "keyboardInput.h"
 #include "interpreter.h"
 #include "lcdController.h"
+#include "audioController.h"
 #include <SDL.h>
 #include <iostream>
 #include "logger.h"
@@ -49,9 +50,9 @@ bool fastForward = false;
  * 1: Left or B
  * 0: Right or A
  */
-bool b_up, b_down, b_left, b_right, b_a, b_b, b_start, b_select, b_increaseScreenSize, b_decreaseScreenSize;
+bool b_up, b_down, b_left, b_right, b_a, b_b, b_start, b_select, b_increaseVolume, b_decreaseVolume;
 
-bool screenSizePressedLastFrame = false;
+bool volumePressedLastFrame = false;
 void checkKeyboardNew()
 {
 	//SDL_PumpEvents();
@@ -70,8 +71,8 @@ void checkKeyboardNew()
 	keyboardBreak = keyboardState[SDL_SCANCODE_B];
 	fastForward = keyboardState[SDL_SCANCODE_SPACE];
 	saveToFile = keyboardState[SDL_SCANCODE_P];
-	b_increaseScreenSize = keyboardState[SDL_SCANCODE_RIGHTBRACKET];
-	b_decreaseScreenSize = keyboardState[SDL_SCANCODE_LEFTBRACKET];
+    b_increaseVolume = keyboardState[SDL_SCANCODE_RIGHTBRACKET];
+    b_decreaseVolume = keyboardState[SDL_SCANCODE_LEFTBRACKET];
 
 
 	if (!keyboardState[SDL_SCANCODE_P])
@@ -84,19 +85,19 @@ void checkKeyboardNew()
 		loaded = false;
 	}
 
-	if (!screenSizePressedLastFrame && b_increaseScreenSize)
+	if (!volumePressedLastFrame && b_increaseVolume)
 	{
-		//increaseScreenSize();
+		increaseVolume();
 	}
-	if (!screenSizePressedLastFrame && b_decreaseScreenSize)
+	if (!volumePressedLastFrame && b_decreaseVolume)
 	{
-		//decreaseScreenSize();
+		decreaseVolume();
 	}
 
-	screenSizePressedLastFrame = false;
-	if (b_increaseScreenSize || b_decreaseScreenSize)
+    volumePressedLastFrame = false;
+	if (b_increaseVolume || b_decreaseVolume)
 	{
-		screenSizePressedLastFrame = true;
+        volumePressedLastFrame = true;
 	}
 
 

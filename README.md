@@ -23,6 +23,7 @@ Run the `GBEmu` executable in the corresponding directory to run the emulator.
  - Save current cartridge RAM: P
  - Manually load cartridge RAM: L
  - Fast-forward: Space
+ - Increase/Decrease volume: [ and ]
 
 ## Features
  - Passes all tests in blargg's cpu_instrs test ROM

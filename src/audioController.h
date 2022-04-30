@@ -31,4 +31,7 @@ uint8_t readFromAudioRegister(uint16_t address);
 void updateAudio(uint8_t cycles);
 void mixAudio();
 
+void increaseVolume();
+void decreaseVolume();
+
 #endif //GBEMU_AUDIOCONTROLLER_H

@@ -98,6 +98,19 @@ uint16_t dutyCycle[5][8] =
 };
 
 
+
+void increaseVolume() {
+    if (masterVolume < 1.0) {
+        masterVolume += 0.05;
+    }
+}
+void decreaseVolume() {
+    if (masterVolume > 0) {
+        masterVolume -= 0.05;
+    }
+}
+
+
 void updateAudio(uint8_t cycles)
 {
 	cyclesLeft += cycles;
