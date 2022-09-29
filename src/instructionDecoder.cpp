@@ -153,6 +153,10 @@ void execute(uint16_t address)
 		case 0x78:
 			dest = &a;
 			break;
+		default:
+			dest = &a;
+			logger::logError("Invalid destination for load!", address, opcode);
+			break;
 		}
 
 		*dest = *reg;
