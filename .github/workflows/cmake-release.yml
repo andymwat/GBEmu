@@ -39,7 +39,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: linux-release-build
-        path: ${{github.workspace}}/build/GBEmu 
+        path: ${{github.workspace}}/build/
          
     
 
