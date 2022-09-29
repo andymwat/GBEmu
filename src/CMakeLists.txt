@@ -54,7 +54,7 @@ if(WIN32)
     #INCLUDE(FindPkgConfig)
     #PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
 else()
-    set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+    set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unknown-pragmas")
     set(CMAKE_CXX_FLAGS_DEBUG "-g")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
