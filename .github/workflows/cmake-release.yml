@@ -1,4 +1,4 @@
-name: CMake build
+name: CMake build release
 
 on:
   push:
@@ -32,14 +32,19 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
-    #- name: Install Dependencies
-    #  run: |
-    #    sudo apt-get update -y -qq
-    #    sudo apt-get install libsdl2-dev
+    - name: Get msbuild
+      uses: microsoft/setup-msbuild@v1.1
+    - name: Get msvc
+      uses: ilammy/msvc-dev-cmd@v1
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
     - name: Build
-      run: cd ${{github.workspace}}/build && make      
+      run: cd ${{github.workspace}}/build && make 
+          | ls
+          | dir
+          | nmake
+          | msbuild 
+          
     - name: Upload build 
       uses: actions/upload-artifact@v3
       with:
