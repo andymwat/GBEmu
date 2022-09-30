@@ -29,6 +29,7 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 if(WIN32)
     if (MSVC)  # Visual studio
+        set(CMAKE_CXX_FLAGS "-wd4068")
         set(CMAKE_CXX_FLAGS_DEBUG "-Od")
         set(CMAKE_CXX_FLAGS_RELEASE "-Ox")
     else()
