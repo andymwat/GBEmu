@@ -39,11 +39,8 @@ jobs:
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
     - name: Build
-      run: cd ${{github.workspace}}/build && make 
-          | ls
-          | dir
-          | nmake
-          | msbuild 
+      run: cd ${{github.workspace}}/build
+          | msbuild * -property:Configuration=${{env.BUILD_TYPE}}
           
     - name: Upload build 
       uses: actions/upload-artifact@v3
