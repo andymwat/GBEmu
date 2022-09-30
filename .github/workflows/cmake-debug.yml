@@ -1,0 +1,48 @@
+name: CMake build debug
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Debug
+
+jobs:
+  build-linux-debug:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update -y -qq
+        sudo apt-get install libsdl2-dev
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+    - name: Build
+      run: cd ${{github.workspace}}/build && make      
+    - name: Upload build 
+      uses: actions/upload-artifact@v3
+      with:
+        name: linux-debug-build
+        path: ${{github.workspace}}/build/src/GBEmu
+  build-windows-debug:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    #- name: Install Dependencies
+    #  run: |
+    #    sudo apt-get update -y -qq
+    #    sudo apt-get install libsdl2-dev
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}\build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+    - name: Build
+      run: cd ${{github.workspace}}\build && make      
+    - name: Upload build 
+      uses: actions/upload-artifact@v3
+      with:
+        name: windows-debug-build
+        path: ${{github.workspace}}\build\src\GBEmu.exe
+         
