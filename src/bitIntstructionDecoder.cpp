@@ -73,7 +73,7 @@ void executePrefixedInstruction(uint8_t opcode)
                 break;
             default:
                 reg = &a;
-                throw "Error in bit instruction, invalid target register";
+                throw exceptions::invalidInstruction("Error in bit instruction, invalid target register");
         }
     }
     else //read from address in hl

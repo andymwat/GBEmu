@@ -60,7 +60,7 @@ SDL_Event events;
 
 int main(int argc, char* args[])
 {
-	cout << "GBEmu  Copyright (C) 2020 Andrew Watson\nThis program comes with ABSOLUTELY NO WARRANTY; for details, see the included LICENSE saveFile or visit https://www.gnu.org/licenses/ \n";
+	printf("GBEmu  Copyright (C) 2022 Andrew Watson\nThis program comes with ABSOLUTELY NO WARRANTY; for details, see the included LICENSE file or visit https://www.gnu.org/licenses/ \n");
     
 #ifdef PLATFORM_UNIX
 	string testROMPath = "/home/andrew/Downloads/GBemu/sml.gb";
@@ -74,8 +74,8 @@ int main(int argc, char* args[])
     if (initAudio() != 0)
     {
 		logger::logErrorNoData("Could not initialize audio!");
-		std::cout << "Continue [y/n]? ";
-		char input = getchar();
+		std::printf("Continue [y/n]? ");
+		int input = getchar();
 		if (input != 'Y' && input != 'y')
 		{
 			return -1;
@@ -120,7 +120,6 @@ int main(int argc, char* args[])
         m_TimerCounter = 1024;
         initRegisters();//ignore bootrom
         logger::logInfo("ROM loaded. Starting emulation...");
-
 
 
 
@@ -242,7 +241,7 @@ int main(int argc, char* args[])
 		logger::logErrorNoData(msg);
         if (errorAddress >= 0)
         {
-            logger::logError("Error accessing address, data could not be read (disregard data).", errorAddress, 0);
+            logger::logError("Error accessing address, data could not be read (disregard data).", (uint16_t)errorAddress, 0);
         }
         dumpRegisters();
     }

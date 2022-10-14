@@ -85,7 +85,7 @@ uint16_t noiseShiftRegister = 0xff;
 uint8_t volumeControl;
 uint8_t channelSelection = 0xff;
 
-double masterVolume = 0.25; // Volume for whole system
+float masterVolume = 0.25; // Volume for whole system
 
 
 uint16_t dutyCycle[5][8] =
@@ -98,19 +98,28 @@ uint16_t dutyCycle[5][8] =
 };
 
 
-
+/**
+ * Increase master volume by 5%.
+ */
 void increaseVolume() {
     if (masterVolume < 1.0) {
         masterVolume += 0.05;
     }
 }
+
+/**
+ * Decrease master volume by 5%.
+ */
 void decreaseVolume() {
     if (masterVolume > 0) {
         masterVolume -= 0.05;
     }
 }
 
-
+/**
+ * Update the audio emulation by the given number of cycles.num
+ * @param cycles the number of cycles to progress the emulation by.
+ */
 void updateAudio(uint8_t cycles)
 {
 	cyclesLeft += cycles;
@@ -402,6 +411,9 @@ void updateAudio(uint8_t cycles)
 	}
 }
 
+/**
+ * Mixes audio and writes it to the audio buffer.
+ */
 void mixAudio()
 {
 
@@ -481,16 +493,16 @@ void mixAudio()
 
 
 	//volume
-	audioBuffer[currentSample] *= (float)((volumeControl & 0x70) >> 4) / 7.0f;//left
-	audioBuffer[currentSample + 1] *= (float)(volumeControl & 0x7) / 7.0f;//right
+    float leftSample = (float)audioBuffer[currentSample] * masterVolume * ((float)((volumeControl & 0x70) >> 4) / 7.0f);
+    float rightSample = (float)audioBuffer[currentSample + 1] * masterVolume * ((float)(volumeControl & 0x7) / 7.0f);
 
-	//Master volume
-	audioBuffer[currentSample] *= masterVolume;
-	audioBuffer[currentSample+1] *= masterVolume;
+	audioBuffer[currentSample] = (uint16_t)leftSample;
+	audioBuffer[currentSample + 1] = (uint16_t)rightSample;
+
 
 }
 
-int initAudio(void)
+int initAudio()
 {
 
 	SDL_Init(SDL_INIT_AUDIO);

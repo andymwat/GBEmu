@@ -28,7 +28,7 @@
 #include "interpreter.h"
 #include "lcdController.h"
 #include "keyboardInput.h"
-
+#include "exceptions.h"
 
 
 using namespace std;
@@ -61,13 +61,13 @@ void initWindow() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
         cout<<"Could not initialize, error: " <<SDL_GetError()<<endl;
-        throw "SDL could not initialize";
+        throw exceptions::SDLException("SDL could not initialize");
     } else{
         window = SDL_CreateWindow( "GBEmu", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
         if (window == NULL)
         {
             cout <<"Window could not be created, error: "<<SDL_GetError()<<endl;
-            throw "Window could not initialize";
+            throw exceptions::SDLException("SDL Window could not initialize");
         } else
         {
             screenSurface = SDL_GetWindowSurface(window);
@@ -217,9 +217,6 @@ void pushBufferToWindow() {
 	LAST = NOW;
 	NOW = SDL_GetPerformanceCounter();
 	deltaTime = (NOW - LAST) * 1000 / (double)SDL_GetPerformanceFrequency(); //time for frame in ms
-	//string str = "Frame time: ";
-	//str += to_string(deltaTime) + "ms";
-	//logger::logInfo(str);
 
 	if (!fastForward)
 	{

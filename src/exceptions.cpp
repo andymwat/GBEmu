@@ -22,4 +22,8 @@ namespace exceptions
     invalidOpcode::invalidOpcode(const std::string& message) : std::runtime_error(message) {}
     invalidOpcode::invalidOpcode(const std::string &message, uint16_t address) : std::runtime_error(message + fmt::format("\nAddress:\t{:x}", address)) {}
     invalidOpcode::invalidOpcode(const std::string &message, uint16_t address, uint8_t opcode) : std::runtime_error(message + fmt::format("\nAddress:\t{:x}\nOpcode:\t{:x}", address, opcode)) {}
+
+    SDLException::SDLException(const std::string &message) : std::runtime_error(message) {}
+
+    invalidInstruction::invalidInstruction(const std::string &message) : std::runtime_error(message) {}
 }

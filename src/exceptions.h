@@ -24,12 +24,52 @@
 
 namespace exceptions
 {
+    /**
+     * @brief An exception that is thrown when an invalid opcode is encountered.
+     */
     class invalidOpcode : public std::runtime_error
     {
     public:
+        /**
+         * @brief Construct a new invalid opcode object
+         * @param message The message to be displayed when the exception is thrown.
+         */
         explicit invalidOpcode(const std::string& message);
+
+        /**
+         * @brief Construct a new invalid opcode object
+         * @param message The message to be displayed when the exception is thrown.
+         * @param address The address of the invalid opcode.
+         */
         explicit invalidOpcode(const std::string& message, uint16_t address);
+
+        /**
+         * @brief Construct a new invalid opcode object
+         * @param message The message to be displayed when the exception is thrown.
+         * @param address The address of the invalid opcode.
+         * @param opcode The invalid opcode.
+         */
         explicit invalidOpcode(const std::string& message, uint16_t address, uint8_t opcode);
+    };
+
+    /**
+     * @brief An exception for SDL errors.
+     */
+    class SDLException : public std::runtime_error {
+    public:
+        /**
+         * @brief Construct a new SDL exception object
+         * @param message The message to be displayed when the exception is thrown.
+         */
+        explicit SDLException(const std::string& message);
+    };
+
+    /**
+     * @brief An exception for invalid instructions/opcodes.
+     */
+    class invalidInstruction : public std::runtime_error {
+    public:
+        explicit invalidInstruction(const std::string& message);
     };
 }
 

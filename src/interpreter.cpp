@@ -105,7 +105,6 @@ uint8_t romUpperBits = 0x00;
 
 void writeToAddress(uint16_t address, uint8_t data) {
 
-	// std::cout<<"Writing address " << std::to_string(address) <<std::endl;
 	if (address >= 0x8000 && address <= 0x9fff)
 	{
 		vram[address - 0x8000] = data;
@@ -156,7 +155,6 @@ void writeToAddress(uint16_t address, uint8_t data) {
 		{
 			//logger::logWarningNoData(" Attempting to write to cartRAM while RAM is disabled, ignoring.");
 		}
-		//cout<<"WARNING: Cart RAM banking is not tested. Writing to address 0x" <<hex<<address<<dec<<".\n";
 
 	}
 	else if (address >= 0xff00 && address <= 0xff7f)
@@ -178,7 +176,6 @@ void writeToAddress(uint16_t address, uint8_t data) {
 	}
 	else if (address >= 0xfe00 && address <= 0xfe9f)
 	{
-		//cout<<"Writing to sprite attribute table address "<<to_string(0xfe00-address)<<endl;
 		spriteAttributeTable[address - 0xfe00] = data;
 	}
 	else {
@@ -459,11 +456,11 @@ uint8_t handleSoundRead(uint16_t address)
 void handleIOWrite(uint16_t address, uint8_t data) {
 	if (address == 0xff4d)
 	{
-		//logger::logWarning("Speed control register write unimplemented.", address, data);
+        if (LOG_VERBOSE)
+		    logger::logWarning("Speed control register write unimplemented.", address, data);
 	}
 	else if (address == 0xff00)
 	{
-		//logger::logWarning("Joypad Write", pc, joypadRegister);
 		joypadRegister = data & 0xf0;
 	}
 	else if (address == 0xff42)
@@ -707,7 +704,10 @@ void loadTestRom(string path)//calculates number of banks based on cartridge MBC
 		logger::logErrorNoData("ROM file not found!");
 		throw "ROM not found, exiting...";
 	}
-	uint8_t mbc, banks, ramBanks;
+
+	uint8_t mbc;
+    uint8_t banks;
+    uint8_t ramBanks;
 
 	infile.seekg(0, std::ios::end);
 	size_t length = infile.tellg();
@@ -716,17 +716,12 @@ void loadTestRom(string path)//calculates number of banks based on cartridge MBC
 	infile.read((char*)(&banks), 1);
 	infile.read((char*)(&ramBanks), 1);
 
-	//cout << "ROM MBC: 0x" <<hex<< (uint16_t)(mbc)<<dec << endl << "ROM Bank identifier: 0x" <<hex<< (uint16_t)(banks)<<dec << endl;
-	//cout << "RAM banks identifier: 0x" <<hex<< (uint16_t)(ramBanks)<<dec << endl;
 	currentCartridge = new cartridge(mbc, banks, ramBanks);
 	infile.seekg(0, std::ios::beg);
-	//cout << "File size is " << to_string(length) << " bytes." << endl;
 	infile.read((char*)(currentCartridge->banks), length);
 	rom0 = currentCartridge->banks;//pointer to beginning of banks
 	cartRam = currentCartridge->ramBanks;
 	romSwitchable = (uint8_t*)(currentCartridge->banks + currentCartridge->bankSize);//romSwitchable points to 2nd bank at first
-	//cout<<"Romswitchable and rom0: "<<hex<<"0x"<<(unsigned long)(romSwitchable)<<" 0x"<<(unsigned long)(rom0)<<dec<<endl;
-	//cout<<"romSwitchable is now 0x" <<hex<<((unsigned long)(romSwitchable-rom0))<<dec<<" bytes more than rom0"<<endl;
 }
 
 bool carryStatus()

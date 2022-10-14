@@ -23,6 +23,7 @@
 #include "main.h"
 #include <cmath>
 #include <iostream>
+#include <memory>
 #include "logger.h"
 
 //#include <unistd.h>
