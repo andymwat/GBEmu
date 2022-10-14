@@ -1,6 +1,6 @@
 #
 #    GBEmu - A simple DMG emulator
-#    Copyright (C) 2020 Andrew Watson
+#    Copyright (C) 2022 Andrew Watson
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
