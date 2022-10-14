@@ -10,7 +10,7 @@ env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Debug
   VERBOSE: true
-  MSVC_RUNTIME_LIBRARY: MultiThreadedDebug
+  MSVC_RUNTIME_LIBRARY: MultiThreadedDebugDLL
 
 jobs:
   build-linux-debug:
