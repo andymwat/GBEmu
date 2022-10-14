@@ -72,7 +72,6 @@ void executePrefixedInstruction(uint8_t opcode)
                 reg = &a;
                 break;
             default:
-                reg = &a;
                 throw exceptions::invalidInstruction("Error in bit instruction, invalid target register");
         }
     }
@@ -230,8 +229,8 @@ void executePrefixedInstruction(uint8_t opcode)
     else
     {
         errorAddress = -1;
-        logger::logError("Prefixed opcode not implemented.", 0xffff, opcode);
-        throw exceptions::invalidOpcode("PREFIXED OPCODE NOT IMPLEMENTED");
+        logger::logError("Prefixed opcode not implemented.", pc, opcode);
+        throw exceptions::invalidOpcode("PREFIXED OPCODE NOT IMPLEMENTED", pc, opcode);
     }
 }
 #pragma clang diagnostic pop

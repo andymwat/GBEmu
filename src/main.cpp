@@ -21,6 +21,7 @@
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
 
+//Long-term TODO: remove all global variables
 
 #include <iostream>
 #include <fstream>

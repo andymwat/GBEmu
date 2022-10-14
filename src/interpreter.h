@@ -32,13 +32,21 @@ extern uint16_t pc;
 extern bool runningTest;
 extern uint8_t* testInstructions;
 
+/**
+ * Struct for holding the current state of the main CPU registers
+ */
 struct cpuRegisterState
 {
 	uint8_t a, b, c, d, e, f, h, l;
 	uint16_t sp;
 	uint16_t pc;
 
-	int checkAgainst(cpuRegisterState other)
+    /**
+     * Compare this cpuRegisterState to another
+     * @param other the other cpuRegisterState to compare to
+     * @return true if the two cpuRegisterStates are equal, false otherwise
+     */
+	[[nodiscard]] bool checkAgainst(cpuRegisterState other) const
 	{
 		bool errored = false;
 		if (this->a != other.a)
@@ -105,11 +113,7 @@ struct cpuRegisterState
 			std::cout << "Actual:  \t0x" << std::hex << other.sp << std::dec << std::endl;
 			errored = true;
 		}
-		if (errored)
-		{
-			return -1;
-		}
-		return 0;
+		return !errored;
 	}
 	
 };
@@ -120,12 +124,30 @@ extern uint8_t* cartRam;
 extern uint8_t workRam[8192];
 extern uint8_t* rom0;//first 256 are internal bootROM
 extern uint8_t* romSwitchable;
-extern uint8_t backgroundPalette, scrollX, scrollY, windowX, windowY, lcdControl, lcdStatus, coincidence, bgPaletteData, objectPalette0Data, objectPalette1Data;
+extern uint8_t backgroundPalette;
+extern uint8_t scrollX;
+extern uint8_t scrollY;
+extern uint8_t windowX;
+extern uint8_t windowY;
+extern uint8_t lcdControl;
+extern uint8_t lcdStatus;
+extern uint8_t coincidence;
+extern uint8_t bgPaletteData;
+extern uint8_t objectPalette0Data;
+extern uint8_t objectPalette1Data;
 extern uint8_t highRam[127];
 
 extern bool enableInterrupts;
-extern bool lcdEnable, windowDisplayEnable, spriteDisplayEnable, bgDisplayEnable;
-extern bool spriteSize, bgTilemapDisplaySelect, bgAndWindowTileDataSelect, windowTilemapDisplaySelect;
+
+extern bool lcdEnable;
+extern bool windowDisplayEnable;
+extern bool spriteDisplayEnable;
+extern bool bgDisplayEnable;
+
+extern bool spriteSize;
+extern bool bgTilemapDisplaySelect;
+extern bool bgAndWindowTileDataSelect;
+extern bool windowTilemapDisplaySelect;
 extern uint8_t interruptRegister, interruptFlag;
 
 extern uint8_t m_DividerRegister;
@@ -134,7 +156,9 @@ extern uint8_t serialControl;
 
 extern uint8_t joypadRegister;
 
-extern uint8_t tima,tma,tmc;
+extern uint8_t tima;
+extern uint8_t tma;
+extern uint8_t tmc;
 
 
 extern unsigned int cycles;
