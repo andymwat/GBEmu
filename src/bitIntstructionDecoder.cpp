@@ -21,8 +21,10 @@
 // Created by andrew on 11/25/19.
 //
 #include <iostream>
+#include <stdexcept>
 #include "interpreter.h"
 #include "lcdController.h"
+#include "exceptions.h"
 
 using namespace std;
 void executePrefixedInstruction(uint8_t opcode)
@@ -229,7 +231,7 @@ void executePrefixedInstruction(uint8_t opcode)
     {
         errorAddress = -1;
         logger::logError("Prefixed opcode not implemented.", 0xffff, opcode);
-        throw "PREFIXED OPCODE NOT IMPLEMENTED";
+        throw exceptions::invalidOpcode("PREFIXED OPCODE NOT IMPLEMENTED");
     }
 }
 #pragma clang diagnostic pop

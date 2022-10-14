@@ -15,12 +15,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-# Avoid project name warning
-project(GBEmu)
-cmake_minimum_required(VERSION 3.12)
+PROJECT(GBEmu)
 
-#Build other libraries
-add_subdirectory(lib/src)
-
-#Build main project
-add_subdirectory(src)
+# Build format libary
+add_subdirectory(fmt-9.1.0)

@@ -33,7 +33,7 @@
 
 
 
-//Gotta do this for SDL for some reason
+//Need do this for SDL for some reason
 #undef main
 //
 #include "cartridge.h"
@@ -46,6 +46,7 @@
 
 #include "audioController.h"
 #include "tests.h"
+#include "exceptions.h"
 
 
 #ifdef PLATFORM_UNIX
@@ -59,12 +60,12 @@ SDL_Event events;
 
 int main(int argc, char* args[])
 {
-	cout << "GBEmu  Copyright (C) 2020 Andrew Watson\nThis program comes with ABSOLUTELY NO WARRANTY; for details, see the included LICENSE file or visit https://www.gnu.org/licenses/ \n";
+	cout << "GBEmu  Copyright (C) 2020 Andrew Watson\nThis program comes with ABSOLUTELY NO WARRANTY; for details, see the included LICENSE saveFile or visit https://www.gnu.org/licenses/ \n";
     
 #ifdef PLATFORM_UNIX
 	string testROMPath = "/home/andrew/Downloads/GBemu/sml.gb";
 #else
-	string testROMPath = "C:/Users/andym/Downloads/ROMs/GBEmu/zelda.gb";
+	string testROMPath = "C:/Users/andym/Downloads/ROMs/GBEmu/tetris.gb";
 #endif
 
 	logger::logInfo("Initializing window...");
@@ -95,25 +96,24 @@ int main(int argc, char* args[])
 	{
 		logger::logErrorNoData("Provide a ROM to run as an argument, or run GBEmu with no arguments to run the test ROM.\n");
 	}
-	
 
 	
-    std::string str = "Loading from file: " + filePath + ".sav";
+    std::string str = "Loading from saveFile: " + filePath + ".sav";
     logger::logInfo(str);
     std::string savePath = filePath + ".sav";
-    FILE* file = fopen(savePath.c_str(), "rb");
-    if (file == nullptr)
+    FILE* saveFile = fopen(savePath.c_str(), "rb");
+    if (saveFile == nullptr)
     {
-        logger::logWarningNoData( "Failed to open save file! This is normal the first time loading a ROM, if a file wasn't saved previously, or if the ROM has no battery-backed RAM.");
+        logger::logWarningNoData( "Failed to open save saveFile! This is normal the first time loading a ROM, if a saveFile wasn't saved previously, or if the ROM has no battery-backed RAM.");
     }
     else
     {
-        int result = fread(currentCartridge->ramBanks, sizeof(uint8_t), currentCartridge->totalRamSize, file);
+        int result = fread(currentCartridge->ramBanks, sizeof(uint8_t), currentCartridge->totalRamSize, saveFile);
         if (result != currentCartridge->totalRamSize)
         {
-            logger::logErrorNoData("Error reading from save file! Number of bytes read is ot the same as the cartridge's RAM size!");
+            logger::logErrorNoData("Error reading from save saveFile! Number of bytes read is ot the same as the cartridge's RAM size!");
         }
-        fclose(file);
+        fclose(saveFile);
     }
 
     try {
@@ -186,16 +186,16 @@ int main(int argc, char* args[])
                         cyclesUntilUpdate -= cycles;
                     }
 
-					//Saving saveRAM to file
+					//Saving saveRAM to saveFile
                     if (saveToFile && !saved)
                     {
                         saveToFile = false;
 						savePath = filePath + ".sav";
-                        logger::logInfo("Saving to file: " + savePath + "\n");
+                        logger::logInfo("Saving to saveFile: " + savePath + "\n");
                         FILE* file = fopen(savePath.c_str(), "wb");
 						if (file == nullptr)
 						{
-							logger::logErrorNoData("Failed to open file!\n");
+							logger::logErrorNoData("Failed to open saveFile!\n");
 						}
 						else 
 						{
@@ -207,16 +207,16 @@ int main(int argc, char* args[])
                         saved = true;
                     }
 
-					//Loading saveRAM from file
+					//Loading saveRAM from saveFile
                     if (loadFromFile && !loaded)
                     {
                         loadFromFile = false;
 						savePath = filePath + ".sav";
-                        logger::logInfo("Loading from file: " + savePath + "\n");
+                        logger::logInfo("Loading from saveFile: " + savePath + "\n");
                         FILE* file = fopen(savePath.c_str(), "rb");
                         if (file == nullptr)
                         {
-                            logger::logErrorNoData("Failed to open file!\n");
+                            logger::logErrorNoData("Failed to open saveFile!\n");
                         }
                         else
                         {
