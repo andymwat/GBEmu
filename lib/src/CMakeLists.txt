@@ -17,5 +17,9 @@
 #
 PROJECT(GBEmu)
 
+message(STATUS "Building libraries")
+message(DEBUG CMAKE_BUILD_TYPE: "${CMAKE_BUILD_TYPE}")
+
 # Build format libary
+message(STATUS "Building fmt library")
 add_subdirectory(fmt-9.1.0)
