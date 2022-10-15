@@ -72,6 +72,7 @@ void executePrefixedInstruction(uint8_t opcode)
                 reg = &a;
                 break;
             default:
+                logger::logError("Error in bit instruction, invalid target register", pc, opcode);
                 throw exceptions::invalidInstruction("Error in bit instruction, invalid target register");
         }
     }

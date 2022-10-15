@@ -71,6 +71,16 @@ namespace exceptions
     public:
         explicit invalidInstruction(const std::string& message);
     };
+
+    /**
+     * @brief An exception for errors relating to the cartridge
+     */
+    class cartridgeError : public std::runtime_error {
+    public:
+        explicit cartridgeError(const std::string& message);
+        explicit cartridgeError(const std::string& message, uint8_t data);
+        explicit cartridgeError(const std::string& message, uint16_t data);
+    };
 }
 
 

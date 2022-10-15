@@ -28,6 +28,7 @@
 #include "keyboardInput.h"
 #include "instructionDecoder.h"
 #include "logger.h"
+#include "exceptions.h"
 
 
 
@@ -113,7 +114,7 @@ void execute(uint16_t address)
 				reg = &a;
 				break;
 			default:
-				throw "Error in middle chunk of instructions, invalid target register";
+				throw exceptions::invalidInstruction("Error in middle chunk of instructions, invalid target register");
 			}
 		}
 		else //read from address in hl
@@ -166,7 +167,7 @@ void execute(uint16_t address)
 			if (memoryReference)
 			{
 				logger::logError("Error in instruction decoder", address, opcode);
-				throw "Error in instruction decoder";
+				throw exceptions::invalidInstruction("Error in instruction decoder");
 			}
 			writeToAddress(concat(h, l), *dest);
 		}
@@ -973,7 +974,7 @@ void execute(uint16_t address)
 		{
 			errorAddress = -1;
 			logger::logError("Opcode not implemented", address, opcode);
-			throw "OPCODE NOT IMPLEMENTED";
+			throw exceptions::invalidOpcode("OPCODE NOT IMPLEMENTED", address, opcode);
 			
 		}
 	}
@@ -992,7 +993,7 @@ bool executeStructural(uint8_t opcode, uint16_t address)
 	if (opcode == 0x10)//stop
 	{
 		logger::logError("Encountered stop opcode!", address, opcode);
-		throw "ERROR: Encountered stop opcode! (0x10)";
+		throw exceptions::invalidOpcode("ERROR: Encountered stop opcode! (0x10)", address, opcode);
 	}
 	else if (opcode == 0xcd)//call nn
 	{
@@ -1202,7 +1203,7 @@ bool executeStructural(uint8_t opcode, uint16_t address)
 		if (pc == 0x0000)
 		{
 			logger::logWarning("Jumped to 0x0000, probably a bug.", address, opcode);
-			throw "Jumped to 0, probably a bug";
+			throw exceptions::invalidInstruction("Jumped to 0, probably a bug");
 		}
 	}
 	else if (opcode == 0xca)//jp z, nn

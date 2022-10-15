@@ -26,4 +26,8 @@ namespace exceptions
     SDLException::SDLException(const std::string &message) : std::runtime_error(message) {}
 
     invalidInstruction::invalidInstruction(const std::string &message) : std::runtime_error(message) {}
+
+    cartridgeError::cartridgeError(const std::string &message) : std::runtime_error(message) {}
+    cartridgeError::cartridgeError(const std::string &message, uint8_t data) : std::runtime_error(message + fmt::format("\nData:\t{:x}", data)) {}
+    cartridgeError::cartridgeError(const std::string &message, uint16_t data) : std::runtime_error(message + fmt::format("\nData:\t{:x}", data)) {}
 }

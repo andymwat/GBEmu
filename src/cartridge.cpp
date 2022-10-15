@@ -25,6 +25,7 @@
 #include <iostream>
 #include <memory>
 #include "logger.h"
+#include "exceptions.h"
 
 //#include <unistd.h>
 
@@ -41,7 +42,7 @@ cartridge::cartridge(uint8_t mbcNumber, uint8_t bankNum, uint8_t ramBankNum) {
     }
     else
     {
-	    throw "UNIMPLEMENTED BANK COUNT";
+	    throw exceptions::cartridgeError("UNIMPLEMENTED BANK COUNT", bankNum);
     }
     this->banks = new uint8_t[bankSize*numberOfBanks];
 
@@ -67,7 +68,7 @@ cartridge::cartridge(uint8_t mbcNumber, uint8_t bankNum, uint8_t ramBankNum) {
             break;
         default:
             logger::logErrorNoData("ramBankNum is " + to_string(ramBankNum));
-            throw "Invalid ramBank identifier!";
+            throw exceptions::cartridgeError("Invalid ramBank identifier!", ramBankNum);
 
     }
 
