@@ -19,8 +19,5 @@
 project(GBEmu)
 cmake_minimum_required(VERSION 3.12)
 
-#Build other libraries
-add_subdirectory(lib/src)
-
 #Build main project
 add_subdirectory(src)

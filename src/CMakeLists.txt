@@ -27,7 +27,8 @@ endif()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 #Get other libraries (only fmt for now)
-set(OTHER_LIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/lib/include)
+#set(OTHER_LIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/lib/include)
+set(OTHER_LIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/src/fmt)
 
 
 if(WIN32)
@@ -49,14 +50,15 @@ if(WIN32)
     set(SDL_INCLUDE_DIR "${SDL2_INCLUDE_DIRS}")
     find_package(SDL REQUIRED)
     if (MSVC)  # Visual studio
-        add_executable(GBEmu WIN32 main.cpp main.h audioController.h audioController.cpp tests.cpp tests.h cartridge.cpp cartridge.h interpreter.cpp interpreter.h lcdController.cpp lcdController.h keyboardInput.cpp keyboardInput.h instructionDecoder.cpp bitInstructionDecoder.cpp logger.cpp logger.h exceptions.cpp exceptions.h)
+        add_executable(GBEmu WIN32 main.cpp main.h audioController.h audioController.cpp tests.cpp tests.h cartridge.cpp cartridge.h interpreter.cpp interpreter.h lcdController.cpp lcdController.h keyboardInput.cpp keyboardInput.h instructionDecoder.cpp bitInstructionDecoder.cpp logger.cpp logger.h exceptions.cpp exceptions.h fmt/format.cc fmt/os.cc)
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS /SUBSYSTEM:CONSOLE)
     else()  # MinGW
-        add_executable(GBEmu main.cpp main.h audioController.h audioController.cpp tests.cpp tests.h cartridge.cpp cartridge.h interpreter.cpp interpreter.h lcdController.cpp lcdController.h keyboardInput.cpp keyboardInput.h instructionDecoder.cpp bitInstructionDecoder.cpp logger.cpp logger.h exceptions.cpp exceptions.h)
+        add_executable(GBEmu main.cpp main.h audioController.h audioController.cpp tests.cpp tests.h cartridge.cpp cartridge.h interpreter.cpp interpreter.h lcdController.cpp lcdController.h keyboardInput.cpp keyboardInput.h instructionDecoder.cpp bitInstructionDecoder.cpp logger.cpp logger.h exceptions.cpp exceptions.h fmt/format.cc fmt/os.cc)
     endif()
 
     INCLUDE_DIRECTORIES(${SDL2_INCLUDE_DIRS} ${OTHER_LIB_INCLUDE_DIR})
-    TARGET_LINK_LIBRARIES(GBEmu ${SDL2_LIBS} fmt)
+    #TARGET_LINK_LIBRARIES(GBEmu ${SDL2_LIBS} fmt)
+    TARGET_LINK_LIBRARIES(GBEmu ${SDL2_LIBS})
     #INCLUDE(FindPkgConfig)
     #PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
 else()
@@ -65,11 +67,12 @@ else()
     set(CMAKE_CXX_FLAGS_DEBUG "-g")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-    add_executable(GBEmu main.cpp main.h audioController.h audioController.cpp tests.cpp tests.h cartridge.cpp cartridge.h interpreter.cpp interpreter.h lcdController.cpp lcdController.h keyboardInput.cpp keyboardInput.h instructionDecoder.cpp bitInstructionDecoder.cpp logger.cpp logger.h exceptions.cpp exceptions.h)
+    add_executable(GBEmu main.cpp main.h audioController.h audioController.cpp tests.cpp tests.h cartridge.cpp cartridge.h interpreter.cpp interpreter.h lcdController.cpp lcdController.h keyboardInput.cpp keyboardInput.h instructionDecoder.cpp bitInstructionDecoder.cpp logger.cpp logger.h exceptions.cpp exceptions.h fmt/format.cc fmt/os.cc)
     INCLUDE(FindPkgConfig)
     PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
     INCLUDE_DIRECTORIES(${SDL2_INCLUDE_DIRS} ${OTHER_LIB_INCLUDE_DIR})
-    TARGET_LINK_LIBRARIES(GBEmu ${SDL2_LIBRARIES} fmt)
+    #TARGET_LINK_LIBRARIES(GBEmu ${SDL2_LIBRARIES} fmt)
+    TARGET_LINK_LIBRARIES(GBEmu ${SDL2_LIBRARIES})
 endif()
 
 if(WIN32)
